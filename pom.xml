@@ -1,0 +1,250 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>io.starter</groupId>
+	<artifactId>OpenXLS</artifactId>
+	<version>11.0-SNAPSHOT</version>
+	<packaging>jar</packaging>
+
+	<name>OpenXLS Java Spreadsheet SDK</name>
+	<url>https://sourceforge.net/projects/openxls/</url>
+	<inceptionYear>2002</inceptionYear>
+
+	<licenses>
+		<license>
+			<name>GNU Lesser General Public License (LGPL), Version 3+</name>
+			<url>https://www.gnu.org/licenses/lgpl.txt</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
+
+	<organization>
+		<name>Starter Inc.</name>
+		<url>http://starter.io</url>
+	</organization>
+
+	<scm>
+		<url>https://bitbucket.org/openxls/openxls</url>
+		<connection>scm:git:ssh://git@bitbucket.org/openxls/openxls.git</connection>
+		<tag>master</tag>
+	</scm>
+
+	<mailingLists>
+		<mailingList>
+			<name>Development Discussion</name>
+			<subscribe>openxls-develop-subscribe@lists.sourceforge.net</subscribe>
+			<unsubscribe>openxls-develop-unsubscribe@lists.sourceforge.net</unsubscribe>
+			<post>openxls-develop@lists.sourceforge.net</post>
+			<archive>https://sourceforge.net/mailarchive/forum.php?forum_name=openxls-develop</archive>
+		</mailingList>
+
+		<mailingList>
+			<name>Commit Notifications</name>
+			<subscribe>openxls-commits-subscribe@lists.sourceforge.net</subscribe>
+			<unsubscribe>openxls-commits-unsubscribe@lists.sourceforge.net</unsubscribe>
+			<post>openxls-commits@lists.sourceforge.net</post>
+			<archive>https://sourceforge.net/mailarchive/forum.php?forum_name=openxls-commits</archive>
+		</mailingList>
+	</mailingLists>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
+			<version>1.2.16</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.json</groupId>
+			<artifactId>json</artifactId>
+			<version>20090211</version>
+		</dependency>
+
+		<dependency>
+			<groupId>xpp3</groupId>
+			<artifactId>xpp3</artifactId>
+			<version>1.1.3.3</version>
+		</dependency>
+
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.10</version>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<extensions>
+			<extension>
+				<groupId>org.kuali.maven.wagons</groupId>
+				<artifactId>maven-s3-wagon</artifactId>
+				<version>1.2.1</version>
+			</extension>
+		</extensions>
+		<resources>
+			<resource>
+				<filtering>false</filtering>
+				<directory>${basedir}/src/main/resources</directory>
+			</resource>
+
+			<!-- turn filtering on only for certain resources -->
+			<resource>
+				<filtering>true</filtering>
+				<directory>${basedir}/src/main/resources</directory>
+				<includes>
+					<include>com/extentech/OpenXLS/build.properties</include>
+				</includes>
+			</resource>
+		</resources>
+
+		<plugins>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>buildnumber-maven-plugin</artifactId>
+				<version>1.2</version>
+				<executions>
+					<execution>
+						<id>build-number</id>
+						<goals>
+							<goal>create</goal>
+						</goals>
+						<phase>initialize</phase>
+						<configuration>
+							<!-- put the git commit hash in ${scmVersion} -->
+							<revisionOnScmFailure>UNKNOWN</revisionOnScmFailure>
+							<buildNumberPropertyName>scmVersion</buildNumberPropertyName>
+							<format>{0}</format>
+							<items>
+								<item>scmVersion</item>
+							</items>
+
+							<!-- put the time stamp in deploy format in ${timestamp} -->
+							<timestampFormat>{0,date,yyyyMMdd.HHmmss}</timestampFormat>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>2.5.1</version>
+				<configuration>
+					<source>1.5</source>
+					<target>1.5</target>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>2.10</version>
+				<executions>
+					<execution>
+						<id>default-test</id>
+						<configuration>
+							<excludes>
+								<!-- the profiling suite is most used manually -->
+								<exclude>com/extench/profiling/**/*</exclude>
+
+								<!-- inner classes are never test cases -->
+								<exclude>**/*$*</exclude>
+							</excludes>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
+	<profiles>
+		<profile>
+			<id>release</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-javadoc-plugin</artifactId>
+						<version>2.9</version>
+						<executions>
+							<execution>
+								<id>default-javadoc</id>
+								<goals>
+									<goal>jar</goal>
+								</goals>
+								<phase>package</phase>
+								<configuration>
+									<encoding>ISO-8859-1</encoding>
+
+									<subpackages>
+										io.starter.OpenXLS
+									</subpackages>
+
+									<additionalparam>
+										<!-- individual classes for inclusion - these have to be given 
+											as source files because - there's no way to include only part of a package -->
+										${project.build.sourceDirectory}/com/extentech/formats/XLS/CellNotFoundException.java
+										${project.build.sourceDirectory}/com/extentech/formats/XLS/FormulaNotFoundException.java
+										${project.build.sourceDirectory}/com/extentech/formats/XLS/FunctionNotSupportedException.java
+										${project.build.sourceDirectory}/com/extentech/formats/XLS/RowNotFoundException.java
+										${project.build.sourceDirectory}/com/extentech/formats/XLS/ColumnNotFoundException.java
+										${project.build.sourceDirectory}/com/extentech/formats/XLS/FormulaNotFoundException.java
+										${project.build.sourceDirectory}/com/extentech/formats/XLS/WorkSheetNotFoundException.java
+										${project.build.sourceDirectory}/com/extentech/formats/XLS/CellTypeMismatchException.java
+										${project.build.sourceDirectory}/com/extentech/formats/XLS/CellPositionConflictException.java
+										${project.build.sourceDirectory}/com/extentech/toolkit/ByteTools.java
+										${project.build.sourceDirectory}/com/extentech/toolkit/StringTool.java
+									</additionalparam>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-source-plugin</artifactId>
+						<version>2.2.1</version>
+						<executions>
+							<execution>
+								<id>default-source</id>
+								<goals>
+									<goal>jar</goal>
+								</goals>
+								<phase>package</phase>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+	
+	<!-- S3 Private Maven Rep -->
+	<distributionManagement>
+		<snapshotRepository>
+			<id>repo.starter.io</id>
+			<url>s3://repo.starter.io/snapshot</url>
+		</snapshotRepository>
+		<repository>
+			<id>repo.starter.io</id>
+			<url>s3://repo.starter.io/release</url>
+		</repository>
+	</distributionManagement>
+	<repositories>
+		<repository>
+			<id>repo.starter.io</id>
+			<url>s3://repo.starter.io/release</url>
+		</repository>
+	</repositories>
+</project>
