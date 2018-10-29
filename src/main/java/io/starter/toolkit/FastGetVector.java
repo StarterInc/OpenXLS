@@ -30,7 +30,7 @@ import java.util.*;
 
     
 */
-public class FastGetVector extends ArrayList
+public class FastGetVector extends ArrayList<Object>
 {
 	/** 
 	* serialVersionUID
@@ -151,7 +151,7 @@ public class FastGetVector extends ArrayList
 		return super.get(super.size()-1);
 	}
     
-	public Enumeration elements(){
+	public Enumeration<?> elements(){
 		FastGetVectorEnumerator cve = new FastGetVectorEnumerator(this);
 		return cve;
 	}
@@ -169,7 +169,7 @@ public class FastGetVector extends ArrayList
      
 }
 
-final class FastGetVectorEnumerator implements Enumeration{
+final class FastGetVectorEnumerator implements Enumeration<Object>{
 	
 	private FastGetVector it = null;
 	int x=0;

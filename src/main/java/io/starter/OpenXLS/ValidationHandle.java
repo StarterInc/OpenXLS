@@ -68,7 +68,7 @@ import io.starter.toolkit.StringTool;
  * </pre>
  * </li>
  * </ol>
- *         "http://www.extentech.com">Extentech Inc.</a>
+ *         "http://starter.io">Starter Inc.</a>
  */
 
 public class ValidationHandle implements Handle {

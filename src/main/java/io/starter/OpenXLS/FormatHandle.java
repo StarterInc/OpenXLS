@@ -220,8 +220,8 @@ public class FormatHandle implements Handle, FormatConstants {
 		myxf = duplicateXf(book.getWorkBook().getXf(c.getFormatId()));
 
 		// set the format from the cf
-		List lx = cx.getRules();
-		Iterator itx = lx.iterator();
+		List<?> lx = cx.getRules();
+		Iterator<?> itx = lx.iterator();
 		while (itx.hasNext()) {
 			Cf format = (Cf) itx.next();
 			this.updateFromCF(format, book);
@@ -1181,8 +1181,8 @@ public class FormatHandle implements Handle, FormatConstants {
 	 * 
 	 * @param cx
 	 */
-	public void addCells(List cx) {
-		Iterator itx = cx.iterator();
+	public void addCells(List<?> cx) {
+		Iterator<?> itx = cx.iterator();
 		while (itx.hasNext()) {
 			addCell((BiffRec) itx.next());
 			mycells.add((BiffRec) itx.next());

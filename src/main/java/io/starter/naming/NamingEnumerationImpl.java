@@ -26,11 +26,11 @@ package io.starter.naming;
 import javax.naming.*;
 import java.util.*;
 
-public class NamingEnumerationImpl implements NamingEnumeration{
+public class NamingEnumerationImpl implements NamingEnumeration<Object>{
 
-	private Enumeration e = null;
+	private Enumeration<?> e = null;
 	
-	void setEnumeration(Enumeration ex){
+	void setEnumeration(Enumeration<?> ex){
 		e = ex;
 	}
 

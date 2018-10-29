@@ -79,7 +79,7 @@ public class ConditionalFormatHandle implements Handle {
      * @return
      */
 	public ConditionalFormatRule[] getRules() {
-	    ArrayList cfs = this.cndfmt.getRules();
+	    ArrayList<?> cfs = this.cndfmt.getRules();
 	    ConditionalFormatRule[] rules = new ConditionalFormatRule[cfs.size()];
 	    for(int i=0;i<cfs.size();i++) {
 	        ConditionalFormatRule cfr = new ConditionalFormatRule((Cf) cfs.get(i));

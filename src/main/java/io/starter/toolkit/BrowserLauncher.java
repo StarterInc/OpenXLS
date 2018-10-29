@@ -52,7 +52,7 @@ public class BrowserLauncher {
 		// This uses reflection to mimic the call:
 		// java.awt.Desktop.getDesktop().browse( java.net.URI.create(url) );
 		try {  
-			Class desktop = Class.forName("java.awt.Desktop");
+			Class<?> desktop = Class.forName("java.awt.Desktop");
 			desktop.getDeclaredMethod (
 					"browse", new Class[] {java.net.URI.class})
 				.invoke(

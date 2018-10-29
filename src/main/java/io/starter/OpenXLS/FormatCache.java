@@ -41,14 +41,14 @@ import io.starter.toolkit.Logger;
 // is this a valid class anymore?
 public class FormatCache {
 	
-	Map mpx = new java.util.HashMap();
+	Map<?, ?> mpx = new java.util.HashMap();
 	
 	/** Consolidate all identical formats to avoid too many formats errors
 	 *  
 	 * @deprecated
 	 */
 	public void pack() {
-		Iterator itx = mpx.keySet().iterator();
+		Iterator<?> itx = mpx.keySet().iterator();
 		while(itx.hasNext()) {
 			Object oby = mpx.get(itx.next());
 			FormatHandle thisfmt = (FormatHandle)oby;

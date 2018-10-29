@@ -33,7 +33,7 @@ import javax.naming.spi.InitialContextFactory;
 public class InitialContextFactoryImpl implements InitialContextFactory {
 	
 	
-	public Context getInitialContext(Hashtable env)         
+	public Context getInitialContext(Hashtable<?, ?> env)         
 		throws NamingException{
 			InitialContextImpl contimple = new InitialContextImpl();
 			

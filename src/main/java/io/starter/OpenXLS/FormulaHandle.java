@@ -286,8 +286,8 @@ public class FormulaHandle
     */
     public boolean changeFormulaLocation(String formulaLoc, String newaddr)
         throws FormulaNotFoundException{
-        List dx = form.getPtgsByLocation(formulaLoc);
-		Iterator lx=dx.iterator();
+        List<?> dx = form.getPtgsByLocation(formulaLoc);
+		Iterator<?> lx=dx.iterator();
 		while(lx.hasNext()){
 	        try{
 	        	Ptg thisptg = (Ptg)lx.next();
@@ -317,8 +317,8 @@ public class FormulaHandle
     */
     public boolean addCellToRange(String formulaLoc, CellHandle handle)
     throws FormulaNotFoundException{
-		List dx = form.getPtgsByLocation(formulaLoc);
-		Iterator lx=dx.iterator();
+		List<?> dx = form.getPtgsByLocation(formulaLoc);
+		Iterator<?> lx=dx.iterator();
 		boolean b=false;
 		while(lx.hasNext()){
 	    	Ptg ptg = (Ptg)lx.next();

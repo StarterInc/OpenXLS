@@ -42,7 +42,7 @@ import io.starter.toolkit.StringTool;
  * OpenXLS helper methods. <br>
  * Contains helpful methods to ease use of the OpenXLS toolkit. <br>
  * 
- *         "http://www.extentech.com">Extentech Inc.</a>
+ *         "http://starter.io">Starter Inc.</a>
  * @see ByteTools
  */
 
@@ -1040,7 +1040,7 @@ return WorkBookHandle.simpledateformat.format(d);*/
 			WorkSheetHandle sheet) {
 		CellHandle[] retCells;
 		StringTokenizer cellTokenizer = new StringTokenizer(strRange, ",");
-		ArrayList cells = new ArrayList();
+		ArrayList<CellHandle> cells = new ArrayList<CellHandle>();
 		do {
 			String element = (String) cellTokenizer.nextElement();
 			if (element.indexOf(":") != -1) {

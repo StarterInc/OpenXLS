@@ -23,104 +23,97 @@
 package io.starter.OpenXLS;
 
 /**
- * A lightweight subset of Cell methods allowing for low memory overhead streaming implementations
- *  
- *  
- *  
- *  Feature Request:
- *  
- *  methods determining the type of the cell on the new Cell class (like CellHandle.isDate() or getCellType()). 
- *  The current API has a method returning Object, but from I remember at least the date should be explicitly checked with isDate() method.
-	Basically the API should allow us to do what we do now in method ExcelExtenReader.getCellData(CellHandle).
-	Please review the method and let me know what are the plans for the future.
-
+ * A lightweight subset of Cell methods allowing for low memory overhead
+ * streaming implementations
+ * 
+ * @author John McMahon
+ *
  */
 public interface Cell {
 
 	/**
 	 * Cell types
 	 */
-	public static final int TYPE_BLANK =     -1;
-	public static final int TYPE_STRING     = 0;
-	public static final int TYPE_FP         = 1;
-	public static final int TYPE_INT        = 2;
-	public static final int TYPE_FORMULA    = 3;
-	public static final int TYPE_BOOLEAN    = 4;
-	public static final int TYPE_DOUBLE     = 5;
+	public static final int TYPE_BLANK = -1;
+	public static final int TYPE_STRING = 0;
+	public static final int TYPE_FP = 1;
+	public static final int TYPE_INT = 2;
+	public static final int TYPE_FORMULA = 3;
+	public static final int TYPE_BOOLEAN = 4;
+	public static final int TYPE_DOUBLE = 5;
 
 	public boolean isDate();
-	
-	public int getCellType();
-	
-	
-    /** Returns the Formatting record ID (FormatId) for this Cell
-	<br>
-    This can be used with 'setFormatId(int i)' to copy
-    the formatting from one Cell to another (e.g.
-    a template cell to a new cell)
-	
-    @return int the FormatId for this Cell
-	
-	*/
-	public int getFormatId();
-	
-    /**
-     * Returns the value of this Cell in the native underlying data type.
-     * 
-     * Formula cells will return the calculated value of the formula in the
-     * calculated data type.
-     * 
-     *  Use 'getStringVal()' to return a String regardless of underlying value type.
-     * 
-     * @return Object value for this Cell
-     */
-	public Object getVal();
-	
-    /** Returns the value of the Cell as a String with formatting
-    pattern applied..
-	<br>
-	   see:
-	   <a href="tutorial">http://java.sun.com/docs/books/tutorial/i18n/format/decimalFormat.html</a>
-	<br>
-	   boolean Cell types will return "true" or "false"
-	<br>    
-	   Negative numbers that are formatted in excel to show as red values rather than using a "-" will return with a minus symbol.
-	
-	   @return String the formatted value of the Cell
-	*/
-	public String getFormattedStringVal();
-	
 
-    /** Returns the column number of this Cell.
-    
-        @return int the Column Number of the Cell
-    */
-    public int getColNum();
-    
-    /** Returns the row number of this Cell.
-     * 
-     * NOTE: This is the 1-based row number such as you will see in a spreadsheet UI.
+	public int getCellType();
+
+	/**
+	 * Returns the Formatting record ID (FormatId) for this Cell <br>
+	 * This can be used with 'setFormatId(int i)' to copy the formatting from one
+	 * Cell to another (e.g. a template cell to a new cell)
+	 * 
+	 * @return int the FormatId for this Cell
+	 * 
+	 */
+	public int getFormatId();
+
+	/**
+	 * Returns the value of this Cell in the native underlying data type.
+	 * 
+	 * Formula cells will return the calculated value of the formula in the
+	 * calculated data type.
+	 * 
+	 * Use 'getStringVal()' to return a String regardless of underlying value type.
+	 * 
+	 * @return Object value for this Cell
+	 */
+	public Object getVal();
+
+	/**
+	 * Returns the value of the Cell as a String with formatting pattern applied..
+	 * <br>
+	 * see: <a href=
+	 * "tutorial">http://java.sun.com/docs/books/tutorial/i18n/format/decimalFormat.html</a>
+	 * <br>
+	 * boolean Cell types will return "true" or "false" <br>
+	 * Negative numbers that are formatted in excel to show as red values rather
+	 * than using a "-" will return with a minus symbol.
+	 * 
+	 * @return String the formatted value of the Cell
+	 */
+	public String getFormattedStringVal();
+
+	/**
+	 * Returns the column number of this Cell.
+	 * 
+	 * @return int the Column Number of the Cell
+	 */
+	public int getColNum();
+
+	/**
+	 * Returns the row number of this Cell.
+	 * 
+	 * NOTE: This is the 1-based row number such as you will see in a spreadsheet
+	 * UI.
 	 * 
 	 * ie: A1 = row 1
 	 *
 	 *
-	 *@return int the ONE-based Row Number of the Cell
-    */
-    public int getRowNum();
-    
-   
-    /** Returns the Address of this Cell as a String.
-    
-        @return String the address of this Cell in the WorkSheet
-    */
-    public String getCellAddress();
-    
-    /** Returns the name of this Cell's WorkSheet as a String.
-    
-        @return String the name this Cell's WorkSheet
-    */
-    public String getWorkSheetName();
-	
-	
+	 * @return int the ONE-based Row Number of the Cell
+	 */
+	public int getRowNum();
+
+	/**
+	 * Returns the Address of this Cell as a String.
+	 * 
+	 * @return String the address of this Cell in the WorkSheet
+	 */
+	public String getCellAddress();
+
+	/**
+	 * Returns the name of this Cell's WorkSheet as a String.
+	 * 
+	 * @return String the name this Cell's WorkSheet
+	 */
+	public String getWorkSheetName();
 
 }

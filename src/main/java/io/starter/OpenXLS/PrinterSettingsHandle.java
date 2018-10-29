@@ -175,7 +175,7 @@ public class PrinterSettingsHandle implements Handle {
 	public PrinterSettingsHandle (Boundsheet sheet) {
 		this.sheet = sheet;
 		
-		Iterator iter = sheet.getPrintRecs().iterator();
+		Iterator<?> iter = sheet.getPrintRecs().iterator();
 		while (iter.hasNext()) {
 			BiffRec record = (BiffRec) iter.next();
 			

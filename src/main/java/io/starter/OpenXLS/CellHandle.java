@@ -22,24 +22,75 @@
  */
 package io.starter.OpenXLS;
 
-import static io.starter.OpenXLS.JSONConstants.*;
+import static io.starter.OpenXLS.JSONConstants.JSON_CELL_FORMATTED_VALUE;
+import static io.starter.OpenXLS.JSONConstants.JSON_CELL_FORMULA;
+import static io.starter.OpenXLS.JSONConstants.JSON_CELL_VALUE;
+import static io.starter.OpenXLS.JSONConstants.JSON_DATA;
+import static io.starter.OpenXLS.JSONConstants.JSON_DATETIME;
+import static io.starter.OpenXLS.JSONConstants.JSON_DOUBLE;
+import static io.starter.OpenXLS.JSONConstants.JSON_FLOAT;
+import static io.starter.OpenXLS.JSONConstants.JSON_FORMULA_HIDDEN;
+import static io.starter.OpenXLS.JSONConstants.JSON_HIDDEN;
+import static io.starter.OpenXLS.JSONConstants.JSON_HREF;
+import static io.starter.OpenXLS.JSONConstants.JSON_INTEGER;
+import static io.starter.OpenXLS.JSONConstants.JSON_LOCATION;
+import static io.starter.OpenXLS.JSONConstants.JSON_LOCKED;
+import static io.starter.OpenXLS.JSONConstants.JSON_MERGEACROSS;
+import static io.starter.OpenXLS.JSONConstants.JSON_MERGECHILD;
+import static io.starter.OpenXLS.JSONConstants.JSON_MERGEDOWN;
+import static io.starter.OpenXLS.JSONConstants.JSON_MERGEPARENT;
+import static io.starter.OpenXLS.JSONConstants.JSON_RED_FORMAT;
+import static io.starter.OpenXLS.JSONConstants.JSON_STRING;
+import static io.starter.OpenXLS.JSONConstants.JSON_STYLEID;
+import static io.starter.OpenXLS.JSONConstants.JSON_TEXT_ALIGN;
+import static io.starter.OpenXLS.JSONConstants.JSON_TYPE;
+import static io.starter.OpenXLS.JSONConstants.JSON_VALIDATION_MESSAGE;
+import static io.starter.OpenXLS.JSONConstants.JSON_WORD_WRAP;
 
-import io.starter.formats.XLS.*;
-import io.starter.formats.XLS.charts.Ai;
-import io.starter.formats.XLS.formulas.Ptg;
-import io.starter.formats.XLS.formulas.PtgRef;
-import io.starter.formats.cellformat.CellFormatFactory;
-
-import java.util.*;
-import java.io.Serializable;
-import java.util.HashMap;
 import java.awt.Color;
+import java.awt.font.TextAttribute;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Stack;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import io.starter.toolkit.*;
-
+import io.starter.formats.XLS.BiffRec;
+import io.starter.formats.XLS.Blank;
+import io.starter.formats.XLS.Boolerr;
+import io.starter.formats.XLS.Boundsheet;
+import io.starter.formats.XLS.CellNotFoundException;
+import io.starter.formats.XLS.CellPositionConflictException;
+import io.starter.formats.XLS.CellTypeMismatchException;
+import io.starter.formats.XLS.Cf;
+import io.starter.formats.XLS.ColumnNotFoundException;
+import io.starter.formats.XLS.Condfmt;
+import io.starter.formats.XLS.Font;
+import io.starter.formats.XLS.FormatConstantsImpl;
+import io.starter.formats.XLS.Formula;
+import io.starter.formats.XLS.FormulaNotFoundException;
+import io.starter.formats.XLS.FunctionNotSupportedException;
+import io.starter.formats.XLS.Hlink;
+import io.starter.formats.XLS.Labelsst;
+import io.starter.formats.XLS.Mulblank;
+import io.starter.formats.XLS.Note;
+import io.starter.formats.XLS.NumberRec;
+import io.starter.formats.XLS.ReferenceTracker;
+import io.starter.formats.XLS.Rk;
+import io.starter.formats.XLS.Unicodestring;
+import io.starter.formats.XLS.XLSConstants;
+import io.starter.formats.XLS.XLSRecord;
+import io.starter.formats.XLS.Xf;
+import io.starter.formats.XLS.charts.Ai;
+import io.starter.formats.XLS.formulas.Ptg;
+import io.starter.formats.XLS.formulas.PtgRef;
+import io.starter.formats.cellformat.CellFormatFactory;
+import io.starter.toolkit.Logger;
+import io.starter.toolkit.StringTool;
 
 /**
  * The CellHandle provides a handle to an XLS Cell and its values. <br>
@@ -64,15 +115,15 @@ import io.starter.toolkit.*;
  * - get a handle to any Formula for this Cell<br>
  * <br>
  * 
- *         "http://www.extentech.com">Extentech Inc.</a>
+ * <a href="http://starter.io">Starter Inc.</a>
+ * 
  * @see WorkBookHandle
  * @see WorkSheetHandle
  * @see FormulaHandle
  * @see CellNotFoundException
  * @see CellTypeMismatchException
  */
-public class CellHandle implements Cell, Serializable, Handle,
-		Comparable<CellHandle> {
+public class CellHandle implements Cell, Serializable, Handle, Comparable<CellHandle> {
 
 	/**
 	 * 
@@ -89,8 +140,7 @@ public class CellHandle implements Cell, Serializable, Handle,
 	public static final int TYPE_FORMULA = Cell.TYPE_FORMULA;
 	public static final int TYPE_BOOLEAN = Cell.TYPE_BOOLEAN;
 	public static final int TYPE_DOUBLE = Cell.TYPE_DOUBLE;
-	public static final int NOTATION_STANDARD = 0, NOTATION_SCIENTIFIC = 1,
-			NOTATION_SCIENTIFIC_EXCEL = 2;
+	public static final int NOTATION_STANDARD = 0, NOTATION_SCIENTIFIC = 1, NOTATION_SCIENTIFIC_EXCEL = 2;
 
 	private transient WorkBook wbh = null;
 	private transient WorkSheetHandle wsh = null;
@@ -105,8 +155,8 @@ public class CellHandle implements Cell, Serializable, Handle,
 
 	/**
 	 * returns the underlying BIFF8 record for the Cell <br>
-	 * NOTE: the underlying record is not a part of the public API and may
-	 * change at any time.
+	 * NOTE: the underlying record is not a part of the public API and may change at
+	 * any time.
 	 * 
 	 * @return Returns the underlying biff record.
 	 */
@@ -116,8 +166,8 @@ public class CellHandle implements Cell, Serializable, Handle,
 
 	/**
 	 * sets the underlying BIFF8 record for the Cell <br>
-	 * NOTE: the underlying record is not a part of the public API and may
-	 * change at any time.
+	 * NOTE: the underlying record is not a part of the public API and may change at
+	 * any time.
 	 * 
 	 * @param XLSRecord
 	 *            rec - The BIFF record to set.
@@ -125,7 +175,6 @@ public class CellHandle implements Cell, Serializable, Handle,
 	public void setRecord(XLSRecord rec) {
 		this.mycell = rec;
 	}
-
 
 	/**
 	 * Public Constructor added for use in Bean-context ONLY.
@@ -137,13 +186,13 @@ public class CellHandle implements Cell, Serializable, Handle,
 	}
 
 	/**
-	 * if this cellhandle refers to a mulblank, ensure internal mulblank
-	 * properties are set to appropriate cell in the mulblank range
+	 * if this cellhandle refers to a mulblank, ensure internal mulblank properties
+	 * are set to appropriate cell in the mulblank range
 	 */
 	private void setMulblank() {
 		if (mycell.getOpcode() == XLSConstants.MULBLANK) {
 			if (mulblankcolnum == -1) { // init
-				mulblankcolnum = (short) ((Mulblank) mycell).getColNumber();
+				mulblankcolnum = ((Mulblank) mycell).getColNumber();
 				((Mulblank) mycell).setCurrentCell(mulblankcolnum);
 				((Mulblank) mycell).getIxfe(); // ensure myxf is set to correct
 												// xf for the given cell in the
@@ -154,7 +203,7 @@ public class CellHandle implements Cell, Serializable, Handle,
 												// xf for the given cell in the
 												// set of mulblanks
 			}
-			this.formatter=null;
+			this.formatter = null;
 		}
 	}
 
@@ -178,7 +227,7 @@ public class CellHandle implements Cell, Serializable, Handle,
 	 */
 	void setFormatHandle() {
 		setMulblank();
-		if (formatter != null && formatter.getFormatId()==this.mycell.getIxfe()) {
+		if (formatter != null && formatter.getFormatId() == this.mycell.getIxfe()) {
 			return;
 		}
 		// reusing or creating new xfs is handled in FormatHandle/cloneXf and
@@ -196,10 +245,10 @@ public class CellHandle implements Cell, Serializable, Handle,
 	}
 
 	/**
-	 * Sets a default "empty" value appropriate for the cell type of this
-	 * CellHandle <br>
-	 * For example, will set the value to 0.0 for TYPE_DOUBLE, an empty String
-	 * for TYPE_BLANK
+	 * Sets a default "empty" value appropriate for the cell type of this CellHandle
+	 * <br>
+	 * For example, will set the value to 0.0 for TYPE_DOUBLE, an empty String for
+	 * TYPE_BLANK
 	 **/
 	public void setToDefault() {
 		setVal(this.getDefaultVal());
@@ -217,11 +266,10 @@ public class CellHandle implements Cell, Serializable, Handle,
 
 	/**
 	 * Sets the number format pattern for this cell. All Excel built-in number
-	 * formats are supported. Custom formats will not be applied by OpenXLS
-	 * (e.g. the {@link #getFormattedStringVal} method) but they will be written
-	 * correctly to the output file. For more information on number format
-	 * patterns see <a href="http://support.microsoft.com/kb/264372">Microsoft
-	 * KB264372</a>.
+	 * formats are supported. Custom formats will not be applied by OpenXLS (e.g.
+	 * the {@link #getFormattedStringVal} method) but they will be written correctly
+	 * to the output file. For more information on number format patterns see
+	 * <a href="http://support.microsoft.com/kb/264372">Microsoft KB264372</a>.
 	 * 
 	 * @param pat
 	 *            the Excel number format pattern to apply
@@ -233,12 +281,12 @@ public class CellHandle implements Cell, Serializable, Handle,
 	}
 
 	/**
-	 * Gets the number format pattern for this cell, if set. For more
-	 * information on number format patterns see <a
-	 * href="http://support.microsoft.com/kb/264372">Microsoft KB264372</a>.
+	 * Gets the number format pattern for this cell, if set. For more information on
+	 * number format patterns see
+	 * <a href="http://support.microsoft.com/kb/264372">Microsoft KB264372</a>.
 	 * 
-	 * @return the Excel number format pattern for this cell or
-	 *         <code>null</code> if none is applied
+	 * @return the Excel number format pattern for this cell or <code>null</code> if
+	 *         none is applied
 	 */
 	public String getFormatPattern() {
 		if (this.getFont() == null)
@@ -317,12 +365,13 @@ public class CellHandle implements Cell, Serializable, Handle,
 	}
 
 	/**
-	 * change the size (in points) of the Font used by this Cell and all other
-	 * Cells sharing this FormatId. <br>
-	 * NOTE: To add an entirely new Font use the setFont(String fn, int typ, int
-	 * sz) method instead.
+	 * change the size (in points) of the Font used by this Cell and all other Cells
+	 * sharing this FormatId. <br>
+	 * NOTE: To add an entirely new Font use the setFont(String fn, int typ, int sz)
+	 * method instead.
 	 * 
-	 * @param int sz - Font size in Points.
+	 * @param int
+	 *            sz - Font size in Points.
 	 */
 	public void setFontSize(int sz) {
 		setFormatHandle();
@@ -336,7 +385,8 @@ public class CellHandle implements Cell, Serializable, Handle,
 	 * a weight of 200 is normal <br>
 	 * a weight of 700 is bold <br>
 	 * 
-	 * @param int wt - Font weight range between 100-1000
+	 * @param int
+	 *            wt - Font weight range between 100-1000
 	 */
 	public void setFontWeight(int wt) {
 		setFormatHandle();
@@ -344,10 +394,10 @@ public class CellHandle implements Cell, Serializable, Handle,
 	}
 
 	/**
-	 * Convenience method for toggling the bold state of the Font used by this
-	 * Cell.
+	 * Convenience method for toggling the bold state of the Font used by this Cell.
 	 * 
-	 * @param boolean bold - true if bold
+	 * @param boolean
+	 *            bold - true if bold
 	 */
 	public void setBold(boolean bold) {
 		setFormatHandle();
@@ -421,7 +471,8 @@ public class CellHandle implements Cell, Serializable, Handle,
 	 * For PATTERN_SOLID, the Foreground color is the CELL BACKGROUND color and
 	 * Background Color is 64 (white).
 	 * 
-	 * @param int t - Excel color constant
+	 * @param int
+	 *            t - Excel color constant
 	 * @see FormatHandle.COLOR constants
 	 */
 	public void setForegroundColor(int t) {
@@ -433,7 +484,8 @@ public class CellHandle implements Cell, Serializable, Handle,
 	 * set the Foreground Color for this Cell <br>
 	 * NOTE: this is the PATTERN Color
 	 * 
-	 * @param int Excel color constant
+	 * @param int
+	 *            Excel color constant
 	 * @see FormatHandle.COLOR constants
 	 */
 	// TODO: is this doc correct?
@@ -452,7 +504,8 @@ public class CellHandle implements Cell, Serializable, Handle,
 	 * For PATTERN_SOLID, the Foreground color is the CELL BACKGROUND color and
 	 * Background Color is 64 (white).
 	 * 
-	 * @param int t - Excel color constant
+	 * @param int
+	 *            t - Excel color constant
 	 * @see FormatHandle.COLOR constants
 	 */
 	public void setBackgroundColor(int t) {
@@ -461,8 +514,8 @@ public class CellHandle implements Cell, Serializable, Handle,
 	}
 
 	/**
-	 * get the Color of the Cell Foreground of this Cell and all other cells
-	 * sharing this FormatId. <br>
+	 * get the Color of the Cell Foreground of this Cell and all other cells sharing
+	 * this FormatId. <br>
 	 * <br>
 	 * NOTE: Foreground color is the CELL BACKGROUND color for all patterns and
 	 * Background color is the PATTERN color for all patterns not equal to
@@ -503,8 +556,8 @@ public class CellHandle implements Cell, Serializable, Handle,
 	}
 
 	/**
-	 * get the Color of the Cell Background by this Cell and all other cells
-	 * sharing this FormatId. <br>
+	 * get the Color of the Cell Background by this Cell and all other cells sharing
+	 * this FormatId. <br>
 	 * <br>
 	 * NOTE: Foreground color is the CELL BACKGROUND color for all patterns and
 	 * Background color is the PATTERN color for all patterns not equal to
@@ -527,8 +580,8 @@ public class CellHandle implements Cell, Serializable, Handle,
 	}
 
 	/**
-	 * Return the cell background color i.e. the color if a pattern is set, or
-	 * white if none
+	 * Return the cell background color i.e. the color if a pattern is set, or white
+	 * if none
 	 * 
 	 * @return java.awt.Color cell background color
 	 */
@@ -570,7 +623,8 @@ public class CellHandle implements Cell, Serializable, Handle,
 	 * For PATTERN_SOLID, the Foreground color is the CELL BACKGROUND color and
 	 * Background Color is 64 (white).
 	 * 
-	 * @param int t - Excel color constant for Cell Background color
+	 * @param int
+	 *            t - Excel color constant for Cell Background color
 	 */
 	public void setCellBackgroundColor(int t) {
 		setFormatHandle();
@@ -608,7 +662,8 @@ public class CellHandle implements Cell, Serializable, Handle,
 	/**
 	 * set the Background Pattern for this Cell. <br>
 	 * 
-	 * @param int t - Excel pattern constant
+	 * @param int
+	 *            t - Excel pattern constant
 	 * @see FormatHandle.PATTERN constants
 	 */
 	public void setBackgroundPattern(int t) {
@@ -718,7 +773,8 @@ public class CellHandle implements Cell, Serializable, Handle,
 	/**
 	 * set the Border line style for this Cell.
 	 * 
-	 * @param short s - border constant
+	 * @param short
+	 *            s - border constant
 	 * @see FormatHandle.BORDER line style constants
 	 */
 	public void setBorderLineStyle(short s) {
@@ -729,7 +785,8 @@ public class CellHandle implements Cell, Serializable, Handle,
 	/**
 	 * set the Right Border line style for this Cell.
 	 * 
-	 * @param short s - border constant
+	 * @param short
+	 *            s - border constant
 	 * @see FormatHandle.BORDER line style constants
 	 */
 	public void setRightBorderLineStyle(short s) {
@@ -741,7 +798,8 @@ public class CellHandle implements Cell, Serializable, Handle,
 	 * set the Left Border line style for this Cell.
 	 * 
 	 * @see FormatHandle.BORDER line style constants
-	 * @param short s - border constant
+	 * @param short
+	 *            s - border constant
 	 */
 	public void setLeftBorderLineStyle(short s) {
 		setFormatHandle();
@@ -751,7 +809,8 @@ public class CellHandle implements Cell, Serializable, Handle,
 	/**
 	 * set the Top Border line style for this Cell.
 	 * 
-	 * @param short s - border constant
+	 * @param short
+	 *            s - border constant
 	 * @see FormatHandle.BORDER line style constants
 	 */
 	public void setTopBorderLineStyle(short s) {
@@ -762,7 +821,8 @@ public class CellHandle implements Cell, Serializable, Handle,
 	/**
 	 * set the Bottom Border line style for this Cell.
 	 * 
-	 * @param short s - border constant
+	 * @param short
+	 *            s - border constant
 	 * @see FormatHandle.BORDER line style constants
 	 */
 	public void setBottomBorderLineStyle(short s) {
@@ -774,16 +834,16 @@ public class CellHandle implements Cell, Serializable, Handle,
 	 * removes the borders for this cell
 	 * 
 	 */
-	public void removeBorder(){
+	public void removeBorder() {
 		setFormatHandle();
 		formatter.removeBorders();
 	}
-	
+
 	/**
-	 * Get the OpenXLS Font for this Cell, which roughly matches the
-	 * functionality of the java.awt.Font class. <br>
-	 * Due to awt problems on console systems, converting the OpenXLS font to a
-	 * GUI font is up to you. <br>
+	 * Get the OpenXLS Font for this Cell, which roughly matches the functionality
+	 * of the java.awt.Font class. <br>
+	 * Due to awt problems on console systems, converting the OpenXLS font to a GUI
+	 * font is up to you. <br>
 	 * 
 	 * @return OpenXLS font for Cell
 	 */
@@ -805,18 +865,17 @@ public class CellHandle implements Cell, Serializable, Handle,
 		}
 		int sz = 12;
 		try {
-			sz = (int) this.getFontSize();
+			sz = this.getFontSize();
 		} catch (Exception e) {
 			sz = 12; // back to default
 		}
 		sz += 4; // Excel seems to display 1 point larger than Java
 		// Logger.logInfo("Displaying font:" + fface);
-		HashMap ftmap = new HashMap();
+		HashMap<TextAttribute, Serializable> ftmap = new HashMap<TextAttribute, Serializable>();
 		// implement underlines
 		try {
 			if (this.getIsUnderlined()) {
-				ftmap.put(java.awt.font.TextAttribute.UNDERLINE,
-						java.awt.font.TextAttribute.UNDERLINE);
+				ftmap.put(java.awt.font.TextAttribute.UNDERLINE, java.awt.font.TextAttribute.UNDERLINE);
 			}
 		} catch (Exception e) {
 			;
@@ -827,11 +886,9 @@ public class CellHandle implements Cell, Serializable, Handle,
 		ftmap.put(java.awt.font.TextAttribute.SIZE, new Float(sz));
 		// TODO: Interpret other weights- LIGHT, DEMI_LIGHT, DEMI_BOLD, etc.
 		if (fx == FormatHandle.BOLD)
-			ftmap.put(java.awt.font.TextAttribute.WEIGHT,
-					java.awt.font.TextAttribute.WEIGHT_BOLD);
+			ftmap.put(java.awt.font.TextAttribute.WEIGHT, java.awt.font.TextAttribute.WEIGHT_BOLD);
 		else
-			ftmap.put(java.awt.font.TextAttribute.WEIGHT,
-					java.awt.font.TextAttribute.WEIGHT_REGULAR);
+			ftmap.put(java.awt.font.TextAttribute.WEIGHT, java.awt.font.TextAttribute.WEIGHT_REGULAR);
 		return new java.awt.Font(ftmap);
 	}
 
@@ -842,8 +899,10 @@ public class CellHandle implements Cell, Serializable, Handle,
 	 * 
 	 * @param String
 	 *            fn - system name of the font e.g. "Arial"
-	 * @param int stl - font style (either Font.BOLD or Font.PLAIN)
-	 * @param int sz - font size in points
+	 * @param int
+	 *            stl - font style (either Font.BOLD or Font.PLAIN)
+	 * @param int
+	 *            sz - font size in points
 	 */
 	public void setFont(String fn, int stl, int sz) {
 		setFormatHandle();
@@ -855,16 +914,14 @@ public class CellHandle implements Cell, Serializable, Handle,
 	 */
 	public CommentHandle getComment() throws DocumentObjectNotFoundException {
 		// this needs significant cleanup. We should not have to iterate notes
-		ArrayList notes = mycell.getSheet().getNotes();
+		ArrayList<?> notes = mycell.getSheet().getNotes();
 		for (int i = 0; i < notes.size(); i++) {
 			Note n = (Note) notes.get(i);
-			if (n.getCellAddressWithSheet().equals(
-					this.getCellAddressWithSheet())) {
+			if (n.getCellAddressWithSheet().equals(this.getCellAddressWithSheet())) {
 				return new CommentHandle(n);
 			}
 		}
-		throw new DocumentObjectNotFoundException("Note record not found at "
-				+ this.getCellAddressWithSheet());
+		throw new DocumentObjectNotFoundException("Note record not found at " + this.getCellAddressWithSheet());
 	}
 
 	/**
@@ -889,8 +946,7 @@ public class CellHandle implements Cell, Serializable, Handle,
 	 * @see CommentHandle
 	 */
 	public CommentHandle createComment(String comment, String author) {
-		Note n = mycell.getSheet().createNote(this.getCellAddress(), comment,
-				author);
+		Note n = mycell.getSheet().createNote(this.getCellAddress(), comment, author);
 		return new CommentHandle(n);
 	}
 
@@ -910,8 +966,9 @@ public class CellHandle implements Cell, Serializable, Handle,
 	/**
 	 * Set whether the Font for this Cell is underlined
 	 * 
-	 * @param boolean b - true if the Font for this Cell should be underlined
-	 *        (single underline only)
+	 * @param boolean
+	 *            b - true if the Font for this Cell should be underlined (single
+	 *            underline only)
 	 */
 	public void setUnderlined(boolean isUnderlined) {
 		setFormatHandle();
@@ -926,7 +983,8 @@ public class CellHandle implements Cell, Serializable, Handle,
 	 * <br>
 	 * see FormatHandle.COLOR constants for valid values
 	 * 
-	 * @param int t - Excel color constant
+	 * @param int
+	 *            t - Excel color constant
 	 */
 	public void setFontColor(int t) {
 		setFormatHandle();
@@ -934,21 +992,20 @@ public class CellHandle implements Cell, Serializable, Handle,
 	}
 
 	/**
-	 * Returns any other Cells merged with this one, or null if this Cell is not
-	 * a part of a merged range. <br>
-	 * Adding and/or removing Cells from this CellRange will merge or unmerge
-	 * the Cells.
+	 * Returns any other Cells merged with this one, or null if this Cell is not a
+	 * part of a merged range. <br>
+	 * Adding and/or removing Cells from this CellRange will merge or unmerge the
+	 * Cells.
 	 * 
-	 * @return CellRange object containing all Cells in this Cell's merged
-	 *         range.
+	 * @return CellRange object containing all Cells in this Cell's merged range.
 	 */
 	public CellRange getMergedCellRange() {
 		return mycell.getMergeRange();
 	}
 
 	/**
-	 * Returns if the Cell is the parent (cell containing display value) of a
-	 * merged cell range.
+	 * Returns if the Cell is the parent (cell containing display value) of a merged
+	 * cell range.
 	 * 
 	 * @return boolean true if this cell is a merge parent cell
 	 */
@@ -967,18 +1024,21 @@ public class CellHandle implements Cell, Serializable, Handle,
 
 	}
 
-    /** Returns the ColHandle for the Cell.
-    @return ColHandle for the Cell
-*/ 
-public ColHandle getCol(){
-	try {
-		if (mycol == null) mycol = wsh.getCol( this.getColNum() );
-	} catch (ColumnNotFoundException ex) {
-		// can't happen, the column has to exist because we're in it
-		throw new RuntimeException( ex );
+	/**
+	 * Returns the ColHandle for the Cell.
+	 * 
+	 * @return ColHandle for the Cell
+	 */
+	public ColHandle getCol() {
+		try {
+			if (mycol == null)
+				mycol = wsh.getCol(this.getColNum());
+		} catch (ColumnNotFoundException ex) {
+			// can't happen, the column has to exist because we're in it
+			throw new RuntimeException(ex);
+		}
+		return this.mycol;
 	}
-    return this.mycol;
-}
 
 	/**
 	 * Returns the RowHandle for the Cell.
@@ -997,8 +1057,7 @@ public ColHandle getCol(){
 	 * Formula cells will return the calculated value of the formula in the
 	 * calculated data type.
 	 * 
-	 * Use 'getStringVal()' to return a String regardless of underlying value
-	 * type.
+	 * Use 'getStringVal()' to return a String regardless of underlying value type.
 	 * 
 	 * @return Object value for this Cell
 	 */
@@ -1010,7 +1069,12 @@ public ColHandle getCol(){
 
 	/**
 	 * returns the java Type string of the Cell <br>
-	 * One of: <li>"String" <li>"Float" <li>"Integer" <li>"Formula" <li>"Double"
+	 * One of:
+	 * <li>"String"
+	 * <li>"Float"
+	 * <li>"Integer"
+	 * <li>"Formula"
+	 * <li>"Double"
 	 * 
 	 * @return String java data type
 	 */
@@ -1042,8 +1106,12 @@ public ColHandle getCol(){
 
 	/**
 	 * Returns the type of the Cell as an int <br>
-	 * <li>TYPE_STRING = 0, <li>TYPE_FP = 1, <li>TYPE_INT = 2, <li>TYPE_FORMULA
-	 * = 3, <li>TYPE_BOOLEAN = 4, <li>TYPE_DOUBLE = 5;
+	 * <li>TYPE_STRING = 0,
+	 * <li>TYPE_FP = 1,
+	 * <li>TYPE_INT = 2,
+	 * <li>TYPE_FORMULA = 3,
+	 * <li>TYPE_BOOLEAN = 4,
+	 * <li>TYPE_DOUBLE = 5;
 	 * 
 	 * @return int type for this Cell
 	 */
@@ -1095,8 +1163,8 @@ public ColHandle getCol(){
 	/**
 	 * Returns the row number of this Cell.
 	 * 
-	 * NOTE: This is the 1-based row number such as you will see in a
-	 * spreadsheet UI.
+	 * NOTE: This is the 1-based row number such as you will see in a spreadsheet
+	 * UI.
 	 * 
 	 * ie: A1 = row 1
 	 * 
@@ -1123,8 +1191,8 @@ public ColHandle getCol(){
 	}
 
 	/**
-	 * Returns the Address of this Cell as a String. Includes the sheet name in
-	 * the address.
+	 * Returns the Address of this Cell as a String. Includes the sheet name in the
+	 * address.
 	 * 
 	 * @return String the address of this Cell in the WorkSheet
 	 */
@@ -1173,66 +1241,67 @@ public ColHandle getCol(){
 
 	/**
 	 * Gets the value of the cell as a String with the number format applied.
-	 * Boolean cell types will return "true" or "false". Custom number formats
-	 * are not currently supported, although they will be written correctly to
-	 * the output file. Patterns that display negative numbers in red are not
-	 * currently supported; the number will be prefixed with a minus sign
-	 * instead. For more information on number format patterns see <a
-	 * href="http://support.microsoft.com/kb/264372">Microsoft KB264372</a>.
+	 * Boolean cell types will return "true" or "false". Custom number formats are
+	 * not currently supported, although they will be written correctly to the
+	 * output file. Patterns that display negative numbers in red are not currently
+	 * supported; the number will be prefixed with a minus sign instead. For more
+	 * information on number format patterns see
+	 * <a href="http://support.microsoft.com/kb/264372">Microsoft KB264372</a>.
 	 * 
 	 * @return the value of the cell as a string formatted according to the cell
 	 *         type and, if present, the number format pattern
 	 */
-	public String getFormattedStringVal(){
-    	FormatHandle myfmt = this.getFormatHandle();
-		return CellFormatFactory.fromPatternString(
-				myfmt.getFormatPattern() ).format( this );
-    }
+	public String getFormattedStringVal() {
+		FormatHandle myfmt = this.getFormatHandle();
+		return CellFormatFactory.fromPatternString(myfmt.getFormatPattern()).format(this);
+	}
 
 	/**
 	 * Gets the value of the cell as a String with the number format applied.
-	 * Boolean cell types will return "true" or "false". Custom number formats
-	 * are not currently supported, although they will be written correctly to
-	 * the output file. Patterns that display negative numbers in red are not
-	 * currently supported; the number will be prefixed with a minus sign
-	 * instead. For more information on number format patterns see <a
-	 * href="http://support.microsoft.com/kb/264372">Microsoft KB264372</a>.
+	 * Boolean cell types will return "true" or "false". Custom number formats are
+	 * not currently supported, although they will be written correctly to the
+	 * output file. Patterns that display negative numbers in red are not currently
+	 * supported; the number will be prefixed with a minus sign instead. For more
+	 * information on number format patterns see
+	 * <a href="http://support.microsoft.com/kb/264372">Microsoft KB264372</a>.
 	 * 
-	 * @param formatForXML	if true non-compliant characters will be properly qualified
+	 * @param formatForXML
+	 *            if true non-compliant characters will be properly qualified
 	 * @return the value of the cell as a string formatted according to the cell
 	 *         type and, if present, the number format pattern
 	 */
-	public String getFormattedStringVal(boolean formatForXML){
-    	FormatHandle myfmt = this.getFormatHandle();
-    	String val= this.getVal().toString();
-    	if (formatForXML)
-    		val= io.starter.formats.XLS.OOXMLAdapter.stripNonAscii(val).toString();
-		return CellFormatFactory.fromPatternString(
-				myfmt.getFormatPattern() ).format( val );
-    }
+	public String getFormattedStringVal(boolean formatForXML) {
+		FormatHandle myfmt = this.getFormatHandle();
+		String val = this.getVal().toString();
+		if (formatForXML)
+			val = io.starter.formats.XLS.OOXMLAdapter.stripNonAscii(val).toString();
+		return CellFormatFactory.fromPatternString(myfmt.getFormatPattern()).format(val);
+	}
 
 	/**
 	 * Returns the value of the Cell as a String. <br>
-	 * For numeric cell values, including cells containing a formula which
-	 * return a numeric value, the notation to be used in representing the value
-	 * as a String must be specified. <br>
-	 * The Notation choices are: <li>CellHandle.NOTATION_STANDARD e.g.
-	 * "8002974342" <li>CellHandle.NOTATION_SCIENTIFIC e.g. "8.002974342E9" <li>
-	 * CellHandle.NOTATION_SCIENTIFIC_EXCEL e.g. "8.002974342+E9" <br>
+	 * For numeric cell values, including cells containing a formula which return a
+	 * numeric value, the notation to be used in representing the value as a String
+	 * must be specified. <br>
+	 * The Notation choices are:
+	 * <li>CellHandle.NOTATION_STANDARD e.g. "8002974342"
+	 * <li>CellHandle.NOTATION_SCIENTIFIC e.g. "8.002974342E9"
+	 * <li>CellHandle.NOTATION_SCIENTIFIC_EXCEL e.g. "8.002974342+E9" <br>
 	 * <br>
 	 * For non-numeric values, the value of the cell as a string is returned <br>
 	 * boolean Cell types will return "true" or "false"
 	 * 
-	 * @param int notation one of the CellHandle.NOTATION constants for numeric
-	 *        cell types; ignored for other cell types
-	 * @param int notation - notation constant
+	 * @param int
+	 *            notation one of the CellHandle.NOTATION constants for numeric cell
+	 *            types; ignored for other cell types
+	 * @param int
+	 *            notation - notation constant
 	 * @return String the value of the Cell
 	 */
 	public String getStringVal(int notation) {
 		String numval = mycell.getStringVal();
 		int i = this.getCellType();
-		if (i == TYPE_FP || i == TYPE_INT || i == TYPE_FORMULA
-				|| i == TYPE_DOUBLE) {
+		if (i == TYPE_FP || i == TYPE_INT || i == TYPE_FORMULA || i == TYPE_DOUBLE) {
 			return ExcelTools.formatNumericNotation(numval, notation);
 		}
 		return numval;
@@ -1252,8 +1321,8 @@ public ColHandle getCol(){
 
 	/**
 	 * Returns the Formatting record ID (FormatId) for this Cell <br>
-	 * This can be used with 'setFormatId(int i)' to copy the formatting from
-	 * one Cell to another (e.g. a template cell to a new cell)
+	 * This can be used with 'setFormatId(int i)' to copy the formatting from one
+	 * Cell to another (e.g. a template cell to a new cell)
 	 * 
 	 * @return int the FormatId for this Cell
 	 */
@@ -1270,15 +1339,14 @@ public ColHandle getCol(){
 	 * @return int the conditional format id
 	 */
 	public int getConditionalFormatId() {
-		ConditionalFormatHandle[] cfhandles = this
-				.getConditionalFormatHandles();
+		ConditionalFormatHandle[] cfhandles = this.getConditionalFormatHandles();
 		if (cfhandles == null || cfhandles.length == 0) {
 			return this.getFormatId();
 		}
 		// TODO: only supporting first cfmat handle again
 		Condfmt cfmt = cfhandles[0].getCndfmt();
 
-		Iterator x = cfmt.getRules().iterator();
+		Iterator<?> x = cfmt.getRules().iterator();
 		while (x.hasNext()) {
 			Cf cx1 = ((Cf) x.next());
 			// create a ptgref for this Cell
@@ -1299,7 +1367,8 @@ public ColHandle getCol(){
 	 * throws CellPositionConflictException if there is a cell in that position
 	 * already
 	 * 
-	 * @param int newrow - new row number
+	 * @param int
+	 *            newrow - new row number
 	 * @exception CellPositionConflictException
 	 */
 	public void moveToRow(int newrow) throws CellPositionConflictException {
@@ -1307,14 +1376,15 @@ public ColHandle getCol(){
 		newaddr += String.valueOf(newrow);
 		this.moveTo(newaddr);
 	}
-	
+
 	/**
 	 * move this cell to another row <br>
 	 * overwrite any cells in the destination
 	 * 
-	 * @param int newrow - new row number
+	 * @param int
+	 *            newrow - new row number
 	 */
-	public void moveAndOverwriteToRow(int newrow){
+	public void moveAndOverwriteToRow(int newrow) {
 		String newaddr = ExcelTools.getAlphaVal(mycell.getColNumber());
 		newaddr += String.valueOf(newrow);
 		this.moveAndOverwriteTo(newaddr);
@@ -1349,14 +1419,12 @@ public ColHandle getCol(){
 	 * copy this Cell to another location.
 	 * 
 	 * @param String
-	 *            newaddr - address for copy of this Cell in Excel-style e.g.
-	 *            "A1"
+	 *            newaddr - address for copy of this Cell in Excel-style e.g. "A1"
 	 * @return returns the newly copied CellHandle
 	 * @exception CellPositionConflictException
 	 *                if there is a cell in the new address already
 	 */
-	public CellHandle copyTo(String newaddr)
-			throws CellPositionConflictException {
+	public CellHandle copyTo(String newaddr) throws CellPositionConflictException {
 
 		// check for existing
 		Boundsheet bs = this.mycell.getSheet();
@@ -1383,8 +1451,8 @@ public ColHandle getCol(){
 	/**
 	 * Removes this Cell from the WorkSheet
 	 * 
-	 * @param boolean nullme - true if this CellHandle should be nullified after
-	 *        removal
+	 * @param boolean
+	 *            nullme - true if this CellHandle should be nullified after removal
 	 */
 	public void remove(boolean nullme) {
 		mycell.getSheet().removeCell(mycell);
@@ -1401,8 +1469,8 @@ public ColHandle getCol(){
 	 * move this cell to another location.
 	 * 
 	 * @param String
-	 *            newaddr - the new address for Cell in Excel-style notation
-	 *            e.g. "A1"
+	 *            newaddr - the new address for Cell in Excel-style notation e.g.
+	 *            "A1"
 	 * @exception CellPositionConflictException
 	 *                if there is a cell in the new address already
 	 */
@@ -1430,13 +1498,13 @@ public ColHandle getCol(){
 			hl.init();
 		}
 	}
-	
+
 	/**
 	 * move this cell to another location, overwriting any cells that are in the way
 	 * 
 	 * @param String
-	 *            newaddr - the new address for Cell in Excel-style notation
-	 *            e.g. "A1"
+	 *            newaddr - the new address for Cell in Excel-style notation e.g.
+	 *            "A1"
 	 */
 	public void moveAndOverwriteTo(String newaddr) {
 
@@ -1475,14 +1543,13 @@ public ColHandle getCol(){
 	 * 
 	 * This behavior is still in testing, and may change
 	 * 
-	 * @return an array of FormatHandles, one for each of the Conditional
-	 *         Formatting rules
+	 * @return an array of FormatHandles, one for each of the Conditional Formatting
+	 *         rules
 	 */
 	public FormatHandle[] getConditionallyFormattedHandles() {
 		// TODO, should these be read-only?
 		// TODO, this is bad, only handles first cf record for the cell
-		ConditionalFormatHandle[] cfhandles = this
-				.getConditionalFormatHandles();
+		ConditionalFormatHandle[] cfhandles = this.getConditionalFormatHandles();
 		if (cfhandles != null) {
 			FormatHandle[] fmx = new FormatHandle[cfhandles[0].getCndfmt().getRules().size()];
 			for (int t = 0; t < fmx.length; t++) {
@@ -1504,19 +1571,18 @@ public ColHandle getCol(){
 			return null;
 		}
 		ConditionalFormatHandle[] cfs = sh.getConditionalFormatHandles();
-		ArrayList cfhandles = new ArrayList();
+		ArrayList<ConditionalFormatHandle> cfhandles = new ArrayList<ConditionalFormatHandle>();
 		for (int i = 0; i < cfs.length; i++) {
 			if (cfs[i].contains(this))
 				cfhandles.add(cfs[i]);
 		}
-		ConditionalFormatHandle[] c = new ConditionalFormatHandle[cfhandles
-				.size()];
+		ConditionalFormatHandle[] c = new ConditionalFormatHandle[cfhandles.size()];
 		return (ConditionalFormatHandle[]) cfhandles.toArray(c);
 	}
 
 	/**
-	 * Gets the FormatHandle (a Format Object describing the formats for this
-	 * Cell) for this Cell.
+	 * Gets the FormatHandle (a Format Object describing the formats for this Cell)
+	 * for this Cell.
 	 * 
 	 * @return FormatHandle for this Cell
 	 */
@@ -1530,7 +1596,8 @@ public ColHandle getCol(){
 	/**
 	 * locks or unlocks this Cell for editing
 	 * 
-	 * @param boolean locked - true if Cell should be locked, false otherwise
+	 * @param boolean
+	 *            locked - true if Cell should be locked, false otherwise
 	 */
 	public void setLocked(boolean locked) {
 		// create a new xf for this
@@ -1541,8 +1608,8 @@ public ColHandle getCol(){
 	/**
 	 * Hides or shows the formula for this Cell, if present
 	 * 
-	 * @param boolean hidden - setting whether to hide or show formulas for this
-	 *        Cell
+	 * @param boolean
+	 *            hidden - setting whether to hide or show formulas for this Cell
 	 */
 	public void setFormulaHidden(boolean hidden) {
 		// create a new xf for this
@@ -1551,8 +1618,8 @@ public ColHandle getCol(){
 	}
 
 	/**
-	 * Sets the FormatHandle (a Format Object describing the formats for this
-	 * Cell) for this Cell
+	 * Sets the FormatHandle (a Format Object describing the formats for this Cell)
+	 * for this Cell
 	 * 
 	 * @param FormatHandle
 	 *            to apply to this Cell
@@ -1566,10 +1633,11 @@ public ColHandle getCol(){
 	/**
 	 * Sets the Formatting record ID (FormatId) for this Cell
 	 * 
-	 * This can be used with 'getFormatId()' to copy the formatting from one
-	 * Cell to another (ie: a template cell to a new cell)
+	 * This can be used with 'getFormatId()' to copy the formatting from one Cell to
+	 * another (ie: a template cell to a new cell)
 	 * 
-	 * @param int i - the new index to the Format for this Cell
+	 * @param int
+	 *            i - the new index to the Format for this Cell
 	 */
 	public void setFormatId(int i) {
 		mycell.setXFRecord(i);
@@ -1598,18 +1666,17 @@ public ColHandle getCol(){
 	}
 
 	/**
-	 * Returns the Formula Handle (an Object describing a Formula) for this
-	 * Cell, if it contains a formula
+	 * Returns the Formula Handle (an Object describing a Formula) for this Cell, if
+	 * it contains a formula
 	 * 
 	 * @return FormulaHandle the Formula of the Cell
 	 * @see FormulaHandle
 	 * @exception FormulaNotFoundException
 	 */
 	public FormulaHandle getFormulaHandle() throws FormulaNotFoundException {
-		Formula f = (Formula) mycell.getFormulaRec();
+		Formula f = mycell.getFormulaRec();
 		if (f == null) {
-			throw new FormulaNotFoundException("No Formula for: "
-					+ getCellAddress());
+			throw new FormulaNotFoundException("No Formula for: " + getCellAddress());
 		}
 		FormulaHandle fh = new FormulaHandle(f, this.wbh);
 		return fh;
@@ -1758,11 +1825,11 @@ public ColHandle getCol(){
 	 * <br>
 	 * To set a Cell to a formula, obj should be a string begining with "=" <br>
 	 * <br>
-	 * To set a Cell to an array formula, obj should be a string begining with
-	 * "{=" <br>
+	 * To set a Cell to an array formula, obj should be a string begining with "{="
+	 * <br>
 	 * If you wish to put a line break in a string value, use the newline "\n"
-	 * character. Note this will not function unless you also apply a format
-	 * handle to the cell with WrapText=true
+	 * character. Note this will not function unless you also apply a format handle
+	 * to the cell with WrapText=true
 	 * 
 	 * @param Object
 	 *            obj - the object to set the value of the Cell to
@@ -1784,8 +1851,8 @@ public ColHandle getCol(){
 					this.setFormula(formstr);
 					return;
 				} catch (/* 20070212 KSC: FunctionNotSupported */Exception a) {
-					Logger.logWarn("CellHandle.setVal() failed.  Setting Formula to "
-							+ obj.toString() + " failed: " + a);
+					Logger.logWarn(
+							"CellHandle.setVal() failed.  Setting Formula to " + obj.toString() + " failed: " + a);
 				}
 			}
 		}
@@ -1804,12 +1871,12 @@ public ColHandle getCol(){
 	 * set the value of this cell to String s <br>
 	 * NOTE: this method will not check for formula references or do any data
 	 * conversions <br>
-	 * This method is useful when a string may start with = but you do not want
-	 * to convert to a Formula value
+	 * This method is useful when a string may start with = but you do not want to
+	 * convert to a Formula value
 	 * 
-	 * If you wish to put a line break in the string use the newline "\n"
-	 * character. Note this will not function unless you also apply a format
-	 * handle to the cell with WrapText=true
+	 * If you wish to put a line break in the string use the newline "\n" character.
+	 * Note this will not function unless you also apply a format handle to the cell
+	 * with WrapText=true
 	 * 
 	 * @param String
 	 *            s - the String value to set the Cell to
@@ -1858,8 +1925,7 @@ public ColHandle getCol(){
 	}
 
 	/**
-	 * this method will be fired as each record is parsed from an input
-	 * Spreadsheet
+	 * this method will be fired as each record is parsed from an input Spreadsheet
 	 * 
 	 * Dec 15, 2010
 	 */
@@ -1872,6 +1938,7 @@ public ColHandle getCol(){
 	 * 
 	 * @see java.lang.Object#toString()
 	 */
+	@Override
 	public String toString() {
 		String ret = this.getCellAddress() + ":" + this.getStringVal();
 		if (this.getURL() != null)
@@ -1882,7 +1949,8 @@ public ColHandle getCol(){
 	/**
 	 * Set the Value of the Cell to a double
 	 * 
-	 * @param double d- double value to set this Cell to
+	 * @param double
+	 *            d- double value to set this Cell to
 	 * @throws CellTypeMismatchException
 	 */
 	public void setVal(double d) throws CellTypeMismatchException {
@@ -1892,7 +1960,8 @@ public ColHandle getCol(){
 	/**
 	 * Set value of this Cell to a Float
 	 * 
-	 * @param float f - float value to set this Cell to
+	 * @param float
+	 *            f - float value to set this Cell to
 	 * @throws CellTypeMismatchException
 	 */
 	public void setVal(float f) throws CellTypeMismatchException {
@@ -1901,8 +1970,8 @@ public ColHandle getCol(){
 
 	/**
 	 * Sets the value of this Cell to a java.sql.Date. <br>
-	 * You must also specify a formatting pattern for the new date, or null for
-	 * the default date format ("m/d/yy h:mm".) <br>
+	 * You must also specify a formatting pattern for the new date, or null for the
+	 * default date format ("m/d/yy h:mm".) <br>
 	 * <br>
 	 * valid date format patterns: <br>
 	 * "m/d/y" <br>
@@ -1936,7 +2005,8 @@ public ColHandle getCol(){
 	/**
 	 * Sets the value of this Cell to a boolean value
 	 * 
-	 * @param boolean b - boolean value to set this Cell to
+	 * @param boolean
+	 *            b - boolean value to set this Cell to
 	 * @throws CellTypeMismatchException
 	 */
 	public void setVal(boolean b) throws CellTypeMismatchException {
@@ -1945,11 +2015,11 @@ public ColHandle getCol(){
 
 	/**
 	 * Set the value of this Cell to an int value <br>
-	 * NOTE: setting a Boolean Cell type to a zero or a negative number will set
-	 * the Cell to 'false'; setting it to an int value 1 or greater will set it
-	 * to true.
+	 * NOTE: setting a Boolean Cell type to a zero or a negative number will set the
+	 * Cell to 'false'; setting it to an int value 1 or greater will set it to true.
 	 * 
-	 * @param int i - int value to set this Cell to
+	 * @param int
+	 *            i - int value to set this Cell to
 	 * @throws CellTypeMismatchException
 	 */
 	public void setVal(int i) throws CellTypeMismatchException {
@@ -1964,19 +2034,18 @@ public ColHandle getCol(){
 	}
 
 	/**
-	 * returns the value of this Cell as a double, if possible, or NaN if Cell
-	 * value cannot be converted to double
+	 * returns the value of this Cell as a double, if possible, or NaN if Cell value
+	 * cannot be converted to double
 	 * 
-	 * @return double value or NaN if the Cell value cannot be converted to a
-	 *         double
+	 * @return double value or NaN if the Cell value cannot be converted to a double
 	 */
 	public double getDoubleVal() {
 		return mycell.getDblVal();
 	}
 
 	/**
-	 * returns the value of this Cell as a int, if possible, or NaN if Cell
-	 * value cannot be converted to int
+	 * returns the value of this Cell as a int, if possible, or NaN if Cell value
+	 * cannot be converted to int
 	 * 
 	 * @return int value or NaN if the Cell value cannot be converted to an int
 	 */
@@ -1985,11 +2054,10 @@ public ColHandle getCol(){
 	}
 
 	/**
-	 * returns the value of this Cell as a float, if possible, or NaN if Cell
-	 * value cannot be converted to float
+	 * returns the value of this Cell as a float, if possible, or NaN if Cell value
+	 * cannot be converted to float
 	 * 
-	 * @return float value or NaN if the Cell value cannot be converted to an
-	 *         float
+	 * @return float value or NaN if the Cell value cannot be converted to an float
 	 */
 	public float getFloatVal() {
 		return mycell.getFloatVal();
@@ -2021,8 +2089,8 @@ public ColHandle getCol(){
 	}
 
 	/**
-	 * Set a cell to formula passed in as String. Sets the cachedValue as well,
-	 * so no calculating is necessary.
+	 * Set a cell to formula passed in as String. Sets the cachedValue as well, so
+	 * no calculating is necessary.
 	 * 
 	 * Parses the string to convert into a Excel formula. <br>
 	 * IMPORTANT NOTE: if cell is ALREADY a formula String this method will NOT
@@ -2050,16 +2118,16 @@ public ColHandle getCol(){
 	}
 
 	/**
-	 * sets the formula for this cellhandle using a stack of Ptgs appropriate
-	 * for formula records. This method also sets the cachedValue of the formula
-	 * as well, so no new calculating is necessary.
+	 * sets the formula for this cellhandle using a stack of Ptgs appropriate for
+	 * formula records. This method also sets the cachedValue of the formula as
+	 * well, so no new calculating is necessary.
 	 * 
 	 * @param Stack
 	 *            newExp - Stack of Ptgs
 	 * @param Object
 	 *            value - calculated value of formula
 	 */
-	public void setFormula(Stack newExp, Object value) {
+	public void setFormula(Stack<?> newExp, Object value) {
 		if (!(this.mycell instanceof Formula)) {
 			int ixfe = this.mycell.getIxfe();
 			CellRange mccr = this.mycell.getMergeRange();
@@ -2081,22 +2149,24 @@ public ColHandle getCol(){
 		}
 	}
 
-	/** Returns the size of the merged cell area, if one exists.
+	/**
+	 * Returns the size of the merged cell area, if one exists.
 	 * 
-	 * @param row this parameter is ignored
-	 * @param column this parameter is ignored
+	 * @param row
+	 *            this parameter is ignored
+	 * @param column
+	 *            this parameter is ignored
 	 * @return a 2 position int array with number of rows and number of cols
-	 * @deprecated since October 2012. This method duplicates the functionality
-	 *             of {@link #getMergedCellRange()}, which it calls internally.
-	 *             That method should be used instead.
+	 * @deprecated since October 2012. This method duplicates the functionality of
+	 *             {@link #getMergedCellRange()}, which it calls internally. That
+	 *             method should be used instead.
 	 */
 	@Deprecated
 	public int[] getSpan(int row, int column) {
 		CellRange mergerange = getMergedCellRange();
 		if (mergerange != null) {
 			if (DEBUG)
-				Logger.logInfo("CellHandle " + this.toString()
-						+ " getSpan() for range: " + mergerange.toString());
+				Logger.logInfo("CellHandle " + this.toString() + " getSpan() for range: " + mergerange.toString());
 			int[] ret = { 0, 0 };
 			// if(check.toString().equals(this.toString())){ //it's the first in
 			// the range -- show it!
@@ -2140,21 +2210,19 @@ public ColHandle getCol(){
 	}
 
 	/**
-	 * Determines if the cellHandle represents a completely blank/null cell, and
-	 * can thus be ignored for many operations.
+	 * Determines if the cellHandle represents a completely blank/null cell, and can
+	 * thus be ignored for many operations.
 	 * 
 	 * Criteria for returning true is a cell type of BLANK, that has a default
-	 * format id (0), is not part of a merge range, does not contain a URL, and
-	 * is not a part of a validation
+	 * format id (0), is not part of a merge range, does not contain a URL, and is
+	 * not a part of a validation
 	 * 
 	 * @return true if cell is truly blank
 	 */
 	public boolean isDefaultCell() {
 		if ((this.getCellType() == CellHandle.TYPE_BLANK)
-				&& ((this.getFormatId() == 15 && !this.wbh.getWorkBook()
-						.getIsExcel2007()) || this.getFormatId() == 0)
-				&& (this.getMergedCellRange() == null)
-				&& (this.getURL() == null)
+				&& ((this.getFormatId() == 15 && !this.wbh.getWorkBook().getIsExcel2007()) || this.getFormatId() == 0)
+				&& (this.getMergedCellRange() == null) && (this.getURL() == null)
 				&& (this.getValidationHandle() == null)) {
 			return true;
 		}
@@ -2189,8 +2257,9 @@ public ColHandle getCol(){
 	/**
 	 * Returns an XML representation of the cell and it's component data
 	 * 
-	 * @param int[] mergedRange - include merged ranges in the XML
-	 *        representation if not null
+	 * @param int[]
+	 *            mergedRange - include merged ranges in the XML representation if
+	 *            not null
 	 * @return String of XML
 	 */
 	public String getXML(int[] mergedRange) {
@@ -2208,8 +2277,7 @@ public ColHandle getCol(){
 				if (fms.indexOf("\"") > 0) {
 					fvl = " Formula='" + StringTool.convertXMLChars(fms) + "'";
 				} else {
-					fvl = " Formula=\"" + StringTool.convertXMLChars(fms)
-							+ "\"";
+					fvl = " Formula=\"" + StringTool.convertXMLChars(fms) + "\"";
 				}
 				try {
 					if (this.wbh.getWorkBook().getCalcMode() != WorkBook.CALCULATE_EXPLICIT) {
@@ -2220,8 +2288,7 @@ public ColHandle getCol(){
 							// null
 							val = fmh.getStringVal();
 						} catch (Exception e) {
-							Logger.logWarn("CellHandle.getXML formula calc failed: "
-									+ e.toString());
+							Logger.logWarn("CellHandle.getXML formula calc failed: " + e.toString());
 						}
 					}
 					if (val instanceof Float)
@@ -2230,8 +2297,7 @@ public ColHandle getCol(){
 						typename = "Double";
 					else if (val instanceof Integer)
 						typename = "Integer";
-					else if (val instanceof java.util.Date
-							|| val instanceof java.sql.Date
+					else if (val instanceof java.util.Date || val instanceof java.sql.Date
 							|| val instanceof java.sql.Timestamp)
 						typename = "DateTime";
 					else
@@ -2240,20 +2306,18 @@ public ColHandle getCol(){
 					typename = "String"; // default
 				}
 			} catch (Exception e) {
-				Logger.logErr(
-						"OpenXLS.getXML() failed getting type of Formula for: "
-								+ this.toString(), e);
+				Logger.logErr("OpenXLS.getXML() failed getting type of Formula for: " + this.toString(), e);
 			}
 		}
 		if (this.isDate())
 			typename = "DateTime"; // 20060428 KSC: Moved after Formula parsing
-		
+
 		// TODO: when RowHandle.getCells actually contains ALL cells, keep this
-		if (this.mycell.getOpcode()!=XLSConstants.MULBLANK) { 
+		if (this.mycell.getOpcode() != XLSConstants.MULBLANK) {
 			// Put the style ID in
-			sv = " StyleID=\"s" +  getFormatId() +  "\"";
+			sv = " StyleID=\"s" + getFormatId() + "\"";
 			if (mergedRange != null) { // TODO: fix!
-				csp += " MergeAcross=\"" + ((mergedRange[3] - mergedRange[1])+1) + "\"";
+				csp += " MergeAcross=\"" + ((mergedRange[3] - mergedRange[1]) + 1) + "\"";
 				csp += " MergeDown=\"" + (mergedRange[2] - mergedRange[0]) + "\"";
 			}
 			if (this.getCol().isHidden()) {
@@ -2261,14 +2325,13 @@ public ColHandle getCol(){
 			}
 			// TODO: HRefScreenTip ????
 			if (this.getURL() != null) {
-				hlink = " HRef=\"" + StringTool.convertXMLChars(this.getURL())
-						+ "\"";
+				hlink = " HRef=\"" + StringTool.convertXMLChars(this.getURL()) + "\"";
 			}
-	
+
 			// put the date formattingin
 			// Assemble the string
-			retval.append("<Cell Address=\"" + this.getCellAddress() + "\"" + sv
-					+ csp + fvl + hd + hlink + "><Data Type=\"" + typename + "\">");
+			retval.append("<Cell Address=\"" + this.getCellAddress() + "\"" + sv + csp + fvl + hd + hlink
+					+ "><Data Type=\"" + typename + "\">");
 			if (typename.equals("DateTime")) {
 				retval.append(DateConverter.getFormattedDateVal(this));
 			} else if (this.getCellType() == CellHandle.TYPE_STRING) {
@@ -2286,35 +2349,32 @@ public ColHandle getCol(){
 					val = this.getVal();
 					retval.append(StringTool.convertXMLChars(val.toString()) + vl);
 				} catch (Exception e) {
-					Logger.logErr(
-							"CellHandle.getXML failed for: "
-									+ this.getCellAddress() + " in: "
-									+ this.getWorkBook().toString(), e);
+					Logger.logErr("CellHandle.getXML failed for: " + this.getCellAddress() + " in: "
+							+ this.getWorkBook().toString(), e);
 					retval.append("XML ERROR!");
 				}
 			}
 			retval.append("</Data>");
 			retval.append(end_cell_xml);
-		} else {			
-			int c= ((Mulblank)this.mycell).getColFirst();
-			int lastcol= ((Mulblank)this.mycell).getColLast();
+		} else {
+			int c = ((Mulblank) this.mycell).getColFirst();
+			int lastcol = ((Mulblank) this.mycell).getColLast();
 			for (; c <= lastcol; c++) {
-				mulblankcolnum= (short)c;
+				mulblankcolnum = (short) c;
 				// Put the style ID in
-				sv = " StyleID=\"s" +  getFormatId() +  "\"";
+				sv = " StyleID=\"s" + getFormatId() + "\"";
 				if (this.getCol().isHidden()) {
 					hd = " Hidden=\"true\"";
 				}
 				// TODO: HRefScreenTip ????
 				if (this.getURL() != null) {
-					hlink = " HRef=\"" + StringTool.convertXMLChars(this.getURL())
-							+ "\"";
+					hlink = " HRef=\"" + StringTool.convertXMLChars(this.getURL()) + "\"";
 				}
-		
+
 				// put the date formattingin
 				// Assemble the string
-				retval.append("<Cell Address=\"" + this.getCellAddress() + "\"" + sv
-						+ csp + fvl + hd + hlink + "><Data Type=\"" + typename + "\"/>");
+				retval.append("<Cell Address=\"" + this.getCellAddress() + "\"" + sv + csp + fvl + hd + hlink
+						+ "><Data Type=\"" + typename + "\"/>");
 				retval.append(end_cell_xml);
 			}
 		}
@@ -2325,7 +2385,8 @@ public ColHandle getCol(){
 	 * Set the horizontal alignment for this Cell
 	 * 
 	 * 
-	 * @param int align - constant value representing the horizontal alignment.
+	 * @param int
+	 *            align - constant value representing the horizontal alignment.
 	 * @see FormatHandle.ALIGN* constants
 	 */
 	public void setHorizontalAlignment(int align) {
@@ -2334,8 +2395,7 @@ public ColHandle getCol(){
 	}
 
 	/**
-	 * Returns an int representing the current horizontal alignment in this
-	 * Cell.
+	 * Returns an int representing the current horizontal alignment in this Cell.
 	 * 
 	 * @return int representing horizontal alignment
 	 * @see FormatHandle.ALIGN* constants
@@ -2351,7 +2411,8 @@ public ColHandle getCol(){
 	/**
 	 * Set the Vertical alignment for this Cell
 	 * 
-	 * @param int align - constant value representing the vertical alignment.
+	 * @param int
+	 *            align - constant value representing the vertical alignment.
 	 * @see FormatHandle.ALIGN* constants
 	 */
 	public void setVerticalAlignment(int align) {
@@ -2376,20 +2437,20 @@ public ColHandle getCol(){
 	/**
 	 * Sets the cell wrapping behavior for this cell
 	 * 
-	 * @param boolean wrapit - true if cell text should be wrapped (default is
-	 *        false)
+	 * @param boolean
+	 *            wrapit - true if cell text should be wrapped (default is false)
 	 */
 	public void setWrapText(boolean wrapit) {
-	    setFormatHandle();
-	    formatter.setWrapText(wrapit);
-	    if (wrapit) { // when wrap text it automatically wraps if row height has
-		// NOT been set yet
-		try {
-		    if (!this.getRow().isAlteredHeight()) // has row height been altered??
-			this.getRow().setRowHeightAutoFit();
-		} catch (Exception e) { /* ignore */
+		setFormatHandle();
+		formatter.setWrapText(wrapit);
+		if (wrapit) { // when wrap text it automatically wraps if row height has
+			// NOT been set yet
+			try {
+				if (!this.getRow().isAlteredHeight()) // has row height been altered??
+					this.getRow().setRowHeightAutoFit();
+			} catch (Exception e) { /* ignore */
+			}
 		}
-	    }
 	}
 
 	/**
@@ -2411,7 +2472,8 @@ public ColHandle getCol(){
 	 * Values 91-180 represent rotation down, 0-90 degrees. <br>
 	 * Value 255 is vertical
 	 * 
-	 * @param int align - an int representing the rotation.
+	 * @param int
+	 *            align - an int representing the rotation.
 	 */
 	public void setCellRotation(int align) {
 		setFormatHandle();
@@ -2441,12 +2503,14 @@ public ColHandle getCol(){
 		return this.getColNum() - that.getColNum();
 	}
 
+	@Override
 	public boolean equals(Object that) {
 		if (!(that instanceof CellHandle))
 			return false;
 		return this.mycell.equals(((CellHandle) that).mycell);
 	}
 
+	@Override
 	public int hashCode() {
 		return this.mycell.hashCode();
 	}
@@ -2454,7 +2518,8 @@ public ColHandle getCol(){
 	/**
 	 * Set the super/sub script for the Font
 	 * 
-	 * @param int ss - super/sub script constant (0 = none, 1 = super, 2 = sub)
+	 * @param int
+	 *            ss - super/sub script constant (0 = none, 1 = super, 2 = sub)
 	 */
 	public void setScript(int ss) {
 		if (mycell.myxf == null)
@@ -2469,16 +2534,14 @@ public ColHandle getCol(){
 	 *            to set the value of the Cell to
 	 */
 	private void setBiffRecValue(Object obj) throws CellTypeMismatchException {
-		if (mycell.getOpcode() == XLSConstants.BLANK
-				|| mycell.getOpcode() == XLSConstants.MULBLANK) {
+		if (mycell.getOpcode() == XLSConstants.BLANK || mycell.getOpcode() == XLSConstants.MULBLANK) {
 			// no reason for this Blank blank = (Blank)mycell;
 			// String addr = mycell.getCellAddress();
 
 			// trim the Mulblank
 			/*
-			 * KSC: mulblanks are NOT expanded now if (blank.getMyMul() !=
-			 * null){ Mulblank mblank = (Mulblank)blank.getMyMul();
-			 * mblank.trim(blank); }
+			 * KSC: mulblanks are NOT expanded now if (blank.getMyMul() != null){ Mulblank
+			 * mblank = (Mulblank)blank.getMyMul(); mblank.trim(blank); }
 			 */
 			changeCellType(obj); // 20080206 KSC: Basically replaces all above
 									// code
@@ -2486,8 +2549,7 @@ public ColHandle getCol(){
 			if (obj == null) {
 				// should never be false ??? if (!(mycell instanceof Blank))
 				changeCellType(obj); // will set to blank
-			} else if (obj instanceof Float || obj instanceof Double
-					|| obj instanceof Integer || obj instanceof Long) {
+			} else if (obj instanceof Float || obj instanceof Double || obj instanceof Integer || obj instanceof Long) {
 				if ((mycell instanceof NumberRec) || (mycell instanceof Rk)) {
 					if (obj instanceof Float) {
 						Float f = (Float) obj;
@@ -2506,8 +2568,7 @@ public ColHandle getCol(){
 					changeCellType(obj);
 			} else if (obj instanceof Boolean) {
 				if (mycell instanceof Boolerr)
-					((Boolerr) mycell).setBooleanVal(((Boolean) obj)
-							.booleanValue());
+					((Boolerr) mycell).setBooleanVal(((Boolean) obj).booleanValue());
 				else
 					changeCellType(obj);
 			} else if (obj instanceof String) {
@@ -2554,15 +2615,12 @@ public ColHandle getCol(){
 		try {
 			mycell.myxf = new Xf(this.getFont().getIdx());
 			// get the recidx of the last Xf
-			int insertIdx = mycell.getWorkBook()
-					.getXf(mycell.getWorkBook().getNumXfs() - 1)
-					.getRecordIndex();
+			int insertIdx = mycell.getWorkBook().getXf(mycell.getWorkBook().getNumXfs() - 1).getRecordIndex();
 			// perform default add rec actions
 
 			mycell.myxf.setSheet(null);
-			mycell.getWorkBook().getStreamer()
-					.addRecordAt(mycell.myxf, insertIdx + 1);
-			mycell.getWorkBook().addRecord((BiffRec) mycell.myxf, false);
+			mycell.getWorkBook().getStreamer().addRecordAt(mycell.myxf, insertIdx + 1);
+			mycell.getWorkBook().addRecord(mycell.myxf, false);
 			// update the pointer
 			int xfe = mycell.myxf.getIdx();
 			mycell.setIxfe(xfe);
@@ -2598,19 +2656,19 @@ public ColHandle getCol(){
 
 	/**
 	 * Calculates and returns all formulas that reference this CellHandle. <br>
-	 * Please note that these cells may have already been calculated, so in
-	 * order to get their values without re-calculating them Extentech suggests
-	 * setting the book level non-calculation flag, ie
+	 * Please note that these cells may have already been calculated, so in order to
+	 * get their values without re-calculating them Extentech suggests setting the
+	 * book level non-calculation flag, ie
 	 * book.setFormulaCalculationMode(WorkBookHandle.CALCULATE_EXPLICIT); or
 	 * FormulaHandle.getCachedVal()
 	 * 
 	 * @return List of of calculated cells (CellHandles)
 	 */
-	public List calculateAffectedCells() {
+	public List<CellHandle> calculateAffectedCells() {
 		ReferenceTracker rt = this.wbh.getWorkBook().getRefTracker();
-		Iterator its = rt.clearAffectedFormulaCells(this).values().iterator();
+		Iterator<?> its = rt.clearAffectedFormulaCells(this).values().iterator();
 
-		List ret = new ArrayList();
+		List<CellHandle> ret = new ArrayList<CellHandle>();
 		while (its.hasNext()) {
 			CellHandle cx = new CellHandle((BiffRec) its.next(), this.wbh);
 			ret.add(cx);
@@ -2630,17 +2688,17 @@ public ColHandle getCol(){
 	/**
 	 * Calculates and returns all formulas on the same sheet that reference this
 	 * CellHandle. <br>
-	 * Please note that these cells may have already been calculated, so in
-	 * order to get their values without re-calculating them Extentech suggests
-	 * setting the book level non-calculation flag, ie
+	 * Please note that these cells may have already been calculated, so in order to
+	 * get their values without re-calculating them Extentech suggests setting the
+	 * book level non-calculation flag, ie
 	 * book.setFormulaCalculationMode(WorkBookHandle.CALCULATE_EXPLICIT); or
 	 * FormulaHandle.getCachedVal()
 	 * 
 	 * @return List of of calculated cells (CellHandles)
 	 */
 	public List<CellHandle> calculateAffectedCellsOnSheet() {
-		Iterator its = this.wbh.getWorkBook().getRefTracker().clearAffectedFormulaCellsOnSheet(this, this.getWorkSheetName())
-				.values().iterator(); 
+		Iterator<?> its = this.wbh.getWorkBook().getRefTracker()
+				.clearAffectedFormulaCellsOnSheet(this, this.getWorkSheetName()).values().iterator();
 		List<CellHandle> ret = new ArrayList<CellHandle>();
 		while (its.hasNext()) {
 			CellHandle cx = new CellHandle((BiffRec) its.next(), this.wbh);
@@ -2650,16 +2708,15 @@ public ColHandle getCol(){
 	}
 
 	/**
-	 * flags chart references to the particular cell as dirty/
-	 * needing caches rebuilt
+	 * flags chart references to the particular cell as dirty/ needing caches
+	 * rebuilt
 	 */
 	public void clearChartReferences() {
-		ArrayList<ChartHandle> ret = new ArrayList();
-		Iterator ii = this.wbh.getWorkBook().getRefTracker()
-				.getChartReferences(this.getCell()).iterator();
+		ArrayList<ChartHandle> ret = new ArrayList<ChartHandle>();
+		Iterator<?> ii = this.wbh.getWorkBook().getRefTracker().getChartReferences(this.getCell()).iterator();
 		while (ii.hasNext()) {
 			Ai ai = (Ai) ii.next();
-			if(ai.getParentChart()!=null)
+			if (ai.getParentChart() != null)
 				ai.getParentChart().setMetricsDirty();
 		}
 	}
@@ -2677,9 +2734,8 @@ public ColHandle getCol(){
 	 *            the row in which the copied cell should be placed
 	 * @return CellHandle representing the new Cell
 	 */
-	public static final CellHandle copyCellToWorkSheet(CellHandle sourcecell,
-			WorkSheetHandle newsheet, int row, int col)
-			throws CellPositionConflictException, CellNotFoundException {
+	public static final CellHandle copyCellToWorkSheet(CellHandle sourcecell, WorkSheetHandle newsheet, int row,
+			int col) throws CellPositionConflictException, CellNotFoundException {
 		return copyCellToWorkSheet(sourcecell, newsheet, row, col, false);
 	}
 
@@ -2699,13 +2755,12 @@ public ColHandle getCol(){
 	 *            themselves
 	 * @return CellHandle representing the new cell
 	 */
-	public static CellHandle copyCellToWorkSheet(CellHandle sourcecell,
-			WorkSheetHandle newsheet, int row, int col, boolean copyByValue) {
+	public static CellHandle copyCellToWorkSheet(CellHandle sourcecell, WorkSheetHandle newsheet, int row, int col,
+			boolean copyByValue) {
 		// copy cell values
 		CellHandle newcell = null;
 
-		int offsets[] = { row - sourcecell.getRowNum(),
-				col - sourcecell.getColNum() };
+		int offsets[] = { row - sourcecell.getRowNum(), col - sourcecell.getColNum() };
 
 		if (sourcecell.isFormula() && !copyByValue)
 			try {
@@ -2733,207 +2788,221 @@ public ColHandle getCol(){
 	 *            worksheet to copy this cell into
 	 * @return
 	 */
-	public static final CellHandle copyCellToWorkSheet(CellHandle sourcecell,
-			WorkSheetHandle newsheet) {
+	public static final CellHandle copyCellToWorkSheet(CellHandle sourcecell, WorkSheetHandle newsheet) {
 		// copy cell values
 		CellHandle newcell = null;
 		try {
 			FormulaHandle fmh = sourcecell.getFormulaHandle();
-			// Logger.logInfo("testFormats Formula encountered:  "+
+			// Logger.logInfo("testFormats Formula encountered: "+
 			// fmh.getFormulaString());
 
-			newcell = newsheet.add(fmh.getFormulaString(),
-					sourcecell.getCellAddress());
+			newcell = newsheet.add(fmh.getFormulaString(), sourcecell.getCellAddress());
 		} catch (FormulaNotFoundException ex) {
-			newcell = newsheet.add(sourcecell.getVal(),
-					sourcecell.getCellAddress());
+			newcell = newsheet.add(sourcecell.getVal(), sourcecell.getCellAddress());
 		}
 		return copyCellHelper(sourcecell, newcell);
 	}
 
-	/** Get the JSON object for this cell.
+	/**
+	 * Get the JSON object for this cell.
+	 * 
 	 * @return String representing the JSON for this Cell
 	 */
 	public String getJSON() {
 		return getJSONObject().toString();
 	}
-	
+
 	/** Get the JSON object for this cell. */
 	public JSONObject getJSONObject() {
-        CellRange cr = getMergedCellRange();                      
-        int[] mergedCellRange = null;
-        if (cr!=null) {              
-            try {
-            	mergedCellRange= cr.getRangeCoords();
-                if(mycell.getOpcode()==XLSRecord.MULBLANK){
-                 	Mulblank m = (Mulblank) mycell;
-                 	if(!cr.contains(m.getIntLocation())){
-                 		mergedCellRange = null;
-                 	}
-                }
-            }catch(CellNotFoundException e) {;}
-        }
-       
-        return getJSONObject(mergedCellRange);
-    }
-	
-	/** Get a JSON Object representation of a cell utilizing a
-     * merged range identifier.
-     * 
-     * @deprecated The {@code mergedRange} parameter is unnecessary.
-     *             This method will be removed in a future version.
-     *             Use {@link #getJSONObject()} instead.
-     */
+		CellRange cr = getMergedCellRange();
+		int[] mergedCellRange = null;
+		if (cr != null) {
+			try {
+				mergedCellRange = cr.getRangeCoords();
+				if (mycell.getOpcode() == XLSRecord.MULBLANK) {
+					Mulblank m = (Mulblank) mycell;
+					if (!cr.contains(m.getIntLocation())) {
+						mergedCellRange = null;
+					}
+				}
+			} catch (CellNotFoundException e) {
+				;
+			}
+		}
+
+		return getJSONObject(mergedCellRange);
+	}
+
+	/**
+	 * Get a JSON Object representation of a cell utilizing a merged range
+	 * identifier.
+	 * 
+	 * @deprecated The {@code mergedRange} parameter is unnecessary. This method
+	 *             will be removed in a future version. Use {@link #getJSONObject()}
+	 *             instead.
+	 */
 	@Deprecated
-    public JSONObject getJSONObject(int[] mergedRange) {
-        JSONObject theCell = new JSONObject();
-        try {
-            theCell.put(JSON_LOCATION, getCellAddress());
-            
-            Object val;
-            try{
-            	val = getVal();
-            	if (val == null) val = "";
-            }catch(Exception ex){
-            	Logger.logWarn("OpenXLS.getJSONObject failed: " + ex.toString());
-            	val = "#ERR!";
-            }
-            
-            String typename = getCellTypeName();
-            JSONObject dataval = new JSONObject();
-            
-            if (typename.equals("Formula")) {
-                try {
-                    FormulaHandle fmh = getFormulaHandle();
-                    String fms = fmh.getFormulaString();    
-                    
-                    theCell.put(JSON_CELL_FORMULA, fms);
+	public JSONObject getJSONObject(int[] mergedRange) {
+		JSONObject theCell = new JSONObject();
+		try {
+			theCell.put(JSON_LOCATION, getCellAddress());
 
-                    try {   
-                    	if(Float.parseFloat(val.toString())==(Float.NaN)){
-                    		typename=JSON_FLOAT;
-                    	} else if (val instanceof Float)
-                            typename=JSON_FLOAT;
-                        else if (val instanceof Double) 
-                            typename=JSON_DOUBLE;
-                        else if (val instanceof Integer)
-                            typename=JSON_INTEGER;
-                        else if (val instanceof java.util.Date ||
-                                val instanceof java.sql.Date ||
-                                val instanceof java.sql.Timestamp){
-                            typename=JSON_DATETIME;
-                        }else
-                            typename= JSON_STRING;
-                    } catch (Exception e) { 
-                        typename= JSON_STRING; // default                  
-                    }               
-                } catch (Exception e) {
-                    Logger.logErr( "OpenXLS.getJSON() failed getting type of Formula for: " + toString(),e);
-                }
-            }
-            
-            if (isDate()) typename = JSON_DATETIME;
-            
-            dataval.put( JSON_TYPE, typename );
-            
-            // TODO: Handle Conditional Format
-            // cell should return the style id for its condition
-            // this is an ID that begins incrementing after the last Xf
-            // and should be contained in the CSS for the output
+			Object val;
+			try {
+				val = getVal();
+				if (val == null)
+					val = "";
+			} catch (Exception ex) {
+				Logger.logWarn("OpenXLS.getJSONObject failed: " + ex.toString());
+				val = "#ERR!";
+			}
 
-            // if the conditional format evaluates to TRUE
-            // then we use *that* style ID not the default
-            
-            // We can have multiple CF styles per cell, one per each rule... we'll need that from CSS standpoint so...
+			String typename = getCellTypeName();
+			JSONObject dataval = new JSONObject();
 
-            // style
-            theCell.put(JSON_STYLEID, getConditionalFormatId());
-            
-            // merges
-            if (mergedRange != null) {
-                theCell.put(JSON_MERGEACROSS, (mergedRange[3]-mergedRange[1]));
-                theCell.put(JSON_MERGEDOWN, (mergedRange[2]-mergedRange[0]));
-                if(isMergeParent()) {
-                    theCell.put(JSON_MERGEPARENT, true);
-                }else {
-                    theCell.put(JSON_MERGECHILD, true);
-                }
-            }
-            
-            // handle hidden setting
-            try{
-            if (getCol().isHidden())
-                theCell.put(JSON_HIDDEN, true);
-            }catch(Exception e){;}
-            
-            // handle the locked/formula hidden setting
-            // only active if sheet is protected
-            try{
-	        	if (isFormulaHidden())
-	        		theCell.put(JSON_FORMULA_HIDDEN, true);
-	
-	        	theCell.put(JSON_LOCKED, isLocked());
-            }catch(Exception e){;}
-                
-            
-            try{
-            ValidationHandle vh = getValidationHandle();
-            if (vh!=null)theCell.put(JSON_VALIDATION_MESSAGE, vh.getPromptBoxTitle() + ":" + vh.getPromptBoxText());
-            }catch(Exception e){;}
-            
-            // hyperlinks
-            if (!(getURL()==null))
-                theCell.put(JSON_HREF, getURL());
-            
-            if (getWrapText())
-                theCell.put(JSON_WORD_WRAP, true);
-            
-            // store alignment for container issues
-            int alignment = getFormatHandle().getHorizontalAlignment();
-            if(alignment==FormatHandle.ALIGN_RIGHT){
-            	theCell.put(JSON_TEXT_ALIGN, "right");
-            }else if(alignment==FormatHandle.ALIGN_CENTER){
-            	theCell.put(JSON_TEXT_ALIGN, "center");
-            }else if(alignment==FormatHandle.ALIGN_LEFT){
-            	theCell.put(JSON_TEXT_ALIGN, "left");
-            }
-            
-            // dates
-            if (typename.equals(JSON_DATETIME) && !(val == null) && !val.equals("")){
-                dataval.put(JSON_CELL_VALUE, getFormattedStringVal() );
-                //dataval.put(JSON_DATEVALUE, ch.getFloatVal());
-                dataval.put( "time", DateConverter.getCalendarFromCell( this ).getTimeInMillis() );
-            }else if (getCellType() == CellHandle.TYPE_STRING) {
-            	// FORCES CALC
-            	if(((String)val).indexOf("\n")>-1){
-            	    val = ((String)val).replaceAll("\n", "<br/>");
-            	}
-                if (!val.equals("")) dataval.put(JSON_CELL_VALUE, val.toString());
-            }else { // other
-                dataval.put(JSON_CELL_VALUE, val.toString());
-                try { // formatted pattern
-	                String s = getFormatPattern();
-	                if (!(s.equals(""))) {
-	                    String fmtd = getFormattedStringVal(); // TRIGGERS CALC!
-                    	if (!(val.equals(fmtd)))
-                    		dataval.put(JSON_CELL_FORMATTED_VALUE, fmtd);
-                        if(s.indexOf("Red")>-1) {
-                            Double d = new Double(val.toString());
-                            if (d.doubleValue()<0) {
-                                theCell.put(JSON_RED_FORMAT, "1");
-                                if(fmtd.indexOf("-") == 0)fmtd = fmtd.substring(1, fmtd.length());
-                                dataval.put(JSON_CELL_FORMATTED_VALUE, fmtd);
-                            }
-                        }
-	                }
-	            }catch(Exception x) {};
-            }
-            theCell.put(JSON_DATA, dataval);
-        }catch(JSONException e) {
-            Logger.logErr("error getting JSON for the cell: " + e);
-        }
-        return theCell;
-    }
+			if (typename.equals("Formula")) {
+				try {
+					FormulaHandle fmh = getFormulaHandle();
+					String fms = fmh.getFormulaString();
+
+					theCell.put(JSON_CELL_FORMULA, fms);
+
+					try {
+						if (Float.parseFloat(val.toString()) == (Float.NaN)) {
+							typename = JSON_FLOAT;
+						} else if (val instanceof Float)
+							typename = JSON_FLOAT;
+						else if (val instanceof Double)
+							typename = JSON_DOUBLE;
+						else if (val instanceof Integer)
+							typename = JSON_INTEGER;
+						else if (val instanceof java.util.Date || val instanceof java.sql.Date
+								|| val instanceof java.sql.Timestamp) {
+							typename = JSON_DATETIME;
+						} else
+							typename = JSON_STRING;
+					} catch (Exception e) {
+						typename = JSON_STRING; // default
+					}
+				} catch (Exception e) {
+					Logger.logErr("OpenXLS.getJSON() failed getting type of Formula for: " + toString(), e);
+				}
+			}
+
+			if (isDate())
+				typename = JSON_DATETIME;
+
+			dataval.put(JSON_TYPE, typename);
+
+			// TODO: Handle Conditional Format
+			// cell should return the style id for its condition
+			// this is an ID that begins incrementing after the last Xf
+			// and should be contained in the CSS for the output
+
+			// if the conditional format evaluates to TRUE
+			// then we use *that* style ID not the default
+
+			// We can have multiple CF styles per cell, one per each rule... we'll need that
+			// from CSS standpoint so...
+
+			// style
+			theCell.put(JSON_STYLEID, getConditionalFormatId());
+
+			// merges
+			if (mergedRange != null) {
+				theCell.put(JSON_MERGEACROSS, (mergedRange[3] - mergedRange[1]));
+				theCell.put(JSON_MERGEDOWN, (mergedRange[2] - mergedRange[0]));
+				if (isMergeParent()) {
+					theCell.put(JSON_MERGEPARENT, true);
+				} else {
+					theCell.put(JSON_MERGECHILD, true);
+				}
+			}
+
+			// handle hidden setting
+			try {
+				if (getCol().isHidden())
+					theCell.put(JSON_HIDDEN, true);
+			} catch (Exception e) {
+				;
+			}
+
+			// handle the locked/formula hidden setting
+			// only active if sheet is protected
+			try {
+				if (isFormulaHidden())
+					theCell.put(JSON_FORMULA_HIDDEN, true);
+
+				theCell.put(JSON_LOCKED, isLocked());
+			} catch (Exception e) {
+				;
+			}
+
+			try {
+				ValidationHandle vh = getValidationHandle();
+				if (vh != null)
+					theCell.put(JSON_VALIDATION_MESSAGE, vh.getPromptBoxTitle() + ":" + vh.getPromptBoxText());
+			} catch (Exception e) {
+				;
+			}
+
+			// hyperlinks
+			if (!(getURL() == null))
+				theCell.put(JSON_HREF, getURL());
+
+			if (getWrapText())
+				theCell.put(JSON_WORD_WRAP, true);
+
+			// store alignment for container issues
+			int alignment = getFormatHandle().getHorizontalAlignment();
+			if (alignment == FormatHandle.ALIGN_RIGHT) {
+				theCell.put(JSON_TEXT_ALIGN, "right");
+			} else if (alignment == FormatHandle.ALIGN_CENTER) {
+				theCell.put(JSON_TEXT_ALIGN, "center");
+			} else if (alignment == FormatHandle.ALIGN_LEFT) {
+				theCell.put(JSON_TEXT_ALIGN, "left");
+			}
+
+			// dates
+			if (typename.equals(JSON_DATETIME) && !(val == null) && !val.equals("")) {
+				dataval.put(JSON_CELL_VALUE, getFormattedStringVal());
+				// dataval.put(JSON_DATEVALUE, ch.getFloatVal());
+				dataval.put("time", DateConverter.getCalendarFromCell(this).getTimeInMillis());
+			} else if (getCellType() == CellHandle.TYPE_STRING) {
+				// FORCES CALC
+				if (((String) val).indexOf("\n") > -1) {
+					val = ((String) val).replaceAll("\n", "<br/>");
+				}
+				if (!val.equals(""))
+					dataval.put(JSON_CELL_VALUE, val.toString());
+			} else { // other
+				dataval.put(JSON_CELL_VALUE, val.toString());
+				try { // formatted pattern
+					String s = getFormatPattern();
+					if (!(s.equals(""))) {
+						String fmtd = getFormattedStringVal(); // TRIGGERS CALC!
+						if (!(val.equals(fmtd)))
+							dataval.put(JSON_CELL_FORMATTED_VALUE, fmtd);
+						if (s.indexOf("Red") > -1) {
+							Double d = new Double(val.toString());
+							if (d.doubleValue() < 0) {
+								theCell.put(JSON_RED_FORMAT, "1");
+								if (fmtd.indexOf("-") == 0)
+									fmtd = fmtd.substring(1, fmtd.length());
+								dataval.put(JSON_CELL_FORMATTED_VALUE, fmtd);
+							}
+						}
+					}
+				} catch (Exception x) {
+				}
+				;
+			}
+			theCell.put(JSON_DATA, dataval);
+		} catch (JSONException e) {
+			Logger.logErr("error getting JSON for the cell: " + e);
+		}
+		return theCell;
+	}
 
 	/**
 	 * Returns the validation handle for the cell.
@@ -2943,8 +3012,7 @@ public ColHandle getCol(){
 	public ValidationHandle getValidationHandle() {
 		ValidationHandle ret = null;
 		try {
-			ret = this.getWorkSheetHandle().getValidationHandle(
-					this.getCellAddress());
+			ret = this.getWorkSheetHandle().getValidationHandle(this.getCellAddress());
 		} catch (Exception e) {
 			; // somewhat normal?
 		}
@@ -2952,9 +3020,9 @@ public ColHandle getCol(){
 	}
 
 	/**
-	 * Copies all formatting - xf and non-xf (such as column width, hidden
-	 * state) plus merged cell range from a sourcecell to a new cell (usually in
-	 * a new workbook)
+	 * Copies all formatting - xf and non-xf (such as column width, hidden state)
+	 * plus merged cell range from a sourcecell to a new cell (usually in a new
+	 * workbook)
 	 * 
 	 * @param sourcecell
 	 *            the cell to copy
@@ -2962,8 +3030,7 @@ public ColHandle getCol(){
 	 *            the cell to copy to
 	 * @return
 	 */
-	protected static final CellHandle copyCellHelper(CellHandle sourcecell,
-			CellHandle newcell) {
+	protected static final CellHandle copyCellHelper(CellHandle sourcecell, CellHandle newcell) {
 		// copy row height & attributes
 		int rz = sourcecell.getRow().getHeight();
 		newcell.getRow().setHeight(rz);
@@ -2987,8 +3054,7 @@ public ColHandle getCol(){
 				rng.mergeCells(false);
 			}
 			// Handle formats:
-			Xf origxf = sourcecell.getWorkBook().getWorkBook()
-					.getXf(sourcecell.getFormatId());
+			Xf origxf = sourcecell.getWorkBook().getWorkBook().getXf(sourcecell.getFormatId());
 			newcell.getFormatHandle().addXf(origxf);
 			return newcell;
 		} catch (Exception ex) {

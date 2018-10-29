@@ -307,7 +307,7 @@ public class ImageHandle implements Serializable{
             ImageInputStream iis = ImageIO.createImageInputStream(imagebytestream);
             
             // Find all image readers that recognize the image format
-            Iterator iter = ImageIO.getImageReaders(iis);
+            Iterator<?> iter = ImageIO.getImageReaders(iis);
             if (!iter.hasNext()) {
                 
                 return null;

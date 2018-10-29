@@ -44,7 +44,7 @@ public interface RecycleBin
     
     /** get all of the items in this bin
     */
-    public List getAll();
+    public List<?> getAll();
 
     /** empty the current contents of the bin
     */

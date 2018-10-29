@@ -121,7 +121,7 @@ public class ColHandle {
         /* if an image falls upon this column, 
          * adjust image width so that it does not change
          */
-    	ArrayList iAdjust= new ArrayList();
+    	ArrayList<int[]> iAdjust= new ArrayList<int[]>();
     	ImageHandle[] images= myCol.getSheet().getImages(); 
     	if(images!=null) {
     	    // for each image that falls over this column, trap index + original width -- to be reset after setting col width  
@@ -158,7 +158,7 @@ public class ColHandle {
         /* if an image falls upon this column, 
          * adjust image width so that it does not change
          */
-    	ArrayList iAdjust= new ArrayList();
+    	ArrayList<int[]> iAdjust= new ArrayList<int[]>();
 		ImageHandle[] images= myCol.getSheet().getImages(); 
 		if(images!=null) {
 			// for each image that falls over this column, trap index + original width -- to be reset after setting col width  
@@ -293,7 +293,7 @@ public class ColHandle {
      * @return CellHandle array
     */
     public CellHandle[] getCells(){
-	List mycells;
+	List<?> mycells;
 	try {
 	    mycells = this.mySheet.getBoundsheet().getCellsByCol(this.getColFirst());
 	} catch (CellNotFoundException e) {

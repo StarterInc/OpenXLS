@@ -12,6 +12,11 @@
 	<url>https://sourceforge.net/projects/openxls/</url>
 	<inceptionYear>2002</inceptionYear>
 
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<profile>release</profile>
+	</properties>
+
 	<licenses>
 		<license>
 			<name>GNU Lesser General Public License (LGPL), Version 3+</name>
@@ -30,28 +35,6 @@
 		<connection>scm:git:ssh://git@bitbucket.org/openxls/openxls.git</connection>
 		<tag>master</tag>
 	</scm>
-
-	<mailingLists>
-		<mailingList>
-			<name>Development Discussion</name>
-			<subscribe>openxls-develop-subscribe@lists.sourceforge.net</subscribe>
-			<unsubscribe>openxls-develop-unsubscribe@lists.sourceforge.net</unsubscribe>
-			<post>openxls-develop@lists.sourceforge.net</post>
-			<archive>https://sourceforge.net/mailarchive/forum.php?forum_name=openxls-develop</archive>
-		</mailingList>
-
-		<mailingList>
-			<name>Commit Notifications</name>
-			<subscribe>openxls-commits-subscribe@lists.sourceforge.net</subscribe>
-			<unsubscribe>openxls-commits-unsubscribe@lists.sourceforge.net</unsubscribe>
-			<post>openxls-commits@lists.sourceforge.net</post>
-			<archive>https://sourceforge.net/mailarchive/forum.php?forum_name=openxls-commits</archive>
-		</mailingList>
-	</mailingLists>
-
-	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-	</properties>
 
 	<dependencies>
 		<dependency>
@@ -103,7 +86,7 @@
 				<filtering>true</filtering>
 				<directory>${basedir}/src/main/resources</directory>
 				<includes>
-					<include>com/extentech/OpenXLS/build.properties</include>
+					<include>io/starter/OpenXLS/build.properties</include>
 				</includes>
 			</resource>
 		</resources>
@@ -194,17 +177,17 @@
 									<additionalparam>
 										<!-- individual classes for inclusion - these have to be given 
 											as source files because - there's no way to include only part of a package -->
-										${project.build.sourceDirectory}/com/extentech/formats/XLS/CellNotFoundException.java
-										${project.build.sourceDirectory}/com/extentech/formats/XLS/FormulaNotFoundException.java
-										${project.build.sourceDirectory}/com/extentech/formats/XLS/FunctionNotSupportedException.java
-										${project.build.sourceDirectory}/com/extentech/formats/XLS/RowNotFoundException.java
-										${project.build.sourceDirectory}/com/extentech/formats/XLS/ColumnNotFoundException.java
-										${project.build.sourceDirectory}/com/extentech/formats/XLS/FormulaNotFoundException.java
-										${project.build.sourceDirectory}/com/extentech/formats/XLS/WorkSheetNotFoundException.java
-										${project.build.sourceDirectory}/com/extentech/formats/XLS/CellTypeMismatchException.java
-										${project.build.sourceDirectory}/com/extentech/formats/XLS/CellPositionConflictException.java
-										${project.build.sourceDirectory}/com/extentech/toolkit/ByteTools.java
-										${project.build.sourceDirectory}/com/extentech/toolkit/StringTool.java
+										${project.build.sourceDirectory}/io/starter/formats/XLS/CellNotFoundException.java
+										${project.build.sourceDirectory}/io/starter/formats/XLS/FormulaNotFoundException.java
+										${project.build.sourceDirectory}/io/starter/formats/XLS/FunctionNotSupportedException.java
+										${project.build.sourceDirectory}/io/starter/formats/XLS/RowNotFoundException.java
+										${project.build.sourceDirectory}/io/starter/formats/XLS/ColumnNotFoundException.java
+										${project.build.sourceDirectory}/io/starter/formats/XLS/FormulaNotFoundException.java
+										${project.build.sourceDirectory}/io/starter/formats/XLS/WorkSheetNotFoundException.java
+										${project.build.sourceDirectory}/io/starter/formats/XLS/CellTypeMismatchException.java
+										${project.build.sourceDirectory}/io/starter/formats/XLS/CellPositionConflictException.java
+										${project.build.sourceDirectory}/io/starter/toolkit/ByteTools.java
+										${project.build.sourceDirectory}/io/starter/toolkit/StringTool.java
 									</additionalparam>
 								</configuration>
 							</execution>

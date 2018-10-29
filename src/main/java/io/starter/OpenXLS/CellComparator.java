@@ -27,100 +27,107 @@ import java.util.Comparator;
 import io.starter.formats.XLS.FormulaNotFoundException;
 
 /**
- * CellComparitor is a implementation of a comparitor for
- * sorting cell values.  In this instance numeric values (whether from a cell or a formula result)
- * are sorted before any string values.  
+ * CellComparitor is a implementation of a comparitor for sorting cell values.
+ * In this instance numeric values (whether from a cell or a formula result) are
+ * sorted before any string values.
  * 
- * Date values are sorted according to their internal date representation.  Note that currently this means
- * Dates will always sort above strings due to them storing their value as a long.  
+ * Date values are sorted according to their internal date representation. Note
+ * that currently this means Dates will always sort above strings due to them
+ * storing their value as a long.
  * 
- *
+ * <a href="http://starter.io">Starter Inc.</a>
+ * 
  */
-public class CellComparator implements Comparator{
+public class CellComparator implements Comparator<Object> {
 
-	/** Compare 2 cellHandle classes
+	/**
+	 * Compare 2 cellHandle classes
 	 * 
-	 * This method handles comparisons of cells, note that formula results are used rather 
-	 * than formula strings, Numbers are sorted ahead of string values.  Dates are stored
-	 * as numbers internally in excel so are sorted against numbers
+	 * This method handles comparisons of cells, note that formula results are used
+	 * rather than formula strings, Numbers are sorted ahead of string values. Dates
+	 * are stored as numbers internally in excel so are sorted against numbers
 	 * 
 	 */
 	public int compare(Object cellHandle1, Object cellHandle2) {
 		CellHandle cell1 = (CellHandle) cellHandle1;
 		CellHandle cell2 = (CellHandle) cellHandle2;
-		
+
 		int cellType1 = cell1.getCellType();
 		int cellType2 = cell1.getCellType();
-		
-		// numerics - possibly break out more to see if values are floating point or not. 
+
+		// numerics - possibly break out more to see if values are floating point or
+		// not.
 		// would help for equality, which is likely never reached here.
-		if (cell1.isNumber()&&cell2.isNumber()){
-			if(cell1.getDoubleVal()>cell2.getDoubleVal())return 1;
-			if(cell1.getDoubleVal()<cell2.getDoubleVal())return -1;
+		if (cell1.isNumber() && cell2.isNumber()) {
+			if (cell1.getDoubleVal() > cell2.getDoubleVal())
+				return 1;
+			if (cell1.getDoubleVal() < cell2.getDoubleVal())
+				return -1;
 			return 0;
-		}
-		else if(cell1.isNumber())
-		{// get formula value if exists and is a numeric value
-			if (cellType2==CellHandle.TYPE_FORMULA){
+		} else if (cell1.isNumber()) {// get formula value if exists and is a numeric value
+			if (cellType2 == CellHandle.TYPE_FORMULA) {
 				FormulaHandle f = null;
 				try {
 					f = cell2.getFormulaHandle();
 				} catch (FormulaNotFoundException e) {
 				}
 				Double d = f.getDoubleVal();
-				if (!(d==Double.NaN)){
-					if (cell1.getDoubleVal()>d)return 1;
-					if (cell1.getDoubleVal()<d)return -1;
+				if (!(d == Double.NaN)) {
+					if (cell1.getDoubleVal() > d)
+						return 1;
+					if (cell1.getDoubleVal() < d)
+						return -1;
 					return 0;
 				}
-			}else{
+			} else {
 				return 1;
 			}
-		}
-		else if(cell2.isNumber())
-		{
-			if (cellType1==CellHandle.TYPE_FORMULA){
+		} else if (cell2.isNumber()) {
+			if (cellType1 == CellHandle.TYPE_FORMULA) {
 				FormulaHandle f = null;
 				try {
 					f = cell1.getFormulaHandle();
 				} catch (FormulaNotFoundException e) {
 				}
 				Double d = f.getDoubleVal();
-				if (!(d==Double.NaN)){
-					if (cell2.getDoubleVal()<d)return 1;
-					if (cell2.getDoubleVal()>d)return -1;
+				if (!(d == Double.NaN)) {
+					if (cell2.getDoubleVal() < d)
+						return 1;
+					if (cell2.getDoubleVal() > d)
+						return -1;
 					return 0;
 				}
-			}else{
+			} else {
 				return -1;
 			}
 		}
-		
-		//Two formulas;
-		if (cellType1==CellHandle.TYPE_FORMULA && cellType2==CellHandle.TYPE_FORMULA){
+
+		// Two formulas;
+		if (cellType1 == CellHandle.TYPE_FORMULA && cellType2 == CellHandle.TYPE_FORMULA) {
 			try {
-				FormulaHandle f1 = cell1.getFormulaHandle();			
+				FormulaHandle f1 = cell1.getFormulaHandle();
 				FormulaHandle f2 = cell2.getFormulaHandle();
 				double d1 = f1.getDoubleVal();
 				double d2 = f2.getDoubleVal();
-				if(!(d1==Double.NaN) && !(d2==Double.NaN)){
-					if(d1>d2)return 1;
-					if(d1<d2)return -1;
+				if (!(d1 == Double.NaN) && !(d2 == Double.NaN)) {
+					if (d1 > d2)
+						return 1;
+					if (d1 < d2)
+						return -1;
 					return 0;
-				}else if(!(d1==Double.NaN)){
+				} else if (!(d1 == Double.NaN)) {
 					return 1;
-				}else if(!(d2==Double.NaN)){
+				} else if (!(d2 == Double.NaN)) {
 					return -1;
 				}
 			} catch (FormulaNotFoundException e) {
 			}
 		}
-		
-		
+
 		// Strings, the last choice
 		String val1 = cell1.getStringVal();
 		String val2 = cell2.getStringVal();
 		return val1.compareTo(val2);
 	}
-	
+
 }

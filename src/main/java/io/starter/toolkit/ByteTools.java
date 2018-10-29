@@ -276,8 +276,8 @@ public static String getByteString(byte[] bt, boolean pad){
     * Seems slow, why 2 iterations, should be faster way?
         
     */
-    public static byte[] getBytes(List records){
-        Iterator e = records.iterator();
+    public static byte[] getBytes(List<?> records){
+        Iterator<?> e = records.iterator();
         int buflen = 0;
         while(e.hasNext()){
             byte[] barr = (byte[]) e.next();

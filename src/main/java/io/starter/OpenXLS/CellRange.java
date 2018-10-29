@@ -22,20 +22,13 @@
  */
 package io.starter.OpenXLS;
 
-
-import static io.starter.OpenXLS.JSONConstants.*;
-
-import io.starter.formats.XLS.*;
-import io.starter.formats.XLS.formulas.FormulaParser;
-import io.starter.formats.XLS.formulas.GenericPtg;
-import io.starter.formats.XLS.formulas.Ptg;
-import io.starter.formats.XLS.formulas.PtgRef;
+import static io.starter.OpenXLS.JSONConstants.JSON_CELL;
+import static io.starter.OpenXLS.JSONConstants.JSON_CELLS;
+import static io.starter.OpenXLS.JSONConstants.JSON_CELL_VALUE;
+import static io.starter.OpenXLS.JSONConstants.JSON_LOCATION;
+import static io.starter.OpenXLS.JSONConstants.JSON_RANGE;
 
 import java.io.Serializable;
-
-import io.starter.toolkit.Logger;
-import io.starter.toolkit.StringTool;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -48,6 +41,28 @@ import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import io.starter.formats.XLS.BiffRec;
+import io.starter.formats.XLS.Blank;
+import io.starter.formats.XLS.Boundsheet;
+import io.starter.formats.XLS.CellNotFoundException;
+import io.starter.formats.XLS.CellRec;
+import io.starter.formats.XLS.ColumnNotFoundException;
+import io.starter.formats.XLS.Condfmt;
+import io.starter.formats.XLS.FormulaNotFoundException;
+import io.starter.formats.XLS.Mergedcells;
+import io.starter.formats.XLS.Name;
+import io.starter.formats.XLS.RowNotFoundException;
+import io.starter.formats.XLS.WorkSheetNotFoundException;
+import io.starter.formats.XLS.XLSConstants;
+import io.starter.formats.XLS.XLSRecord;
+import io.starter.formats.XLS.Xf;
+import io.starter.formats.XLS.formulas.FormulaParser;
+import io.starter.formats.XLS.formulas.GenericPtg;
+import io.starter.formats.XLS.formulas.Ptg;
+import io.starter.formats.XLS.formulas.PtgRef;
+import io.starter.toolkit.Logger;
+import io.starter.toolkit.StringTool;
 
 /**
  * Cell Range is a handle to a range of Workbook Cells
@@ -66,7 +81,8 @@ import org.json.JSONObject;
  * <br>
  * </blockquote>
  * 
- *         "http://www.extentech.com">Extentech Inc.</a>
+ * <a href="http://starter.io">Starter Inc.</a>
+ * 
  * @see DataBoundCellRange
  * @see XLSRecord
  */
@@ -78,12 +94,10 @@ public class CellRange implements Serializable {
 	 * returns the conditional format object for this range, if any
 	 * 
 	 * @return Condfmt object
-	 */ 
+	 */
 	protected Condfmt getConditionalFormat() {
 		return cfx;
 	}
-
-
 
 	/**
 	 * 
@@ -92,12 +106,12 @@ public class CellRange implements Serializable {
 	 */
 	private static final long serialVersionUID = -3609881364824289079L;
 	private boolean ismerged = false;
-	private BiffRec parent= null;	// if cell range is child of a named range, must ensure update correctly 
+	private BiffRec parent = null; // if cell range is child of a named range, must ensure update correctly
 	public static final boolean REMOVE_MERGED_CELLS = true;
 	public static final boolean RETAIN_MERGED_CELLS = false;
-	//private Ptg myptg = null;
+	// private Ptg myptg = null;
 	public boolean DEBUG = false;
-	private boolean isDirty= false;	// true if addCellsToRange without init
+	private boolean isDirty = false; // true if addCellsToRange without init
 	int firstcellrow = -1;
 	int firstcellcol = -1;
 	int lastcellrow = -1;
@@ -118,95 +132,101 @@ public class CellRange implements Serializable {
 	protected int externalLink2 = 0;
 
 	FormatHandle fmtr = null;
-	boolean wholeCol= false, wholeRow= false;
-	
+	boolean wholeCol = false, wholeRow = false;
+
 	/** Protected constructor for creating result ranges. */
-	protected CellRange (WorkSheetHandle sheet,
-			int row, int col, int width, int height) {
+	protected CellRange(WorkSheetHandle sheet, int row, int col, int width, int height) {
 		this.sheet = sheet;
 		sheetname = sheet.getSheetName();
 		mybook = sheet.getWorkBook();
-		
+
 		firstcellrow = row;
 		firstcellcol = col;
 		lastcellrow = row + height - 1;
-		lastcellcol = col + width  - 1;
-		
-		range = sheetname + "!" + ExcelTools.formatRange( new int[] {
-				firstcellcol, firstcellrow, lastcellcol, lastcellrow
-			} );
-		
-		cells = new CellHandle[ width * height ];
+		lastcellcol = col + width - 1;
+
+		range = sheetname + "!"
+				+ ExcelTools.formatRange(new int[] { firstcellcol, firstcellrow, lastcellcol, lastcellrow });
+
+		cells = new CellHandle[width * height];
 	}
-	
-	/** Initializes a <code>CellRange</code> from a <code>CellRangeRef</code>.
-	 * The source <code>CellRangeRef</code> instance must be qualified with a
-	 * single resolved worksheet.
+
+	/**
+	 * Initializes a <code>CellRange</code> from a <code>CellRangeRef</code>. The
+	 * source <code>CellRangeRef</code> instance must be qualified with a single
+	 * resolved worksheet.
 	 * 
-	 * @param source the <code>CellRangeRef<code> from which to initialize
-	 * @param init whether to populate the cell array
-	 * @param create whether to fill gaps in the range with blank cells
-	 * @throws IllegalArgumentException if the source range does not have a
-	 *         resolved sheet or has more than one sheet
+	 * @param source
+	 *            the <code>CellRangeRef<code> from which to initialize
+	 * @param init
+	 *            whether to populate the cell array
+	 * @param create
+	 *            whether to fill gaps in the range with blank cells
+	 * @throws IllegalArgumentException
+	 *             if the source range does not have a resolved sheet or has more
+	 *             than one sheet
 	 */
-	public CellRange (CellRangeRef source, boolean init, boolean create) {
+	public CellRange(CellRangeRef source, boolean init, boolean create) {
 		initializeCells = init;
 		createBlanks = create;
-		
+
 		sheet = source.getFirstSheet();
 		if (sheet == null || source.isMultiSheet())
-			throw new IllegalArgumentException(
-				"the source range must have a single resolved sheet" );
-		
+			throw new IllegalArgumentException("the source range must have a single resolved sheet");
+
 		mybook = this.sheet.getWorkBook();
 		sheetname = this.sheet.getSheetName();
-		
+
 		// This is inefficient, but fixing it would require rewriting init.
 		this.range = source.toString();
-		
+
 		try {
 			this.init();
 		} catch (CellNotFoundException e) {
 			// this should be impossible
-			throw new RuntimeException( e );
+			throw new RuntimeException(e);
 		}
 	}
-	
-	/** Initializes a <code>CellRange</code> from a <code>CellRangeRef</code>.
-	 * The source <code>CellRangeRef</code> instance must be qualified with a
-	 * single resolved worksheet.
+
+	/**
+	 * Initializes a <code>CellRange</code> from a <code>CellRangeRef</code>. The
+	 * source <code>CellRangeRef</code> instance must be qualified with a single
+	 * resolved worksheet.
 	 * 
-	 * @param source the <code>CellRangeRef<code> from which to initialize
-	 * @throws IllegalArgumentException if the source range does not have a
-	 *         resolved sheet or has more than one sheet
+	 * @param source
+	 *            the <code>CellRangeRef<code> from which to initialize
+	 * @throws IllegalArgumentException
+	 *             if the source range does not have a resolved sheet or has more
+	 *             than one sheet
 	 */
-	public CellRange (CellRangeRef source) {
-		this( source, false, true );
+	public CellRange(CellRangeRef source) {
+		this(source, false, true);
 	}
-	
+
 	public void clearFormats() {
 		for (int idx = 0; idx < cells.length; idx++)
-			if(cells[idx]!=null)
+			if (cells[idx] != null)
 				cells[idx].clearFormats();
 	}
-	
+
 	/**
 	 * @deprecated use clear()
 	 */
+	@Deprecated
 	public void clearContents() {
-		for (int idx = 0; idx < cells.length; idx++) 
-			if(cells[idx]!=null)
+		for (int idx = 0; idx < cells.length; idx++)
+			if (cells[idx] != null)
 				cells[idx].clearContents();
 	}
-	
+
 	/**
-	 * clears the contents and formats of the cells referenced by this range
-	 * but does not remove the cells from the workbook. 
+	 * clears the contents and formats of the cells referenced by this range but
+	 * does not remove the cells from the workbook.
 	 *
 	 */
 	public void clear() {
-		for (int idx = 0; idx < cells.length; idx++) 
-			if(cells[idx]!=null)
+		for (int idx = 0; idx < cells.length; idx++)
+			if (cells[idx] != null)
 				cells[idx].clear();
 	}
 
@@ -217,11 +237,11 @@ public class CellRange implements Serializable {
 	 * 
 	 */
 	public void removeCells() {
-		for (int idx = 0; idx < cells.length; idx++) 
-			if(cells[idx]!=null)
+		for (int idx = 0; idx < cells.length; idx++)
+			if (cells[idx] != null)
 				cells[idx].remove(true);
 	}
-	
+
 	/**
 	 * Un-Merge the Cells contained in this CellRange
 	 * 
@@ -240,10 +260,11 @@ public class CellRange implements Serializable {
 	}
 
 	/**
-	 * Set the format ID of all cells in this CellRange 
-	 * <br>FormatID can be obtained through any CellHandle with the getFormatID() call
+	 * Set the format ID of all cells in this CellRange <br>
+	 * FormatID can be obtained through any CellHandle with the getFormatID() call
 	 * 
-	 * @param int fmtID - the format ID to set the cells within the range to
+	 * @param int
+	 *            fmtID - the format ID to set the cells within the range to
 	 */
 	public void setFormatID(int fmtID) throws Exception {
 		BiffRec[] mycells = this.getCellRecs();
@@ -255,7 +276,8 @@ public class CellRange implements Serializable {
 	/**
 	 * Set a hyperlink on all cells in this CellRange
 	 * 
-	 * @param String url - the URL String to set
+	 * @param String
+	 *            url - the URL String to set
 	 */
 	public void setURL(String url) throws Exception {
 		BiffRec[] mycells = this.getCellRecs();
@@ -267,7 +289,8 @@ public class CellRange implements Serializable {
 	/**
 	 * Merge the Cells contained in this CellRange
 	 * 
-	 * @param boolean remove - true to delete the Cells following the first in the range
+	 * @param boolean
+	 *            remove - true to delete the Cells following the first in the range
 	 */
 	public void mergeCells(boolean remove) {
 		this.createBlanks();
@@ -278,8 +301,8 @@ public class CellRange implements Serializable {
 	}
 
 	/**
-	 * Merge the Cells contained in this CellRange, clearing or removing
-	 * the Cells following the first in the range
+	 * Merge the Cells contained in this CellRange, clearing or removing the Cells
+	 * following the first in the range
 	 * 
 	 */
 	private void mergeCellsClearFollowingCells() {
@@ -297,13 +320,13 @@ public class CellRange implements Serializable {
 			if (mycells[t] != null)
 				mycells[t].setSheet(this.getSheet().getMysheet());
 			mycells[t].setMergeRange(this); // set the range of merged cells
-			if(t>0) {
-    			if (!(mycells[t] instanceof Blank)) {
-    				String cellname = mycells[t].getCellAddress();
-    				Boundsheet sheet = mycells[t].getSheet();
-    				mycells[t].remove(true); // blow it out!
-    				sheet.addValue(null, cellname);
-    			}
+			if (t > 0) {
+				if (!(mycells[t] instanceof Blank)) {
+					String cellname = mycells[t].getCellAddress();
+					Boundsheet sheet = mycells[t].getSheet();
+					mycells[t].remove(true); // blow it out!
+					sheet.addValue(null, cellname);
+				}
 			}
 		}
 		Mergedcells mc = this.getSheet().getSheet().getMergedCellsRec();
@@ -314,7 +337,7 @@ public class CellRange implements Serializable {
 	}
 
 	/**
-	 * Merge the Cells contained in this CellRange	 * 
+	 * Merge the Cells contained in this CellRange *
 	 */
 	private void mergeCellsKeepFollowingCells() {
 		BiffRec[] mycells = this.getCellRecs();
@@ -335,14 +358,16 @@ public class CellRange implements Serializable {
 		mc.addCellRange(this);
 		this.ismerged = true;
 	}
-	
-	/** Gets the number of columns in the range.
+
+	/**
+	 * Gets the number of columns in the range.
 	 */
 	public int getWidth() {
 		return lastcellcol - firstcellcol + 1;
 	}
-	
-	/** Gets the number of rows in the range.
+
+	/**
+	 * Gets the number of rows in the range.
 	 */
 	public int getHeight() {
 		return lastcellrow - firstcellrow + 1;
@@ -380,8 +405,6 @@ public class CellRange implements Serializable {
 		return mycolints;
 	}
 
-
-
 	/**
 	 * Returns an array of Rows (RowHandles) referenced by this CellRange
 	 * 
@@ -394,21 +417,22 @@ public class CellRange implements Serializable {
 		myrows = new RowHandle[numrows];
 		for (int t = 0; t < numrows; t++) {
 			RowHandle rx = null;
-			try{
+			try {
 				rx = sheet.getRow((firstcellrow - 1) + t);
-			}catch(Exception x){
+			} catch (Exception x) {
 				; // typically empty rows
 			}
-			myrows[t] = rx;			
+			myrows[t] = rx;
 		}
 		return myrows;
 	}
-	
+
 	/**
 	 * Get the number of rows that this CellRange encompasses
+	 * 
 	 * @return
 	 */
-	public int getNumberOfRows(){
+	public int getNumberOfRows() {
 		int numRows = (lastcellrow + 1) - firstcellrow;
 		return numRows;
 	}
@@ -428,27 +452,29 @@ public class CellRange implements Serializable {
 		}
 		return mycols;
 	}
-	
+
 	/**
 	 * Get the number of columns that this CellRange encompasses
+	 * 
 	 * @return
 	 */
-	public int getNumberOfCols(){
-		int numCols =  (lastcellcol + 1) - firstcellcol;
+	public int getNumberOfCols() {
+		int numCols = (lastcellcol + 1) - firstcellcol;
 		return numCols;
 	}
 
 	/**
-	 * returns edge status of the desired CellHandle within this CellRange 
-	 * ie: top, left, bottom, right
-	 * <br>
-	 * returns 0 or 1 for 4 sides
-	 * <br>
-	 * 1,1,1,1 is a single cell in a range 1,1,0,0 is on the top left edge of
-	 * the range
-	 * @param CellHandle ch - 
-	 * @param int sz -
-	 * @return int[] array representing the edge positions  
+	 * returns edge status of the desired CellHandle within this CellRange ie: top,
+	 * left, bottom, right <br>
+	 * returns 0 or 1 for 4 sides <br>
+	 * 1,1,1,1 is a single cell in a range 1,1,0,0 is on the top left edge of the
+	 * range
+	 * 
+	 * @param CellHandle
+	 *            ch -
+	 * @param int
+	 *            sz -
+	 * @return int[] array representing the edge positions
 	 */
 	// TODO: documentation: Don't quite understand this!
 	public int[] getEdgePositions(CellHandle ch, int sz) {
@@ -471,21 +497,21 @@ public class CellRange implements Serializable {
 
 	/**
 	 * returns whether this CellRange intersects with another CellRange
-	 * @param CellRange cr - CellRange to test
-	 * @return boolean true if CellRange cr intersects with this CellRange 
+	 * 
+	 * @param CellRange
+	 *            cr - CellRange to test
+	 * @return boolean true if CellRange cr intersects with this CellRange
 	 */
 	public boolean intersects(CellRange cr) {
 		// get the corners, check for 'contains'
 		try {
 			int[] rc = cr.getRangeCoords();
-			if ((rc[0] >= firstcellrow) && (rc[2] <= lastcellrow)
-					&& (rc[1] >= firstcellcol) && (rc[3] <= lastcellcol)) {
+			if ((rc[0] >= firstcellrow) && (rc[2] <= lastcellrow) && (rc[1] >= firstcellcol)
+					&& (rc[3] <= lastcellcol)) {
 				return true;
 			}
 		} catch (CellNotFoundException e) {
-			Logger
-					.logWarn("CellRange unable to determine intersection of range: "
-							+ cr.toString());
+			Logger.logWarn("CellRange unable to determine intersection of range: " + cr.toString());
 		}
 		return false;
 	}
@@ -493,7 +519,8 @@ public class CellRange implements Serializable {
 	/**
 	 * returns whether this CellRange contains a particular Cell
 	 * 
-	 * @param CellHandle ch - the Cell to check  
+	 * @param CellHandle
+	 *            ch - the Cell to check
 	 * @return true if CellHandle ch is contained within this CellRange
 	 */
 	public boolean contains(Cell cxx) {
@@ -511,7 +538,8 @@ public class CellRange implements Serializable {
 	/**
 	 * returns whether this CellRange contains the specified Row/Col coordinates
 	 * 
-	 * @param int[] rc - row/col coordinates to test
+	 * @param int[]
+	 *            rc - row/col coordinates to test
 	 * @return true if the coordinates are contained with this CellRange
 	 */
 	public boolean contains(int[] rc) {
@@ -530,35 +558,36 @@ public class CellRange implements Serializable {
 	/**
 	 * returns the String representation of this CellRange
 	 */
+	@Override
 	public String toString() {
 		return range;
 	}
 
 	/**
-	 * Constructor to create a new CellRange from a WorkSheetHandle and a set of 
-	 * range coordinates:
-	 * <br>coords[0] = first row 
-	 * <br>coords[1] = first col
-	 * <br>coords[2] = last row
-	 * <br>coords[3] = last col
+	 * Constructor to create a new CellRange from a WorkSheetHandle and a set of
+	 * range coordinates: <br>
+	 * coords[0] = first row <br>
+	 * coords[1] = first col <br>
+	 * coords[2] = last row <br>
+	 * coords[3] = last col
 	 * 
-	 * @param WorkSheetHandle sht - handle to the WorkSheet containing the Range's Cells
-	 * @param int[] coords - the cell coordinates 
-	 * @param boolean cb - true if should create blank cells
+	 * @param WorkSheetHandle
+	 *            sht - handle to the WorkSheet containing the Range's Cells
+	 * @param int[]
+	 *            coords - the cell coordinates
+	 * @param boolean
+	 *            cb - true if should create blank cells
 	 * @throws Exception
 	 **/
-	public CellRange(WorkSheetHandle sht, int[] coords, boolean cb)
-			throws Exception {
+	public CellRange(WorkSheetHandle sht, int[] coords, boolean cb) throws Exception {
 		this.createBlanks = cb;
 		this.sheet = sht;
 		this.mybook = sht.wbh;
 		sheetname = sht.getSheetName();
-		sheetname= GenericPtg.qualifySheetname(sheetname);
+		sheetname = GenericPtg.qualifySheetname(sheetname);
 		String addr = sheetname + "!";
-		String c1 = ExcelTools.getAlphaVal(coords[1])
-				+ String.valueOf(coords[0] + 1);
-		String c2 = ExcelTools.getAlphaVal(coords[3])
-				+ String.valueOf(coords[2] + 1);
+		String c1 = ExcelTools.getAlphaVal(coords[1]) + String.valueOf(coords[0] + 1);
+		String c2 = ExcelTools.getAlphaVal(coords[3]) + String.valueOf(coords[2] + 1);
 		addr += c1 + ":" + c2;
 		this.range = addr;
 		this.init();
@@ -570,8 +599,7 @@ public class CellRange implements Serializable {
 	 */
 	public void setAsPrintArea() {
 		if (this.sheet == null) {
-			Logger.logErr("CellRange.setAsPrintArea() failed: "
-					+ this.toString()
+			Logger.logErr("CellRange.setAsPrintArea() failed: " + this.toString()
 					+ " does not have a valid Sheet reference.");
 			return;
 		}
@@ -579,83 +607,74 @@ public class CellRange implements Serializable {
 	}
 
 	/**
-	 * Constructor to create a new CellRange from a WorkSheetHandle and a set of 
-	 * range coordinates:
-	 * <br>coords[0] = first row 
-	 * <br>coords[1] = first col
-	 * <br>coords[2] = last row
-	 * <br>coords[3] = last col
+	 * Constructor to create a new CellRange from a WorkSheetHandle and a set of
+	 * range coordinates: <br>
+	 * coords[0] = first row <br>
+	 * coords[1] = first col <br>
+	 * coords[2] = last row <br>
+	 * coords[3] = last col
 	 * 
-	 * @param WorkSheetHandle sht - handle to the WorkSheet containing the Range's Cells
-	 * @param int[] coords - the cell coordinates 
+	 * @param WorkSheetHandle
+	 *            sht - handle to the WorkSheet containing the Range's Cells
+	 * @param int[]
+	 *            coords - the cell coordinates
 	 */
 	public CellRange(WorkSheetHandle sht, int[] coords) throws Exception {
 		this(sht, coords, false);
 	}
 
 	/**
-	 * Constructor to Create a new CellRange from a String range
-	 * <br>
-	 * The String range must be in the format Sheet!CR:CR
-	 * <br>
-	 * For Example, "Sheet1!C9:I19"
-	 * <br>NOTE: 
-	 * You MUST Set the WorkBookHandle explicitly on this CellRange or it will generate
-	 * NullPointerException when trying to access the Cells.
+	 * Constructor to Create a new CellRange from a String range <br>
+	 * The String range must be in the format Sheet!CR:CR <br>
+	 * For Example, "Sheet1!C9:I19" <br>
+	 * NOTE: You MUST Set the WorkBookHandle explicitly on this CellRange or it will
+	 * generate NullPointerException when trying to access the Cells.
 	 * 
 	 * 
-	 * @param String r - range String
+	 * @param String
+	 *            r - range String
 	 * @see CellRange.setWorkBook
 	 */
 	public CellRange(String r) {
 		this.range = r;
 	}
 
-	
-	
 	/**
-	 * Increase the bounds of the CellRange by including the CellHandle.
+	 * Increase the bounds of the CellRange by including the CellHandle. <br>
+	 * These are the limitations and side-effects of this method: <br>
+	 * - the Cell must be contiguous with the existing Range, ie: you can add a Cell
+	 * which either increments the row or the column of the existing range by one.
 	 * <br>
-	 * These are the limitations and side-effects of this method:
+	 * - the Cell must be on the same sheet as the existing range. <br>
+	 * - as a Cell Range is a 2 dimensional rectangle, expanding a multiple column
+	 * range by adding a Cell to the end will include the logical Cells on the row
+	 * in the range. <br>
+	 * Some Examples: <br>
 	 * <br>
-	 * - the Cell must be contiguous with the existing Range, ie: you can add a
-	 * Cell which either increments the row or the column of the existing range
-	 * by one.
+	 * // simple one dimensional range expansion: <br>
+	 * existing Range = A1:A20 <br>
+	 * addCellToRange(A21) new Range = A1:A21 <br>
 	 * <br>
-	 * - the Cell must be on the same sheet as the existing range.
+	 * existing Range = A1:B20 <br>
+	 * addCellToRange(A21) <br>
+	 * new Range = A1:B21 // note B20 is included automatically <br>
 	 * <br>
-	 * - as a Cell Range is a 2 dimensional rectangle, expanding a multiple
-	 * column range by adding a Cell to the end will include the logical Cells
-	 * on the row in the range.
-	 * <br>
-	 * Some Examples:
-	 * <br>
-	 * <br>
-	 * // simple one dimensional range expansion: 
-	 * <br>existing Range = A1:A20
-	 * <br>addCellToRange(A21) new Range = A1:A21
-	 * <br>
-	 * <br>existing Range = A1:B20
-	 * <br>addCellToRange(A21) 
-	 * <br>new Range = A1:B21 // note B20 is included automatically
-	 * <br>
-	 * <br>existing Range = A1:A20
-	 * <br>addCellToRange(B1) 
-	 * <br>new Range = A1:B20 //note entire B column of cells are included automatically 
+	 * existing Range = A1:A20 <br>
+	 * addCellToRange(B1) <br>
+	 * new Range = A1:B20 //note entire B column of cells are included automatically
 	 * 
-	 * @param CellHandle ch - the Cell to add to the CellRange
+	 * @param CellHandle
+	 *            ch - the Cell to add to the CellRange
 	 */
 	public boolean addCellToRange(CellHandle ch) {
 		// check worksheet
 		String sheetname = ch.getWorkSheetName();
 		if (sheetname == null) {
-			Logger.logWarn("Cell " + ch.toString() + " NOT added to Range: "
-					+ this.toString());
+			Logger.logWarn("Cell " + ch.toString() + " NOT added to Range: " + this.toString());
 			return false;
 		}
 		if (!sheetname.equalsIgnoreCase(this.getSheet().getSheetName())) {
-			Logger.logWarn("Cell " + ch.toString() + " NOT added to Range: "
-					+ this.toString());
+			Logger.logWarn("Cell " + ch.toString() + " NOT added to Range: " + this.toString());
 			return false;
 		}
 		int[] rc = { ch.getRowNum(), ch.getColNum() };
@@ -682,49 +701,53 @@ public class CellRange implements Serializable {
 			lastcellcol++;
 
 		// myptg is never set so myptg access never happens... taking out
-		//boolean addPtgInfo = false;
-		//if (myptg != null && myptg instanceof PtgRef)
-		//	addPtgInfo = true;
+		// boolean addPtgInfo = false;
+		// if (myptg != null && myptg instanceof PtgRef)
+		// addPtgInfo = true;
 		// format the new range String
 		String newrange = this.getSheet().getSheetName() + "!";
 		String newcellrange = "";
-		//if (addPtgInfo && !((PtgRef) myptg).isColRel())
-		//	newcellrange += "$";
+		// if (addPtgInfo && !((PtgRef) myptg).isColRel())
+		// newcellrange += "$";
 		newcellrange += ExcelTools.getAlphaVal(firstcellcol);
-		//if (addPtgInfo && !((PtgRef) myptg).isRowRel())
-		//	newcellrange += "$";
+		// if (addPtgInfo && !((PtgRef) myptg).isRowRel())
+		// newcellrange += "$";
 		newcellrange += String.valueOf(firstcellrow);
 		newcellrange += ":";
-		//if (addPtgInfo && !((PtgRef) myptg).isColRel())
-		//	newcellrange += "$";
+		// if (addPtgInfo && !((PtgRef) myptg).isColRel())
+		// newcellrange += "$";
 		newcellrange += ExcelTools.getAlphaVal(lastcellcol);
-		//if (addPtgInfo && !((PtgRef) myptg).isColRel())
-		//	newcellrange += "$";
+		// if (addPtgInfo && !((PtgRef) myptg).isColRel())
+		// newcellrange += "$";
 		newcellrange += String.valueOf(lastcellrow);
 		this.range = newrange + newcellrange;
-		isDirty= true;
+		isDirty = true;
 
-		/*if (addPtgInfo) {
-			ReferenceTracker.updateAddressPerPolicy(myptg, newcellrange);
-			return true;
-		}*/
-		
-		if (this.parent!=null && this.parent.getOpcode()==XLSConstants.NAME) {
-			((Name)parent).setLocation(this.range);	// ensure named range expression is updated, as well as any formula references are cleared of cache
+		/*
+		 * if (addPtgInfo) { ReferenceTracker.updateAddressPerPolicy(myptg,
+		 * newcellrange); return true; }
+		 */
+
+		if (this.parent != null && this.parent.getOpcode() == XLSConstants.NAME) {
+			((Name) parent).setLocation(this.range); // ensure named range expression is updated, as well as any formula
+														// references are cleared of cache
 		}
-		
+
 		return false;
 	}
 
 	/**
 	 * get the Cells in this cell range
+	 * 
 	 * @return CellHandle[] all the Cells in this range
 	 */
 	public CellHandle[] getCells() {
-		if (isDirty) 
+		if (isDirty)
 			try {
 				init();
-			} catch (CellNotFoundException e) { ; } 
+			} catch (CellNotFoundException e) {
+				;
+			}
 		return cells;
 	}
 
@@ -734,14 +757,14 @@ public class CellRange implements Serializable {
 	 * @return List of CellHandles
 	 */
 	public List<CellHandle> getCellList() {
-		return Arrays.asList( cells );
+		return Arrays.asList(cells);
 	}
 
 	/**
-	 * get the underlying Cell Records in this range 
-	 * <br>NOTE: Cell Records are not
-	 * a part of the public API and are not intended for use in client
-	 * applications.
+	 * get the underlying Cell Records in this range <br>
+	 * NOTE: Cell Records are not a part of the public API and are not intended for
+	 * use in client applications.
+	 * 
 	 * @return BiffRec[] array of Cell Records
 	 * 
 	 */
@@ -754,65 +777,64 @@ public class CellRange implements Serializable {
 		}
 		return ret;
 	}
-	
+
 	/*
-	 * reset the underlying cell records in this range
-	 * <br>NOTE: Cell Records are not
-	 * a part of the public API and are not intended for use in client
+	 * reset the underlying cell records in this range <br>NOTE: Cell Records are
+	 * not a part of the public API and are not intended for use in client
 	 * applications.
+	 * 
 	 * @return BiffRec[] array of Cell Records
 	 * 
-	 *NOT USED AT THIS TIME
-	public BiffRec[] resetCellRecs() {
-		this.isDirty= true;
-		return getCellRecs();
-	}*/
-	
-	/**
-	 * If the cells contain an incrementing value that can be transferred into an int,
-	 * then return that value, else throw a NPE.  I'm sure there is a better exception to be thrown,
-	 * but not sure what that is, and it doesn't make sense to return a value like -1 in these cases.
+	 * NOT USED AT THIS TIME public BiffRec[] resetCellRecs() { this.isDirty= true;
+	 * return getCellRecs(); }
 	 */
-	public int getIncrementAmount() throws Exception{
+
+	/**
+	 * If the cells contain an incrementing value that can be transferred into an
+	 * int, then return that value, else throw a NPE. I'm sure there is a better
+	 * exception to be thrown, but not sure what that is, and it doesn't make sense
+	 * to return a value like -1 in these cases.
+	 */
+	public int getIncrementAmount() throws Exception {
 		CellHandle[] ch = this.getCells();
-		if (ch.length==1){
+		if (ch.length == 1) {
 			throw new Exception("Cannot have increment with non-range cell");
 		}
 		boolean initialized = false;
 		int incAmount = 0;
-		for(int i=1;i<ch.length;i++){
-			int value1 = ch[i-1].getIntVal();
+		for (int i = 1; i < ch.length; i++) {
+			int value1 = ch[i - 1].getIntVal();
 			int value2 = ch[i].getIntVal();
-			if(!initialized){
-				incAmount = (value2-value1);
+			if (!initialized) {
+				incAmount = (value2 - value1);
 				initialized = true;
-			}else{
-				if (value2-value1!=incAmount){
+			} else {
+				if (value2 - value1 != incAmount) {
 					throw new Exception("Inconsistent values across increment");
 				}
 			}
 		}
-		if (!initialized){
+		if (!initialized) {
 			throw new Exception("Error determining increment");
 		}
 		return incAmount;
 	}
-	
 
 	/**
-	 * Constructor which creates a new CellRange from a String range
-	 * <br>
-	 * The String range must be in the format Sheet!CR:CR
-	 * <br>
+	 * Constructor which creates a new CellRange from a String range <br>
+	 * The String range must be in the format Sheet!CR:CR <br>
 	 * For Example, "Sheet1!C9:I19"
 	 * 
-	 * @param String range - the range string
-	 * @param WorkBook bk
-	 * @param boolean createblanks - true if blank cells should be created if necessary
-	 * @param boolean initcells - true if cells should (be initialized) 
+	 * @param String
+	 *            range - the range string
+	 * @param WorkBook
+	 *            bk
+	 * @param boolean
+	 *            createblanks - true if blank cells should be created if necessary
+	 * @param boolean
+	 *            initcells - true if cells should (be initialized)
 	 */
-	public CellRange(String range, io.starter.OpenXLS.WorkBook bk,
-			boolean createblanks, boolean initcells) {
+	public CellRange(String range, io.starter.OpenXLS.WorkBook bk, boolean createblanks, boolean initcells) {
 		createBlanks = createblanks;
 		initializeCells = initcells;
 		this.range = range;
@@ -827,18 +849,19 @@ public class CellRange implements Serializable {
 	}
 
 	/**
-	 * Constructor which creates a new CellRange from a String range
-	 * <br>
-	 * The String range must be in the format Sheet!CR:CR
-	 * <br>
+	 * Constructor which creates a new CellRange from a String range <br>
+	 * The String range must be in the format Sheet!CR:CR <br>
 	 * For Example, "Sheet1!C9:I19"
 	 * 
-	 * @param String range - the range string
-	 * @param WorkBook bk
-	 * @param boolean createblanks - true if blank cells should be created (if necessary)
+	 * @param String
+	 *            range - the range string
+	 * @param WorkBook
+	 *            bk
+	 * @param boolean
+	 *            createblanks - true if blank cells should be created (if
+	 *            necessary)
 	 */
-	public CellRange(String range, io.starter.OpenXLS.WorkBook bk,
-			boolean c) {
+	public CellRange(String range, io.starter.OpenXLS.WorkBook bk, boolean c) {
 		createBlanks = c;
 		this.range = range;
 		if (bk == null)
@@ -846,43 +869,47 @@ public class CellRange implements Serializable {
 		this.setWorkBook(bk);
 		try {
 			if (!"".equals(this.range))
-					this.init();
+				this.init();
 		} catch (CellNotFoundException e) {
 			;
 		} catch (NumberFormatException ne) {
-			;	// happens upon !REF range
+			; // happens upon !REF range
 		}
 	}
-	
+
 	/**
-	 * sets the parent of this Cell range 
-	 * <br>Used Internally.  Not intended for the End User.
+	 * sets the parent of this Cell range <br>
+	 * Used Internally. Not intended for the End User.
+	 * 
 	 * @param b
 	 */
 	public void setParent(BiffRec b) {
-		parent= b;
+		parent = b;
 	}
-	
+
 	/**
 	 * Re-sort all cells in this cell range according to the column.
 	 * 
-	 * A custom comparator can be passed in, or the default one can be used with 
+	 * A custom comparator can be passed in, or the default one can be used with
 	 * sort(String, boolean).
 	 * 
 	 * Comparators will be passed 2 CellHandle objects for comparison.
 	 * 
-	 * Collections.reverse will be called on the results if ascending is set to false;
+	 * Collections.reverse will be called on the results if ascending is set to
+	 * false;
 	 * 
-	 * @param rowNumber the 0 based (row 5 = 4) number of the row to be sorted upon
+	 * @param rowNumber
+	 *            the 0 based (row 5 = 4) number of the row to be sorted upon
 	 * @param comparator
-	 * @throws RowNotFoundException 
-	 * @throws ColumnNotFoundException 
+	 * @throws RowNotFoundException
+	 * @throws ColumnNotFoundException
 	 */
-	public void sort(int rownumber, Comparator<CellHandle> comparator, boolean ascending) throws RowNotFoundException{
+	public void sort(int rownumber, Comparator<CellHandle> comparator, boolean ascending) throws RowNotFoundException {
 		this.createBlanks();
 		ArrayList<CellHandle> sortRow = this.getCellsByRow(rownumber);
 		Collections.sort(sortRow, comparator);
-		if(!ascending)Collections.reverse(sortRow);
+		if (!ascending)
+			Collections.reverse(sortRow);
 		// now we have sorted the array list, come up with a map to resort the rows.
 		int[] coords = null;
 		try {
@@ -893,9 +920,9 @@ public class CellRange implements Serializable {
 		} catch (CellNotFoundException e1) {
 		}
 		ArrayList<ArrayList> outputCols = new ArrayList<ArrayList>();
-		for (int i=0;i<sortRow.size();i++){
+		for (int i = 0; i < sortRow.size(); i++) {
 			CellHandle cell = sortRow.get(i);
-			ArrayList cells = null;
+			ArrayList<?> cells = null;
 			try {
 				cells = this.getCellsByCol(ExcelTools.getAlphaVal(cell.getColNum()));
 			} catch (ColumnNotFoundException e) {
@@ -904,66 +931,67 @@ public class CellRange implements Serializable {
 			outputCols.add(cells);
 		}
 		this.removeCells();
-		for (int i=coords[1];i<=coords[3];i++){
-			ArrayList cells = outputCols.get(i-coords[1]);
-			for(int x=0;x<cells.size();x++){
+		for (int i = coords[1]; i <= coords[3]; i++) {
+			ArrayList<?> cells = outputCols.get(i - coords[1]);
+			for (int x = 0; x < cells.size(); x++) {
 				CellHandle cell = (CellHandle) cells.get(x);
 				Boundsheet bs = this.getSheet().getBoundsheet();
 				cell.getCell().setCol((short) i);
 				bs.addCell((CellRec) cell.getCell());
 			}
 		}
-	
-		
+
 	}
-	
+
 	/**
-	 * Changes the cellRange to a createBlanks cellrange and re-initializes the range,
-	 * creating the missing blanks.
+	 * Changes the cellRange to a createBlanks cellrange and re-initializes the
+	 * range, creating the missing blanks.
 	 */
-	private void createBlanks(){
-		if(!this.createBlanks){
-			this.createBlanks=true;
-			this.initializeCells=true;
+	private void createBlanks() {
+		if (!this.createBlanks) {
+			this.createBlanks = true;
+			this.initializeCells = true;
 			try {
 				this.init();
 			} catch (CellNotFoundException e) {
 			}
 		}
 	}
-	
+
 	/**
-	 *  Resort all cells in the range according to the rownumber passed in.
-	 *  
-	 * @param rownumber the 0 based row number
+	 * Resort all cells in the range according to the rownumber passed in.
+	 * 
+	 * @param rownumber
+	 *            the 0 based row number
 	 * @param ascending
-	 * @throws RowNotFoundException 
-	 * @throws ColumnNotFoundException 
+	 * @throws RowNotFoundException
+	 * @throws ColumnNotFoundException
 	 */
-	public void sort(int rownumber, boolean ascending) throws RowNotFoundException{
-		Comparator<CellHandle> cp = new CellComparator();
+	public void sort(int rownumber, boolean ascending) throws RowNotFoundException {
+		Comparator cp = new CellComparator();
 		this.sort(rownumber, cp, ascending);
 	}
-	
+
 	/**
 	 * Re-sort all cells in this cell range according to the column.
 	 * 
-	 * A custom comparator can be passed in, or the default one can be used with 
+	 * A custom comparator can be passed in, or the default one can be used with
 	 * sort(String, boolean).
 	 * 
 	 * Comparators will be passed 2 CellHandle objects for comparison.
 	 * 
-	 *  * Collections.reverse will be called on the results if ascending is set to false;
+	 * * Collections.reverse will be called on the results if ascending is set to
+	 * false;
 	 * 
 	 * @param columnName
 	 * @param comparator
-	 * @throws RowNotFoundException 
-	 * @throws ColumnNotFoundException 
+	 * @throws RowNotFoundException
+	 * @throws ColumnNotFoundException
 	 */
-	public void sort(String columnName, Comparator comparator, boolean ascending) throws ColumnNotFoundException{
-		if(!this.createBlanks){
+	public void sort(String columnName, Comparator comparator, boolean ascending) throws ColumnNotFoundException {
+		if (!this.createBlanks) {
 			// we cannot have empty cells in this operation
-			this.createBlanks=true;
+			this.createBlanks = true;
 			try {
 				this.init();
 			} catch (CellNotFoundException e) {
@@ -971,7 +999,8 @@ public class CellRange implements Serializable {
 		}
 		ArrayList sortCol = this.getCellsByCol(columnName);
 		Collections.sort(sortCol, comparator);
-		if(!ascending)Collections.reverse(sortCol);
+		if (!ascending)
+			Collections.reverse(sortCol);
 		// now we have sorted the array list, come up with a map to resort the rows.
 		int[] coords = null;
 		try {
@@ -980,11 +1009,10 @@ public class CellRange implements Serializable {
 			coords[0] = coords[0]--;
 			coords[2] = coords[2]--;
 		} catch (CellNotFoundException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 		ArrayList<ArrayList<CellHandle>> outputRows = new ArrayList<ArrayList<CellHandle>>();
-		for (int i=0;i<sortCol.size();i++){
+		for (int i = 0; i < sortCol.size(); i++) {
 			CellHandle cell = (CellHandle) sortCol.get(i);
 			ArrayList<CellHandle> cells = null;
 			try {
@@ -995,41 +1023,42 @@ public class CellRange implements Serializable {
 			outputRows.add(cells);
 		}
 		this.removeCells();
-		for (int i=coords[0];i<=coords[2];i++){
-			ArrayList cells = outputRows.get(i-coords[0]);
-			for(int x=0;x<cells.size();x++){
+		for (int i = coords[0]; i <= coords[2]; i++) {
+			ArrayList<?> cells = outputRows.get(i - coords[0]);
+			for (int x = 0; x < cells.size(); x++) {
 				CellHandle cell = (CellHandle) cells.get(x);
 				Boundsheet bs = this.getSheet().getBoundsheet();
-				cell.getCell().setRowNumber(i-1);
+				cell.getCell().setRowNumber(i - 1);
 				bs.addCell((CellRec) cell.getCell());
 			}
 		}
 	}
+
 	/**
 	 * Resort all cells in the range according to the column passed in.
 	 * 
 	 * 
 	 * @param columnName
 	 * @param ascending
-	 * @throws ColumnNotFoundException 
-	 * @throws RowNotFoundException 
+	 * @throws ColumnNotFoundException
+	 * @throws RowNotFoundException
 	 */
 	@SuppressWarnings("unchecked")
-	public void sort(String columnName, boolean ascending) throws ColumnNotFoundException{
-		Comparator cp = new CellComparator();
+	public void sort(String columnName, boolean ascending) throws ColumnNotFoundException {
+		Comparator<?> cp = new CellComparator();
 		this.sort(columnName, cp, ascending);
 	}
-	
+
 	public static String xmlResponsePre = "<CellRange>";
 	public static String xmlResponsePost = "</CellRange>";
 
 	/**
 	 * Return the XML representation of this CellRange object
 	 * 
-	 * @return String of XML 
+	 * @return String of XML
 	 */
 	public String getXML() {
-		StringBuffer sb = new StringBuffer("<CellRange Range=\""+this.getRange()+"\">");
+		StringBuffer sb = new StringBuffer("<CellRange Range=\"" + this.getRange() + "\">");
 		// StringBuffer sb = new StringBuffer(xmlResponsePre);
 		CellHandle[] cx = this.getCells();
 		sb.append("\r\n");
@@ -1041,54 +1070,60 @@ public class CellRange implements Serializable {
 		sb.append(xmlResponsePost);
 		return sb.toString();
 	}
-	
-	/** gets the array of Cells in this Name
+
+	/**
+	 * gets the array of Cells in this Name
 	 * 
-	 * NOTE: this method variation also returns the Sheetname for the name record if not null.
+	 * NOTE: this method variation also returns the Sheetname for the name record if
+	 * not null.
 	 * 
 	 * Thus this method is limited to use with 2D ranges.
 	 * 
 	 * 
-	 * 	@return Cell[] all Cells defined in this Name
-    	@param fragment whether to enclose result in NameHandle tag
-	*/
-	public String getCellRangeXML(boolean fragment){
-	    StringBuffer sbx = new StringBuffer();
-	    if(!fragment)
-	    	sbx.append("<?xml version=\"1\" encoding=\"utf-8\"?>");
-	    sbx.append("<CellRange Range=\""+this.getRange()+"\">");
-	    sbx.append(getXML());
-    	sbx.append("</NameHandle>");
+	 * @return Cell[] all Cells defined in this Name
+	 * @param fragment
+	 *            whether to enclose result in NameHandle tag
+	 */
+	public String getCellRangeXML(boolean fragment) {
+		StringBuffer sbx = new StringBuffer();
+		if (!fragment)
+			sbx.append("<?xml version=\"1\" encoding=\"utf-8\"?>");
+		sbx.append("<CellRange Range=\"" + this.getRange() + "\">");
+		sbx.append(getXML());
+		sbx.append("</NameHandle>");
 		return sbx.toString();
 	}
-	
-	/** gets the array of Cells in this Name
+
+	/**
+	 * gets the array of Cells in this Name
 	 * 
 	 * Thus this method is limited to use with 2D ranges.
 	 * 
-	 * 	@return Cell[] all Cells defined in this Name
-    	@param fragment whether to enclose result in NameHandle tag
-	*/
-	public String getCellRangeXML(){
-	    StringBuffer sbx = new StringBuffer();
-    	sbx.append("<?xml version=\"1\" encoding=\"utf-8\"?>");
-	    sbx.append(getXML());
-    	return sbx.toString();
+	 * @return Cell[] all Cells defined in this Name
+	 * @param fragment
+	 *            whether to enclose result in NameHandle tag
+	 */
+	public String getCellRangeXML() {
+		StringBuffer sbx = new StringBuffer();
+		sbx.append("<?xml version=\"1\" encoding=\"utf-8\"?>");
+		sbx.append(getXML());
+		return sbx.toString();
 	}
-	
-	
+
 	/**
-	 * Constructor which creates a new CellRange using an array of cells as it's constructor. 
-	 * <br>NOTE
-	 * that if the array of cells you are adding is not a rectangle of data (ie
-	 * [A1][B1][C1]) that you will have null cells in your cell range and
-	 * operations on it may cause errors.
-	 * <br>
+	 * Constructor which creates a new CellRange using an array of cells as it's
+	 * constructor. <br>
+	 * NOTE that if the array of cells you are adding is not a rectangle of data (ie
+	 * [A1][B1][C1]) that you will have null cells in your cell range and operations
+	 * on it may cause errors. <br>
 	 * If you wish to populate a cell range that is not contiguous, consider the
 	 * constructor CellRange(CellHandle[] newcells, boolean createblanks), which
-	 * will populate null cells with blank records, allowing normal operations
-	 * such as formatting, merging, etc.
-	 * @param CellHandle[] newcells - the array of cells from which to create the new CellRange
+	 * will populate null cells with blank records, allowing normal operations such
+	 * as formatting, merging, etc.
+	 * 
+	 * @param CellHandle[]
+	 *            newcells - the array of cells from which to create the new
+	 *            CellRange
 	 * @throws CellNotFoundException
 	 */
 	public CellRange(CellHandle[] newcells) throws CellNotFoundException {
@@ -1101,16 +1136,18 @@ public class CellRange implements Serializable {
 	}
 
 	/**
-	 * create a new CellRange using an array of cells as it's constructor.
-	 * <br>
-	 * If you wish to populate a cell range that is not contiguous, set
-	 * createblanks to true, which will populate null cells with blank records,
-	 * allowing normal operations such as formatting, merging, etc.
-	 * @param CellHandle[] newcells - the array of cells from which to create the new CellRange
-	 * @param boolean createblanks - true if should create blank cells if necesary
+	 * create a new CellRange using an array of cells as it's constructor. <br>
+	 * If you wish to populate a cell range that is not contiguous, set createblanks
+	 * to true, which will populate null cells with blank records, allowing normal
+	 * operations such as formatting, merging, etc.
+	 * 
+	 * @param CellHandle[]
+	 *            newcells - the array of cells from which to create the new
+	 *            CellRange
+	 * @param boolean
+	 *            createblanks - true if should create blank cells if necesary
 	 */
-	public CellRange(CellHandle[] newcells, boolean createblanks)
-			throws CellNotFoundException {
+	public CellRange(CellHandle[] newcells, boolean createblanks) throws CellNotFoundException {
 		this.createBlanks = createblanks;
 		this.setWorkBook(newcells[0].getWorkBook());
 		this.sheet = newcells[0].getWorkSheetHandle();
@@ -1121,36 +1158,38 @@ public class CellRange implements Serializable {
 	}
 
 	/**
-	 * Constructor which creates a new CellRange from a String range
-	 * <br>
-	 * The String range must be in the format Sheet!CR:CR
-	 * <br>
+	 * Constructor which creates a new CellRange from a String range <br>
+	 * The String range must be in the format Sheet!CR:CR <br>
 	 * For Example, "Sheet1!C9:I19"
 	 * 
-	 * @param String range - the range string
-	 * @param WorkBook bk
+	 * @param String
+	 *            range - the range string
+	 * @param WorkBook
+	 *            bk
 	 * @throws CellNotFoundException
 	 */
-	public CellRange(String range, io.starter.OpenXLS.WorkBook bk)
-			throws CellNotFoundException {
+	public CellRange(String range, io.starter.OpenXLS.WorkBook bk) throws CellNotFoundException {
 		this(range, bk, true);
 	}
 
 	/**
-	 * attach the workbook for this CellRange 
+	 * attach the workbook for this CellRange
 	 * 
-	 * @param WorkBook bk
+	 * @param WorkBook
+	 *            bk
 	 */
 	public void setWorkBook(io.starter.OpenXLS.WorkBook bk) {
 		this.mybook = bk;
 	}
 
-	/** Gets the coordinates of this cell range,
+	/**
+	 * Gets the coordinates of this cell range,
 	 * 
-	 * @return int[5]: [0] first row (zero based, ie row 1=0), [1] first column, [2] last row (zero based, ie row 1=0),
-	 *                 [3] last column, [4] number of cells in range
+	 * @return int[5]: [0] first row (zero based, ie row 1=0), [1] first column, [2]
+	 *         last row (zero based, ie row 1=0), [3] last column, [4] number of
+	 *         cells in range
 	 */
-	public int[] getCoords() throws CellNotFoundException{
+	public int[] getCoords() throws CellNotFoundException {
 		int numrows = 0;
 		int numcols = 0;
 		int numcells = 0;
@@ -1158,34 +1197,36 @@ public class CellRange implements Serializable {
 		String temprange = range;
 		String[] s = ExcelTools.stripSheetNameFromRange(temprange);
 		temprange = s[1];
-		// qualify sheet and reset range - necessary if sheetname with spaces is used in formula parsing 
-		sheetname = GenericPtg.qualifySheetname(s[0]);		
-		if (sheetname!=null && !sheetname.equals("")) {
-			if (s[2]==null)
-				this.range= sheetname + "!" + temprange;	
+		// qualify sheet and reset range - necessary if sheetname with spaces is used in
+		// formula parsing
+		sheetname = GenericPtg.qualifySheetname(s[0]);
+		if (sheetname != null && !sheetname.equals("")) {
+			if (s[2] == null)
+				this.range = sheetname + "!" + temprange;
 			else {
-				s[2]= GenericPtg.qualifySheetname(s[2]);
-				this.range= sheetname + ":" + s[2] + "!" + temprange;
+				s[2] = GenericPtg.qualifySheetname(s[2]);
+				this.range = sheetname + ":" + s[2] + "!" + temprange;
 			}
 		}
-		
+
 		/*
 		 * check for R1C1
 		 */
-		if((temprange.indexOf("R")==0)&&
-				(temprange.indexOf("C")>1)&&
-				(Character.isDigit(temprange.charAt(temprange.indexOf("C")-1)))){
-			
-			int[] b =  ExcelTools.getRangeRowCol(temprange);
-			
+		if ((temprange.indexOf("R") == 0) && (temprange.indexOf("C") > 1)
+				&& (Character.isDigit(temprange.charAt(temprange.indexOf("C") - 1)))) {
+
+			int[] b = ExcelTools.getRangeRowCol(temprange);
+
 			numrows = (b[2] - b[0]);
-			if(numrows <=0)numrows = 1;
-			
+			if (numrows <= 0)
+				numrows = 1;
+
 			numcols = (b[3] - b[2]);
-			if(numcols <=0)numcols = 1;
-			
+			if (numcols <= 0)
+				numcols = 1;
+
 			numcells = numrows * numcols;
-			
+
 			int[] retr = new int[5];
 			retr[0] = b[0];
 			retr[1] = b[1];
@@ -1201,7 +1242,7 @@ public class CellRange implements Serializable {
 			startcell = endcell;
 		else
 			startcell = temprange.substring(0, lastcolon);
-	
+
 		startcell = StringTool.strip(startcell, "$");
 		endcell = StringTool.strip(endcell, "$");
 
@@ -1231,54 +1272,55 @@ public class CellRange implements Serializable {
 		lastcellcol = ExcelTools.getIntVal(lastcellcolstr);
 		numrows = (lastcellrow - firstcellrow) + 1;
 		numcols = (lastcellcol - firstcellcol) + 1;
-		
+
 		numcells = numrows * numcols;
 		if (numcells < 0)
 			numcells *= -1; // handle swapped cells ie: "B1:A1"
 
-		coords[0] = firstcellrow -1;
+		coords[0] = firstcellrow - 1;
 		coords[1] = firstcellcol;
-		coords[2] = lastcellrow -1;
+		coords[2] = lastcellrow - 1;
 		coords[3] = lastcellcol;
 		coords[4] = numcells;
-		if (firstcellrow < 0 && lastcellrow < 0 || firstcellcol < 0
-				|| lastcellcol < 0) {
+		if (firstcellrow < 0 && lastcellrow < 0 || firstcellcol < 0 || lastcellcol < 0) {
 			// not an error if it is a whole column or whole row range
-			if (firstcellcol==-1 && lastcellcol==-1) {
+			if (firstcellcol == -1 && lastcellcol == -1) {
 				// what should numcells be for wholerow?
-				wholeRow= true;
-			} else if (firstcellrow==-1 && lastcellrow==-1) {
+				wholeRow = true;
+			} else if (firstcellrow == -1 && lastcellrow == -1) {
 				// what should numcells be for wholecol?
-				wholeCol= true;
+				wholeCol = true;
 			} else
 				Logger.logErr("CellRange.getRangeCoords: Error in Range " + range);
 		}
 
 		// trap OOXML external reference link, if any
 		if (s[3] != null)
-			externalLink1 = Integer.valueOf(s[3].substring(1, s[3].length() - 1))
-					.intValue();
+			externalLink1 = Integer.valueOf(s[3].substring(1, s[3].length() - 1)).intValue();
 		if (s[4] != null)
-			externalLink2 = Integer.valueOf(s[4].substring(1, s[4].length() - 1))
-					.intValue();
+			externalLink2 = Integer.valueOf(s[4].substring(1, s[4].length() - 1)).intValue();
 
 		return coords;
-		
+
 	}
-	/** Gets the coordinates of this cell range.
+
+	/**
+	 * Gets the coordinates of this cell range.
 	 * 
-	 * @return int[5]: [0] first row, [1] first column, [2] last row,
-	 *                 [3] last column, [4] number of cells in range
-	 *                 
-	 * @deprecated {@link #getCoords()} instead, which returns zero based values for rows.
+	 * @return int[5]: [0] first row, [1] first column, [2] last row, [3] last
+	 *         column, [4] number of cells in range
+	 * 
+	 * @deprecated {@link #getCoords()} instead, which returns zero based values for
+	 *             rows.
 	 */
+	@Deprecated
 	public int[] getRangeCoords() throws CellNotFoundException {
 		int[] ordinalValues = this.getCoords();
 		ordinalValues[0] += 1;
 		ordinalValues[2] += 1;
 		return ordinalValues;
 	}
-	
+
 	/**
 	 * Returns the WorkSheet referenced in this CellRange.
 	 * 
@@ -1290,16 +1332,17 @@ public class CellRange implements Serializable {
 
 	/**
 	 * initializes this CellRange
+	 * 
 	 * @throws CellNotFoundException
 	 */
 	public void init() throws CellNotFoundException {
-		if (!FormulaParser.isComplexRange(range)) {		
+		if (!FormulaParser.isComplexRange(range)) {
 			int[] coords = this.getRangeCoords();
 			int rowctr = coords[0];
 			int firstcellcol = coords[1];
 			int lastcellcol = coords[3];
 			int numcells = coords[4];
-	
+
 			int cellctr = firstcellcol - 1;
 			try {
 				if (sheetname != null) {
@@ -1307,14 +1350,13 @@ public class CellRange implements Serializable {
 												// default to work sheet 0
 						sheetname = this.mybook.getWorkSheet(0).getSheetName();
 				}
-				if (sheetname == null){
-					if(this.sheet!=null)
+				if (sheetname == null) {
+					if (this.sheet != null)
 						sheetname = this.sheet.getSheetName();
 					else
-						throw new IllegalArgumentException (
-							"sheet name not specified: " + range);
+						throw new IllegalArgumentException("sheet name not specified: " + range);
 				}
-	
+
 				String s = sheetname;
 				if (s != null) {
 					// handle enclosing apostrophes which are added to PtgRefs
@@ -1346,69 +1388,70 @@ public class CellRange implements Serializable {
 						// use caching 20080917 KSC: PROBLEM HERE [Claritas
 						// BugTracker 1862]
 						if (this.initializeCells)
-							cells[i] = sheet.getCell(rowctr - 1, cellctr, sheet
-									.getUseCache()); // 20080917 KSC: use cache
-														// setting instead of
-														// defaulting to true);
+							cells[i] = sheet.getCell(rowctr - 1, cellctr, sheet.getUseCache()); // 20080917 KSC: use
+																								// cache
+																								// setting instead of
+																								// defaulting to true);
 					} catch (CellNotFoundException e) {
 						if (this.createBlanks) {
 							cells[i] = sheet.add(null, rowctr - 1, cellctr);
 						}
-	
+
 					}
 				}
 				if (resetFastAdds) {
 					sheet.setFastCellAdds(true);
 				}
 			} catch (WorkSheetNotFoundException e) {
-				throw new IllegalArgumentException( e.toString() );
+				throw new IllegalArgumentException(e.toString());
 			}
-		} else {	// gather cells for a complex range ...
-			io.starter.formats.XLS.formulas.PtgMemFunc pm= new io.starter.formats.XLS.formulas.PtgMemFunc();
-			XLSRecord b= new XLSRecord();
+		} else { // gather cells for a complex range ...
+			io.starter.formats.XLS.formulas.PtgMemFunc pm = new io.starter.formats.XLS.formulas.PtgMemFunc();
+			XLSRecord b = new XLSRecord();
 			b.setWorkBook(this.mybook.getWorkBook());
 			pm.setParentRec(b);
 			try {
 				pm.setLocation(range);
-				Ptg[] p= pm.getComponents();
-				java.util.ArrayList<CellHandle> cellsfromcomplexrange= new java.util.ArrayList<CellHandle>();
-				for (int i= 0; i < p.length; i++) {
+				Ptg[] p = pm.getComponents();
+				java.util.ArrayList<CellHandle> cellsfromcomplexrange = new java.util.ArrayList<CellHandle>();
+				for (int i = 0; i < p.length; i++) {
 					try {
-						cellsfromcomplexrange.add(mybook.getCell(((PtgRef)p[i]).getLocation()));														
+						cellsfromcomplexrange.add(mybook.getCell(((PtgRef) p[i]).getLocation()));
 					} catch (CellNotFoundException e) {
 						if (this.createBlanks) {
 							cells[i] = sheet.add(null, p[i].getLocation());
-						}	
-					} 
+						}
+					}
 				}
-				cells= new CellHandle[cellsfromcomplexrange.size()];
-				cells= cellsfromcomplexrange.toArray(cells);
+				cells = new CellHandle[cellsfromcomplexrange.size()];
+				cells = cellsfromcomplexrange.toArray(cells);
 			} catch (Exception e) {
-				throw new IllegalArgumentException( e.toString() );
+				throw new IllegalArgumentException(e.toString());
 			}
-			
+
 		}
-		isDirty= false;
+		isDirty = false;
 	}
-	
-	/** Initializes this <code>CellRange</code>'s cell list if necessary.
-	 * This method is useful if this <code>CellRange</code> was created with
-	 * <code>initCells</code> set to <code>false</code> and it is later
-	 * necessary to retrieve the cell list.
+
+	/**
+	 * Initializes this <code>CellRange</code>'s cell list if necessary. This method
+	 * is useful if this <code>CellRange</code> was created with
+	 * <code>initCells</code> set to <code>false</code> and it is later necessary to
+	 * retrieve the cell list.
 	 * 
-	 * @param createBlanks whether missing cells should be created as blanks.
-	 *        If this is <code>false</code> they will appear in the cell list
-	 *        as <code>null</code>s.
-	 */  
-	public void initCells (boolean createBlanks) {
+	 * @param createBlanks
+	 *            whether missing cells should be created as blanks. If this is
+	 *            <code>false</code> they will appear in the cell list as
+	 *            <code>null</code>s.
+	 */
+	public void initCells(boolean createBlanks) {
 		// If we don't need to do anything, return
-		if (initializeCells == true
-				&& (createBlanks ? this.createBlanks : true) )
+		if (initializeCells == true && (createBlanks ? this.createBlanks : true))
 			return;
-		
+
 		this.initializeCells = true;
 		this.createBlanks = createBlanks;
-		
+
 		try {
 			this.init();
 		} catch (CellNotFoundException e) {
@@ -1438,7 +1481,8 @@ public class CellRange implements Serializable {
 	 * set whether this CellRange will add blank records to the WorkBook for any
 	 * missing Cells contained within the range.
 	 * 
-	 * @param boolean b - true if should create blank records for missing Cells
+	 * @param boolean
+	 *            b - true if should create blank records for missing Cells
 	 */
 	public void setCreateBlanks(boolean b) {
 		createBlanks = b;
@@ -1462,9 +1506,9 @@ public class CellRange implements Serializable {
 		String rc1x = "R";
 		try {
 			int[] rc1 = this.getRangeCoords();
-			rc1x += rc1[0]+1;		// rangecoords are already 1-based
+			rc1x += rc1[0] + 1; // rangecoords are already 1-based
 			rc1x += "C" + rc1[1];
-			rc1x += ":R" + (rc1[2]+1);
+			rc1x += ":R" + (rc1[2] + 1);
 			rc1x += "C" + rc1[3];
 
 		} catch (CellNotFoundException e) {
@@ -1475,7 +1519,9 @@ public class CellRange implements Serializable {
 
 	/**
 	 * Sets the range of cells for this CellRange to a string range
-	 * @param String rng - Range string
+	 * 
+	 * @param String
+	 *            rng - Range string
 	 */
 	public void setRange(String rng) {
 		range = rng;
@@ -1489,9 +1535,12 @@ public class CellRange implements Serializable {
 	/**
 	 * sets a border around the range of cells
 	 * 
-	 * @param int width - line width
-	 * @param int linestyle - line style 
-	 * @param java.awt.Color colr - color of border line
+	 * @param int
+	 *            width - line width
+	 * @param int
+	 *            linestyle - line style
+	 * @param java.awt.Color
+	 *            colr - color of border line
 	 */
 	public void setBorder(int width, int linestyle, java.awt.Color colr) {
 		CellHandle[] ch = getCells();
@@ -1519,7 +1568,9 @@ public class CellRange implements Serializable {
 
 	/**
 	 * update the CellRange when the underlying Cells change their location
-	 * @return boolean true if the CellRange could be updated, false if there are no cells represented by this range
+	 * 
+	 * @return boolean true if the CellRange could be updated, false if there are no
+	 *         cells represented by this range
 	 * 
 	 * 
 	 */
@@ -1529,7 +1580,7 @@ public class CellRange implements Serializable {
 							// jm
 
 		// arbitrarily set the initial vals...
-		if (cells[0]!=null) {	// 20100106 KSC: if didn't create blanks it's possible that cells are null
+		if (cells[0] != null) { // 20100106 KSC: if didn't create blanks it's possible that cells are null
 			firstcellrow = cells[0].getRowNum() + 1;
 			firstcellcol = cells[0].getColNum();
 			lastcellrow = cells[0].getRowNum() + 1;
@@ -1543,17 +1594,18 @@ public class CellRange implements Serializable {
 			this.myrowints = null;
 			this.mycolints = null;
 			return true;
-		} else if (this.range!=null){// 20100106 KSC: handle ranges containing null cell[0] (i.e. ranges referencing cells not present and createBlanks==false) 
+		} else if (this.range != null) {// 20100106 KSC: handle ranges containing null cell[0] (i.e. ranges referencing
+										// cells not present and createBlanks==false)
 			if (this.DEBUG)
 				Logger.logWarn("CellRange.update:  trying to access blank cells in range " + this.range);
 			try {
 				this.getRangeCoords();
 				return true;
-			} catch (CellNotFoundException e) {	// shouldn't
-				return false;	
+			} catch (CellNotFoundException e) { // shouldn't
+				return false;
 			}
 		}
-		return false;	// return false if it doesn't have it's cells defined
+		return false; // return false if it doesn't have it's cells defined
 	}
 
 	/**
@@ -1567,76 +1619,82 @@ public class CellRange implements Serializable {
 
 	/**
 	 * Sets the sheet reference for this CellRange.
-	 * @param WorkSheetHandle aSheet
+	 * 
+	 * @param WorkSheetHandle
+	 *            aSheet
 	 */
 	public void setSheet(WorkSheetHandle aSheet) {
 		this.sheet = aSheet;
 		this.sheetname = aSheet.getSheetName();
 	}
 
-	
-	
-	/** Whether to copy the cell contents.
+	/**
+	 * Whether to copy the cell contents.
 	 * 
 	 */
 	public static final int COPY_CONTENTS = 0x01;
-	
-	/** Whether formulas should be copied.
-	 * If this bit is not set the formula result will be copied instead.
+
+	/**
+	 * Whether formulas should be copied. If this bit is not set the formula result
+	 * will be copied instead.
 	 */
 	public static final int COPY_FORMULAS = 0x02;
-	
+
 	public static final int COPY_FORMATS = 0x0100;
-	
-	/** Copies this range to another location.
-	 * At present only contents and complete formats may be copied. 
+
+	/**
+	 * Copies this range to another location. At present only contents and complete
+	 * formats may be copied.
 	 * 
-	 * @param row the topmost row of the target area
-	 * @param col the leftmost column of the target area
-	 * @param what a set of flags determining what will be copied
+	 * @param row
+	 *            the topmost row of the target area
+	 * @param col
+	 *            the leftmost column of the target area
+	 * @param what
+	 *            a set of flags determining what will be copied
 	 * @return the destination range
 	 */
-	public CellRange copy (
-			WorkSheetHandle sheet, int row, int col, int what) {
-		CellRange result = new CellRange(
-				sheet, row, col, this.getWidth(), this.getHeight());
-		
+	public CellRange copy(WorkSheetHandle sheet, int row, int col, int what) {
+		CellRange result = new CellRange(sheet, row, col, this.getWidth(), this.getHeight());
+
 		int first_col = col;
-		
+
 		// note these are not currently used, see setting below
 		boolean copy_contents = (what & COPY_CONTENTS) != 0;
 		boolean copy_formulas = (what & COPY_FORMULAS) != 0;
-		boolean copy_formats  = (what & COPY_FORMATS) != 0;
-		
+		boolean copy_formats = (what & COPY_FORMATS) != 0;
+
 		// set to true until this thing is fully implemented
 		copy_formats = true;
 		copy_formulas = true;
-		
-		int cur_row = cells[ 0 ].getRowNum();
+
+		int cur_row = cells[0].getRowNum();
 		for (int idx = 0; idx < cells.length; idx++) {
-			CellHandle source = cells[ idx ];
-			
+			CellHandle source = cells[idx];
+
 			if (source.getRowNum() != cur_row) {
 				cur_row = source.getRowNum();
 				row++;
 				col = first_col;
 			}
-			
+
 			CellHandle target = null;
 			try {
-				target = sheet.getCell( row, col );
-			} catch (CellNotFoundException e) {}
-			
+				target = sheet.getCell(row, col);
+			} catch (CellNotFoundException e) {
+			}
+
 			int formatID;
-			if (copy_formats) 
+			if (copy_formats)
 				formatID = source.getFormatId();
 			else if (target != null)
 				formatID = target.getFormatId();
-			else formatID = sheet.getWorkBook().getWorkBook().getDefaultIxfe();
-			
+			else
+				formatID = sheet.getWorkBook().getWorkBook().getDefaultIxfe();
+
 			if (copy_contents) {
 				Object value;
-				
+
 				if (copy_formulas && source.isFormula()) {
 					try {
 						value = source.getFormulaHandle().getFormulaString();
@@ -1644,123 +1702,128 @@ public class CellRange implements Serializable {
 						// This shouldn't happen; we known the formula exists.
 						// If it does happen it indicates a bug in OpenXLS,
 						// thus we throw an Error.
-						throw new Error(
-								"formula cell has no Formula record", e );
+						throw new Error("formula cell has no Formula record", e);
 					}
 				} else {
 					value = source.getVal();
 				}
-				
-				target = sheet.add( value, row, col, formatID );
-				
-				if (target.isFormula()) try {
-					FormulaHandle.moveCellRefs(
-							target.getFormulaHandle(), new int[]{
-								row - source.getRowNum(),
-								col - source.getColNum() } );
-				} catch (FormulaNotFoundException e) {}
+
+				target = sheet.add(value, row, col, formatID);
+
+				if (target.isFormula())
+					try {
+						FormulaHandle.moveCellRefs(target.getFormulaHandle(),
+								new int[] { row - source.getRowNum(), col - source.getColNum() });
+					} catch (FormulaNotFoundException e) {
+					}
 			}
-			
+
 			else if (target == null) {
-				target = sheet.add( null, row, col, formatID );
+				target = sheet.add(null, row, col, formatID);
 			}
-			
+
 			if (copy_formats) {
-				target.setFormatId( formatID );
+				target.setFormatId(formatID);
 			}
-			
-			result.cells[ idx ] = target;
+
+			result.cells[idx] = target;
 			col++;
 		}
-		
+
 		return result;
 	}
-	
-	/** Fills this range from the given cell.
-	 * @param source the cell whose attributes should be copied
-	 *        or <code>null</code> to copy from the first cell in the range
-	 * @param what a set of flags determining what will be copied
-	 * @param increment the amount by which to increment numeric values
-	 *        or <code>NaN</code> for no increment
+
+	/**
+	 * Fills this range from the given cell.
+	 * 
+	 * @param source
+	 *            the cell whose attributes should be copied or <code>null</code> to
+	 *            copy from the first cell in the range
+	 * @param what
+	 *            a set of flags determining what will be copied
+	 * @param increment
+	 *            the amount by which to increment numeric values or
+	 *            <code>NaN</code> for no increment
 	 */
-	public void fill (CellHandle source, int what, double increment) {
-		if (null == source) source = cells[ 0 ];
-		
+	public void fill(CellHandle source, int what, double increment) {
+		if (null == source)
+			source = cells[0];
+
 		boolean copy_contents = (what & COPY_CONTENTS) != 0;
 		boolean copy_formulas = (what & COPY_FORMULAS) != 0;
-		boolean copy_formats  = (what & COPY_FORMATS) != 0;
-		
+		boolean copy_formats = (what & COPY_FORMATS) != 0;
+
 		int sourceRow = source.getRowNum();
 		int sourceCol = source.getColNum();
-		
+
 		Object value = null;
 		if (copy_contents) {
 			if (copy_formulas && source.isFormula()) {
 				try {
 					value = source.getFormulaHandle().getFormulaString();
 				} catch (FormulaNotFoundException e) {
-					throw new Error( "formula cell has no Formula record", e );
+					throw new Error("formula cell has no Formula record", e);
 				}
 			} else {
 				value = source.getVal();
 			}
 		}
-		
-		// if increment is set, ensure the value can be incremented
-		if (!Double.isNaN( increment )
-				&& !( copy_contents && value instanceof Number ) )
-			throw new IllegalArgumentException(
-					"cannot increment unless filling with a numeric value" );
-		
-		for (int idx = 0; idx < cells.length; idx++) {
-			CellHandle target = cells[ idx ];
-			
-			// don't overwrite the source cell
-			if (source.equals( target )) continue;
 
-			if (!Double.isNaN( increment ))
+		// if increment is set, ensure the value can be incremented
+		if (!Double.isNaN(increment) && !(copy_contents && value instanceof Number))
+			throw new IllegalArgumentException("cannot increment unless filling with a numeric value");
+
+		for (int idx = 0; idx < cells.length; idx++) {
+			CellHandle target = cells[idx];
+
+			// don't overwrite the source cell
+			if (source.equals(target))
+				continue;
+
+			if (!Double.isNaN(increment))
 				value = ((Number) value).doubleValue() + increment;
-			
+
 			int formatID = (copy_formats ? source : target).getFormatId();
-			
+
 			if (copy_contents) {
-				cells[ idx ] = target = sheet.add( value,
-						target.getRowNum(), target.getColNum(), formatID );
-				
-				if (target.isFormula()) try {
-					FormulaHandle.moveCellRefs(
-							target.getFormulaHandle(), new int[]{
-								target.getRowNum() - sourceRow,
-								target.getColNum() - sourceCol } );
-				} catch (FormulaNotFoundException e) {}
+				cells[idx] = target = sheet.add(value, target.getRowNum(), target.getColNum(), formatID);
+
+				if (target.isFormula())
+					try {
+						FormulaHandle.moveCellRefs(target.getFormulaHandle(),
+								new int[] { target.getRowNum() - sourceRow, target.getColNum() - sourceCol });
+					} catch (FormulaNotFoundException e) {
+					}
 			}
-			
+
 			// when adding Date values passing the format ID to sheet.add
 			// doesn't set the format so we always set it here
 			if (copy_formats) {
-				target.setFormatId( formatID );
+				target.setFormatId(formatID);
 			}
-			
+
 		}
 	}
-	
+
 	public Collection<CellHandle> calculateAffectedCellsOnSheet() {
 		Set<CellHandle> affected = new HashSet<CellHandle>();
 		for (CellHandle cell : cells) {
-			if(cell!=null){
-				affected.add( cell );
-				affected.addAll( cell.calculateAffectedCellsOnSheet() );
+			if (cell != null) {
+				affected.add(cell);
+				affected.addAll(cell.calculateAffectedCellsOnSheet());
 			}
 		}
 		return affected;
 	}
 
 	/**
-	 * return a JSON array of cell values for the given range
-	 * <br>
+	 * return a JSON array of cell values for the given range <br>
 	 * static version
-	 * @param String range - a string representation of the desired range of cells 
-	 * @param WorkBook wbh - the source WorkBook for the cell range
+	 * 
+	 * @param String
+	 *            range - a string representation of the desired range of cells
+	 * @param WorkBook
+	 *            wbh - the source WorkBook for the cell range
 	 * @return JSONArray - a JSON representation of the desired cell range
 	 */
 	public static JSONArray getValuesAsJSON(String range, WorkBook wbh) {
@@ -1774,65 +1837,69 @@ public class CellRange implements Serializable {
 		}
 		return rangeArray;
 	}
-	
+
 	/**
-	 * Return a json object representing this cell range, entries
-	 * contain only address and values for more compact space
+	 * Return a json object representing this cell range, entries contain only
+	 * address and values for more compact space
+	 * 
 	 * @param range
 	 * @param wbh
 	 * @return
 	 */
-	public JSONObject getBasicJSON(){
+	public JSONObject getBasicJSON() {
 		try {
 			JSONObject crObj = new JSONObject();
 			crObj.put(JSON_RANGE, this.getRange());
 			JSONArray rangeArray = new JSONArray();
 			// should this possibly be full
 			CellHandle[] cells = this.getCells();
-			for (int j = 0; j < cells.length; j++){
+			for (int j = 0; j < cells.length; j++) {
 				JSONObject result = new JSONObject();
 				String addy = cells[j].getCellAddress();
-	        	String val = cells[j].getVal().toString();
-	        	result.put(JSON_LOCATION, addy);
-	        	result.put(JSON_CELL_VALUE, val);
-	        	rangeArray.put(result);
+				String val = cells[j].getVal().toString();
+				result.put(JSON_LOCATION, addy);
+				result.put(JSON_CELL_VALUE, val);
+				rangeArray.put(result);
 			}
-	        crObj.put(JSON_CELLS, rangeArray);
-	        return crObj;
+			crObj.put(JSON_CELLS, rangeArray);
+			return crObj;
 		} catch (Exception e) {
 			Logger.logErr("Error obtaining CellRange " + range + " JSON: " + e);
 		}
 		return new JSONObject();
 	}
-	
-	/** Return a json object representing this cell range with full cell
-	 * information embedded.
+
+	/**
+	 * Return a json object representing this cell range with full cell information
+	 * embedded.
 	 */
 	public JSONObject getJSON() {
-        JSONObject theRange = new JSONObject();
-        JSONArray cells = new JSONArray();
-        try {
-            theRange.put(JSON_RANGE, getRange());            
-            CellHandle[] chandles = getCells();
-            for (int i=0;i<chandles.length;i++) {
-                CellHandle thisCell = chandles[i];
-                JSONObject result = new JSONObject();
-                
-                result.put(JSON_CELL, thisCell.getJSONObject());
-                cells.put(result);
-            }
-            theRange.put(JSON_CELLS, cells);
-        }catch(JSONException e) {
-            Logger.logErr("Error getting cellRange JSON: " + e);
-        }       
-        return theRange;
-    }
-	
+		JSONObject theRange = new JSONObject();
+		JSONArray cells = new JSONArray();
+		try {
+			theRange.put(JSON_RANGE, getRange());
+			CellHandle[] chandles = getCells();
+			for (int i = 0; i < chandles.length; i++) {
+				CellHandle thisCell = chandles[i];
+				JSONObject result = new JSONObject();
+
+				result.put(JSON_CELL, thisCell.getJSONObject());
+				cells.put(result);
+			}
+			theRange.put(JSON_CELLS, cells);
+		} catch (JSONException e) {
+			Logger.logErr("Error getting cellRange JSON: " + e);
+		}
+		return theRange;
+	}
+
 	/**
-	 * Get the cells from a particular rownumber, constrained by the boundaries of the cellRange
+	 * Get the cells from a particular rownumber, constrained by the boundaries of
+	 * the cellRange
+	 * 
 	 * @param rownumber
 	 */
-	public ArrayList<CellHandle> getCellsByRow(int rownumber) throws RowNotFoundException{
+	public ArrayList<CellHandle> getCellsByRow(int rownumber) throws RowNotFoundException {
 		ArrayList<CellHandle> al = new ArrayList<CellHandle>();
 		RowHandle r = this.getSheet().getRow(rownumber);
 		CellHandle[] cells = r.getCells();
@@ -1842,47 +1909,50 @@ public class CellRange implements Serializable {
 		} catch (CellNotFoundException e) {
 			throw new RowNotFoundException("Error getting internal coordinates for CellRange" + e);
 		}
-		for (int i=0;i<cells.length;i++){
-			if (cells[i].getColNum()>=coords[1] && cells[i].getColNum()<=coords[3]){
+		for (int i = 0; i < cells.length; i++) {
+			if (cells[i].getColNum() >= coords[1] && cells[i].getColNum() <= coords[3]) {
 				al.add(cells[i]);
 			}
 		}
 		return al;
 	}
-	
-	
+
 	/**
-	 * Get the cells from a particular column, constrained by the boundaries of the cellRange
+	 * Get the cells from a particular column, constrained by the boundaries of the
+	 * cellRange
+	 * 
 	 * @param rownumber
-	 * @throws ColumnNotFoundException 
+	 * @throws ColumnNotFoundException
 	 */
-	public ArrayList<CellHandle> getCellsByCol(String col) throws ColumnNotFoundException{
+	public ArrayList<CellHandle> getCellsByCol(String col) throws ColumnNotFoundException {
 		ArrayList<CellHandle> al = new ArrayList<CellHandle>();
 		ColHandle r = this.getSheet().getCol(col);
 		CellHandle[] cells = r.getCells();
 		int[] coords = null;
 		try {
 			coords = this.getRangeCoords();
-			coords[0] = coords[0]-1;
-			coords[2] = coords[2]-1;
+			coords[0] = coords[0] - 1;
+			coords[2] = coords[2] - 1;
 		} catch (CellNotFoundException e) {
 			throw new ColumnNotFoundException("Error getting internal coordinates for CellRange" + e);
 		}
-		for (int i=0;i<cells.length;i++){
-			if (cells[i].getRowNum()>=coords[0] && cells[i].getRowNum()<=coords[2]){
+		for (int i = 0; i < cells.length; i++) {
+			if (cells[i].getRowNum() >= coords[0] && cells[i].getRowNum() <= coords[2]) {
 				al.add(cells[i]);
 			}
 		}
 		return al;
 	}
+
 	/**
-	 * returns the cells for a given range
-	 * <br> 
-	 * static version 
+	 * returns the cells for a given range <br>
+	 * static version
 	 * 
-	 * @param String range - a string representation of the desired range of cells
-	 * @param WorkBook wbh - the source WorkBook for the cell range
-	 * @return CellHandle[] array of cells represented by the desired cell range 
+	 * @param String
+	 *            range - a string representation of the desired range of cells
+	 * @param WorkBook
+	 *            wbh - the source WorkBook for the cell range
+	 * @return CellHandle[] array of cells represented by the desired cell range
 	 */
 	public static CellHandle[] getCells(String range, WorkBookHandle wbh) {
 		CellRange cr = new CellRange(range, wbh, true);
@@ -1903,73 +1973,66 @@ public class CellRange implements Serializable {
 	/**
 	 * Sets a bottom border on all cells in the cellrange
 	 * 
-	 * 	Linestyle should be set through the FormatHandle constants
+	 * Linestyle should be set through the FormatHandle constants
 	 */
-	public void setInnerBorderBottom(int linestyle, java.awt.Color colr) 
-	{
+	public void setInnerBorderBottom(int linestyle, java.awt.Color colr) {
 		CellHandle[] ch = getCells();
 		for (int t = 0; t < ch.length; t++) {
-				ch[t].setBottomBorderLineStyle((short) linestyle);
-				ch[t].setBorderBottomColor(colr);
+			ch[t].setBottomBorderLineStyle((short) linestyle);
+			ch[t].setBorderBottomColor(colr);
 		}
 	}
-	
+
 	/**
 	 * Sets a right border on all cells in the cellrange
 	 * 
-	 * 	Linestyle should be set through the FormatHandle constants
+	 * Linestyle should be set through the FormatHandle constants
 	 */
-	public void setInnerBorderRight(int linestyle, java.awt.Color colr) 
-	{
+	public void setInnerBorderRight(int linestyle, java.awt.Color colr) {
 		CellHandle[] ch = getCells();
 		for (int t = 0; t < ch.length; t++) {
-				ch[t].setRightBorderLineStyle((short) linestyle);
-				ch[t].setBorderRightColor(colr);
+			ch[t].setRightBorderLineStyle((short) linestyle);
+			ch[t].setBorderRightColor(colr);
 		}
 	}
-	
+
 	/**
 	 * Sets a left border on all cells in the cellrange
 	 * 
-	 * 	Linestyle should be set through the FormatHandle constants
+	 * Linestyle should be set through the FormatHandle constants
 	 */
-	public void setInnerBorderLeft(int linestyle, java.awt.Color colr) 
-	{
+	public void setInnerBorderLeft(int linestyle, java.awt.Color colr) {
 		CellHandle[] ch = getCells();
 		for (int t = 0; t < ch.length; t++) {
-				ch[t].setLeftBorderLineStyle((short) linestyle);
-				ch[t].setBorderLeftColor(colr);
+			ch[t].setLeftBorderLineStyle((short) linestyle);
+			ch[t].setBorderLeftColor(colr);
 		}
 	}
+
 	/**
 	 * Sets a top border on all cells in the cellrange
 	 * 
-	 * 	Linestyle should be set through the FormatHandle constants
+	 * Linestyle should be set through the FormatHandle constants
 	 */
-	public void setInnerBorderTop(int linestyle, java.awt.Color colr) 
-	{
+	public void setInnerBorderTop(int linestyle, java.awt.Color colr) {
 		CellHandle[] ch = getCells();
 		for (int t = 0; t < ch.length; t++) {
-				ch[t].setTopBorderLineStyle((short) linestyle);
-				ch[t].setBorderTopColor(colr);
+			ch[t].setTopBorderLineStyle((short) linestyle);
+			ch[t].setBorderTopColor(colr);
 		}
 	}
-	
+
 	/**
 	 * Sets a surround border on all cells in the cellrange
 	 * 
-	 * 	Linestyle should be set through the FormatHandle constants
+	 * Linestyle should be set through the FormatHandle constants
 	 */
-	public void setInnerBorderSurround(int linestyle, java.awt.Color colr) 
-	{
+	public void setInnerBorderSurround(int linestyle, java.awt.Color colr) {
 		CellHandle[] ch = getCells();
 		for (int t = 0; t < ch.length; t++) {
-				ch[t].setBorderColor(colr);
-				ch[t].setBorderLineStyle((short) linestyle);
+			ch[t].setBorderColor(colr);
+			ch[t].setBorderLineStyle((short) linestyle);
 		}
 	}
-	
-	
-	
-	
+
 }

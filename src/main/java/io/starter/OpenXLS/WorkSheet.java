@@ -136,12 +136,12 @@ public interface WorkSheet extends Handle{
 	
 	    @return CompatibleVector column names
 	*/
-	public abstract List getColNames();
+	public abstract List<?> getColNames();
 	/** returns a Vector of Row numbers
 	
 	    @return CompatibleVector row numbers
 	*/
-	public abstract List getRowNums();
+	public abstract List<?> getRowNums();
 	/** get an a RowHandle for
 	    this WorkSheet by number
 	    

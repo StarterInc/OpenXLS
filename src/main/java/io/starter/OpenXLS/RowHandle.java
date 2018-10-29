@@ -120,8 +120,8 @@ public class RowHandle {
      */
     public void setRowHeightAutoFit() {
     	// this.myRow.setUnsynched(false);	// firstly, set so excel
-	Collection ct = myRow.getCells();
-	Iterator it = ct.iterator();
+	Collection<?> ct = myRow.getCells();
+	Iterator<?> it = ct.iterator();
 	double h= 0;
 	int dpi = Toolkit.getDefaultToolkit().getScreenResolution();		// 96 is "small", 120 dpi is "lg"
 	// 1 point= 1/72 of an inch
@@ -172,7 +172,7 @@ public class RowHandle {
         /* 20080604 KSC: if an image falls upon this column, 
          * adjust image width so that it does not change
          */
-    	ArrayList iAdjust= new ArrayList();
+    	ArrayList<int[]> iAdjust= new ArrayList<int[]>();
 		ImageHandle[] images= myRow.getSheet().getImages(); 
 		if(images!=null) {
 			// for each image that falls over this row, trap index + original width -- to be reset after setting row height
@@ -256,8 +256,8 @@ public class RowHandle {
     @param cache cellhandles flag
 	*/
 	public CellHandle[] getCells(boolean cached){
-	    Collection ct = myRow.getCells();
-	    Iterator it = ct.iterator();
+	    Collection<?> ct = myRow.getCells();
+	    Iterator<?> it = ct.iterator();
 		CellHandle[] ch = new CellHandle[ct.size()];
 		int t = 0;
 		Mulblank aMul= null;

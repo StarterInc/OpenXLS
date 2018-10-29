@@ -22,10 +22,12 @@
  */
 package io.starter.naming;
 
+import java.util.Enumeration;
 
-import javax.naming.*;
+import javax.naming.InvalidNameException;
+import javax.naming.Name;
+
 import io.starter.toolkit.CompatibleVector;
-import java.util.*;
 
 /*	
 	Name add(int posn, String comp) 
@@ -56,16 +58,19 @@ import java.util.*;
 			  Determines whether this name starts with a specified prefix. 
 */
 
-public class NameImpl implements Name{
-	/** 
-	* serialVersionUID
-	*/
-	private static final long serialVersionUID = 4387233472850688497L;
-	CompatibleVector vals = new CompatibleVector();	/* (non-Javadoc)
-	
-	  
-	 * * @see javax.naming.Name#clone()
+public class NameImpl implements Name {
+	/**
+	 * serialVersionUID
 	 */
+	private static final long serialVersionUID = 4387233472850688497L;
+	CompatibleVector vals = new CompatibleVector(); /*
+													 * (non-Javadoc)
+													 * 
+													 * 
+													 * * @see javax.naming.Name#clone()
+													 */
+
+	@Override
 	public Object clone() {
 		NameImpl nimple = new NameImpl();
 		CompatibleVector newvals = new CompatibleVector();
@@ -73,91 +78,125 @@ public class NameImpl implements Name{
 		nimple.vals = newvals;
 		return nimple;
 	}
-	/* (non-Javadoc)
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see javax.naming.Name#remove(int)
 	 */
 	public Object remove(int arg0) throws InvalidNameException {
 		return vals.remove(arg0);
 	}
-	/* (non-Javadoc)
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see javax.naming.Name#get(int)
 	 */
 	public String get(int arg0) {
 		return vals.get(arg0).toString();
 	}
-	/* (non-Javadoc)
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see javax.naming.Name#getAll()
 	 */
 	public Enumeration getAll() {
 		return vals.elements();
 	}
-	
-	/* Creates a name whose components consist of a prefix of the components of this name. 
+
+	/*
+	 * Creates a name whose components consist of a prefix of the components of this
+	 * name.
+	 * 
 	 * @see javax.naming.Name#getPrefix(int)
 	 */
 	public Name getPrefix(int arg0) {
 		return null;
 	}
-	
-	/* Creates a name whose components consist of a suffix of the components in this name. 
+
+	/*
+	 * Creates a name whose components consist of a suffix of the components in this
+	 * name.
+	 * 
 	 * @see javax.naming.Name#getSuffix(int)
 	 */
 	public Name getSuffix(int arg0) {
-		// TODO Auto-generated method stub
 		return null;
 	}
-	
-	/* (non-Javadoc)
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see javax.naming.Name#add(java.lang.String)
 	 */
 	public Name add(String arg0) throws InvalidNameException {
 		return null;
 	}
-	
-	/* Adds the components of a name -- in order -- at a specified position within this name. 
+
+	/*
+	 * Adds the components of a name -- in order -- at a specified position within
+	 * this name.
+	 * 
 	 * @see javax.naming.Name#addAll(int, javax.naming.Name)
 	 */
 	public Name addAll(int arg0, Name arg1) throws InvalidNameException {
-		this.vals.addAll(arg0,((NameImpl)arg1).getVals());
+		this.vals.addAll(arg0, ((NameImpl) arg1).getVals());
 		return this;
 	}
-	
-	/* (non-Javadoc)
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see javax.naming.Name#addAll(javax.naming.Name)
 	 */
 	public Name addAll(Name arg0) throws InvalidNameException {
-		this.vals.addAll(((NameImpl)arg0).getVals());
+		this.vals.addAll(((NameImpl) arg0).getVals());
 		return this;
 	}
-	/* (non-Javadoc)
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see javax.naming.Name#size()
 	 */
 	public int size() {
 		return vals.size();
 	}
-	/* (non-Javadoc)
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see javax.naming.Name#isEmpty()
 	 */
 	public boolean isEmpty() {
-		return vals.size()>0;
+		return vals.size() > 0;
 	}
-	
-	/* (non-Javadoc)
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see javax.naming.Name#compareTo(java.lang.Object)
 	 */
 	public int compareTo(Object arg0) {
 		return this.compareTo(arg0);
 	}
-	
-	/* (non-Javadoc)
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see javax.naming.Name#endsWith(javax.naming.Name)
 	 */
 	public boolean endsWith(Name arg0) {
-		Object ob1 = arg0.get(arg0.size()-1);
-		Object ob2 = this.get(this.size()-1);
+		Object ob1 = arg0.get(arg0.size() - 1);
+		Object ob2 = this.get(this.size() - 1);
 		return ob1.equals(ob2);
 	}
-	/* (non-Javadoc)
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see javax.naming.Name#startsWith(javax.naming.Name)
 	 */
 	public boolean startsWith(Name arg0) {
@@ -165,15 +204,17 @@ public class NameImpl implements Name{
 		Object ob2 = this.get(0);
 		return ob1.equals(ob2);
 	}
-	
-	/* (non-Javadoc)
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see javax.naming.Name#add(int, java.lang.String)
 	 */
 	public Name add(int arg0, String arg1) throws InvalidNameException {
-		vals.set(arg0,arg1);
+		vals.set(arg0, arg1);
 		return this;
 	}
-	
+
 	/**
 	 * @return
 	 */
