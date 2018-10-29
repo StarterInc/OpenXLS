@@ -1,6 +1,6 @@
-OpenXLS 10.1 Release Notes
+OpenXLS 11.0 Release Notes
 -----------------------------------------
-Thank you for installing OpenXLS Java Spreadsheet SDK version 10.
+Thank you for installing OpenXLS Excel-compatible Java Spreadsheet Library.
 
 This document contains notes regarding this release that may not
 have been available in time to include with the release documentation.
@@ -9,22 +9,17 @@ For the most up-to-date information, please visit our resource center:
 http://extentech.com/index.jsp
 
 I - Release Notes
-OpenXLS 10.3 introduces many improvements over prior versions.
+OpenXLS 11.0 introduces few tangible improvements over prior versions, however it does reflect new stewardship of the project from Starter Inc.
 
-If you are upgrading from a prior version of OpenXLS, please see the following for information on important changes:
-http://extentech.com/nimbledocs/4520/2011/March/29/upgrading_to_extenxls_10
-
-Please contact your representative at:
-sales@extentech.com for new license keys when upgrading OpenXLS from 9.x to 10.x.
-
-Product EOL Notice: OpenXLS 8 is no longer officially supported.
-
-NOTE: Java compatibility -- OpenXLS 10 introduces some new Java 1.5-based methods which may not work in versions of Java prior to 1.5.
-Please test your code thoroughly and consider upgrading to a Java 1.5+ compatible environment.
-
-Contact support@extentech.com if you require special help with this.
+Please visit our GitHub page for the most recent updates.
 
 II - Change History
+
+11.0 ## Changes ##
+	1. Bug fixes, cleanup
+	2. Move to io.starter package heirarchy
+	3. Cleanup maven
+	4. Setup GitHub project and refresh dependencies
 
 10.3 ## Changes ##
 	1. New API for Streaming Encrypted Writable Parser
