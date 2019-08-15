@@ -1761,7 +1761,7 @@ s     * @return
 						// TODO: legend adjustment may have to do with y title and label ofsets ...?			
 {						adjust= 2*lcoords[4];	// spacing before and after legend box  TODO this isn't correct !!
 //KSC: TESTING!		
-//io.starter.OpenXLS.util.Logger.log("Original lcoords:  " + Arrays.toString(lcoords));					
+//io.starter.toolkit.Logger.log("Original lcoords:  " + Arrays.toString(lcoords));					
 }					else {
 						lcoords= new int[6];
 						lcoords[0]= chartMetrics.get("canvasw").intValue();
@@ -1771,14 +1771,14 @@ s     * @return
 					lcoords[0]= chartMetrics.get("canvasw").intValue();
 				}
 				double ldist= lcoords[0]-chartMetrics.get("w");	// save distance between legend box and w (significant if legend is on rhs)
-//io.starter.OpenXLS.util.Logger.log("Before Adjustments:  x:" + chartMetrics.get("x") + " w:" + chartMetrics.get("w") + " cw:" + chartMetrics.get("canvasw") + " y:" + chartMetrics.get("y") + " h:" + chartMetrics.get("h") + " ch:" + chartMetrics.get("canvash"));				
+//io.starter.toolkit.Logger.log("Before Adjustments:  x:" + chartMetrics.get("x") + " w:" + chartMetrics.get("w") + " cw:" + chartMetrics.get("canvasw") + " y:" + chartMetrics.get("y") + " h:" + chartMetrics.get("h") + " ch:" + chartMetrics.get("canvash"));				
 				// now adjust plot area coordinates based on canvas w, h, title and label offsets, and legend box, if any
 				chartMetrics.put("x", (Double)chartMetrics.get("x") + (Double) this.getAxes().axisMetrics.get("YAXISLABELOFFSET") + (Double) this.getAxes().axisMetrics.get("YAXISTITLEOFFSET"));
 				chartMetrics.put("y", (Double) chartMetrics.get("y") + chartMetrics.get("TITLEOFFSET"));
 				// TODO: seems that w is different doesn't need decrementing by x?? check out ...				
 				chartMetrics.put("w", (Double)chartMetrics.get("w") - (Double) this.getAxes().axisMetrics.get("YAXISLABELOFFSET"));
 				chartMetrics.put("h", (Double) chartMetrics.get("canvash")- (Double)chartMetrics.get("y") - (Double) this.getAxes().axisMetrics.get("XAXISLABELOFFSET") - (Double) this.getAxes().axisMetrics.get("XAXISTITLEOFFSET") - 10);
-//io.starter.OpenXLS.util.Logger.log("After Adjustments:   x:" + chartMetrics.get("x") + " w:" + chartMetrics.get("w") + " cw:" + chartMetrics.get("canvasw") + " y:" + chartMetrics.get("y") + " h:" + chartMetrics.get("h") + " ch:" + chartMetrics.get("canvash"));				
+//io.starter.toolkit.Logger.log("After Adjustments:   x:" + chartMetrics.get("x") + " w:" + chartMetrics.get("w") + " cw:" + chartMetrics.get("canvasw") + " y:" + chartMetrics.get("y") + " h:" + chartMetrics.get("h") + " ch:" + chartMetrics.get("canvash"));				
 	
 				double cw= chartMetrics.get("canvasw");
 				// rhs legend has to have some extra adjustments to w and/or canvasw ... 
@@ -1797,7 +1797,7 @@ s     * @return
 					if (this.getAxes().hasAxis(XAXIS) && ldist > 0) 	// pie, donut, don't
 						// ensure distance between legend box and edge of plot area remains the same	
 						chartMetrics.put("w", lcoords[0]-(Double)chartMetrics.get("x")-ldist);
-//io.starter.OpenXLS.util.Logger.log("Adjusted LCoords:  " + Arrays.toString(lcoords)); 				
+//io.starter.toolkit.Logger.log("Adjusted LCoords:  " + Arrays.toString(lcoords)); 				
 						
 				}  else {
 					double w= chartMetrics.get("w")+chartMetrics.get("x");

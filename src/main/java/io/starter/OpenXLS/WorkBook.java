@@ -5,18 +5,25 @@
  * 
  * This file is part of OpenXLS.
  * 
- * OpenXLS is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as
- * published by the Free Software Foundation, either version 3 of
+ * OpenXLS is free software: you can redistribute it and/or
+ * modify
+ * it under the terms of the GNU Lesser General Public
+ * License as
+ * published by the Free Software Foundation, either version
+ * 3 of
  * the License, or (at your option) any later version.
  * 
- * OpenXLS is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * OpenXLS is distributed in the hope that it will be
+ * useful,
+ * but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+ * the
  * GNU Lesser General Public License for more details.
  * 
- * You should have received a copy of the GNU Lesser General Public
- * License along with OpenXLS.  If not, see
+ * You should have received a copy of the GNU Lesser General
+ * Public
+ * License along with OpenXLS. If not, see
  * <http://www.gnu.org/licenses/>.
  * ---------- END COPYRIGHT NOTICE ----------
  */
@@ -24,101 +31,100 @@ package io.starter.OpenXLS;
 
 import java.io.OutputStream;
 
-import io.starter.formats.XLS.*;
+import io.starter.formats.XLS.CellNotFoundException;
+import io.starter.formats.XLS.ChartNotFoundException;
+import io.starter.formats.XLS.FunctionNotSupportedException;
+import io.starter.formats.XLS.PivotTableNotFoundException;
+import io.starter.formats.XLS.WorkSheetNotFoundException;
+import io.starter.formats.XLS.XLSConstants;
 
 /** An interface representing an OpenXLS WorkBook.
- * @deprecated This interface does not provide any useful abstraction. In
- *             practice it is equivalent to the {@link WorkBookHandle} class.
- *             Use that type instead.
+ * 
  */
-public interface WorkBook
-extends Handle, Document{
-    
-    public static int CALCULATE_ALWAYS = XLSConstants.CALCULATE_ALWAYS;
-    public static int CALCULATE_EXPLICIT= XLSConstants.CALCULATE_EXPLICIT;
-    public static int CALCULATE_AUTO = XLSConstants.CALCULATE_AUTO;
-    public static String CALC_MODE_PROP = XLSConstants.CALC_MODE_PROP;
-    public static String REFTRACK_PROP = XLSConstants.REFTRACK_PROP;
-    public static String USETEMPFILE_PROP = XLSConstants.USETEMPFILE_PROP;
-    public static String DEFAULTENCODING= XLSConstants.DEFAULTENCODING;
-    public static String UNICODEENCODING= XLSConstants.UNICODEENCODING;
-    public static String VALIDATEWORKBOOK= XLSConstants.VALIDATEWORKBOOK;
-    
-    // public static final int FORMULA_CALC_AUTO = 0;
-    
-	public static final int STRING_ENCODING_AUTO = XLSConstants.STRING_ENCODING_AUTO;
-	public static final int STRING_ENCODING_UNICODE =
-		XLSConstants.STRING_ENCODING_UNICODE;
-	public static final int STRING_ENCODING_COMPRESSED =
-		XLSConstants.STRING_ENCODING_COMPRESSED;
-	public static final int ALLOWDUPES = XLSConstants.ALLOWDUPES;
-	public static final int SHAREDUPES = XLSConstants.SHAREDUPES;
-	
+public interface WorkBook extends Handle, Document {
 
-    	/** Explicit calcing of formulas
-	 *  
-	 * 
-	 * @param mode
-	 */
+	public static int		CALCULATE_ALWAYS			= XLSConstants.CALCULATE_ALWAYS;
+	public static int		CALCULATE_EXPLICIT			= XLSConstants.CALCULATE_EXPLICIT;
+	public static int		CALCULATE_AUTO				= XLSConstants.CALCULATE_AUTO;
+	public static String	CALC_MODE_PROP				= XLSConstants.CALC_MODE_PROP;
+	public static String	REFTRACK_PROP				= XLSConstants.REFTRACK_PROP;
+	public static String	USETEMPFILE_PROP			= XLSConstants.USETEMPFILE_PROP;
+	public static String	DEFAULTENCODING				= XLSConstants.DEFAULTENCODING;
+	public static String	UNICODEENCODING				= XLSConstants.UNICODEENCODING;
+	public static String	VALIDATEWORKBOOK			= XLSConstants.VALIDATEWORKBOOK;
+
+	// public static final int FORMULA_CALC_AUTO = 0;
+
+	public static final int	STRING_ENCODING_AUTO		= XLSConstants.STRING_ENCODING_AUTO;
+	public static final int	STRING_ENCODING_UNICODE		= XLSConstants.STRING_ENCODING_UNICODE;
+	public static final int	STRING_ENCODING_COMPRESSED	= XLSConstants.STRING_ENCODING_COMPRESSED;
+	public static final int	ALLOWDUPES					= XLSConstants.ALLOWDUPES;
+	public static final int	SHAREDUPES					= XLSConstants.SHAREDUPES;
+
+	/** Explicit calcing of formulas
+	*  
+	* 
+	* @param mode
+	*/
 	public void setFormulaCalculationMode(int mode);
-    
-    public int getFormulaCalculationMode();
-	
-    /** get a non-Excel property
-     * @return Returns the properties.
-     */
-    public Object getProperty(String name) ;
-    
-    /** add non-Excel property
-     * @param properties The properties to set.
-     */
-    public void addProperty(String name, Object val) ;
-	
+
+	public int getFormulaCalculationMode();
+
+	/** get a non-Excel property
+	 * @return Returns the properties.
+	 */
+	@Override
+	public Object getProperty(String name);
+
+	/** add non-Excel property
+	 * @param properties The properties to set.
+	 */
+	@Override
+	public void addProperty(String name, Object val);
+
 	/** The Session for the WorkBook instance
 	 * 
 	 * @return
 	 
 	public BookSession getSession();
 	*/
-    
-    public java.awt.Color[] getColorTable() ;
-	
-    /** Returns all of the Cells contained in the WorkBook
-     * 
-     */
-    public CellHandle[] getCells();
-    
+
+	public java.awt.Color[] getColorTable();
+
+	/** Returns all of the Cells contained in the WorkBook
+	 * 
+	 */
+	public CellHandle[] getCells();
+
 	/** Returns the Cell at the specified Location
 	 * 
 	 * @param address
 	 * @return
 	 */
-	public abstract CellHandle getCell(String address)
-		throws CellNotFoundException, WorkSheetNotFoundException;
-	
-	
+	public abstract CellHandle getCell(String address) throws CellNotFoundException, WorkSheetNotFoundException;
+
 	/**
 	 * Returns an Array of all the FormatHandles present in the workbook
 	 * @return all existing FormatHandles in the workbook
 	 */
 	public abstract FormatHandle[] getFormats();
-	
+
 	/** Gets the date format used by this book. */
-    public DateConverter.DateFormat getDateFormat();
-	
+	public DateConverter.DateFormat getDateFormat();
+
 	/** get a handle to a PivotTable in the WorkBook
 	
 	    @param String name of the PivotTable
 	    @return PivotTable the PivotTable
 	*/
-	public abstract PivotTableHandle getPivotTable(String ptname)
-		throws PivotTableNotFoundException;
+	public abstract PivotTableHandle getPivotTable(String ptname) throws PivotTableNotFoundException;
+
 	/** get an array of handles to all PivotTables in the WorkBook
 	    
 	    @return PivotTable[] all of the WorkBooks PivotTables
 	*/
-	public abstract PivotTableHandle[] getPivotTables()
-		throws PivotTableNotFoundException;
+	public abstract PivotTableHandle[] getPivotTables() throws PivotTableNotFoundException;
+
 	/** set the workbook to protected mode
 	
 	    Note: the password cannot be decrypted or changed
@@ -129,6 +135,7 @@ extends Handle, Document{
 	
 	*/
 	public abstract void setProtected(boolean b);
+
 	/** set Default row height
 	
 	    Note: only affects undefined Rows containing Cells
@@ -136,6 +143,7 @@ extends Handle, Document{
 	    @param int Default Row Height
 	*/
 	public abstract void setDefaultRowHeight(int t);
+
 	/** set Default col width
 	
 	    Note: only affects undefined Columns containing Cells
@@ -144,9 +152,7 @@ extends Handle, Document{
 	
 	*/
 	public abstract void setDefaultColWidth(int t);
-	
-	
-	
+
 	/** Sets the internal name of this WorkBookHandle.
 	 * 
 	 *  Overrides the default for 'getName()' which returns
@@ -154,45 +160,54 @@ extends Handle, Document{
 	 * 
 	 * @param WorkBook Name
 	 */
+	@Override
 	public abstract void setName(String nm);
+
 	/** Set the Debugging level.  Higher values output more
 	    debugging info during execution.
 	    
 	    @parameter int Debug level.  higher=more verbose
 	*/
+	@Override
 	public abstract void setDebugLevel(int l);
+
 	/** Returns a Named Range Handle
 	
 	    @return NameHandle a Named range in the WorkBook
 	*/
-	public abstract NameHandle getNamedRange(String rangename)
-		throws CellNotFoundException;
+	public abstract NameHandle getNamedRange(String rangename) throws CellNotFoundException;
+
 	/** Returns a Chart Handle
 	
 		@return ChartHandle a Chart in the WorkBook
 	*/
-	public abstract ChartHandle getChart(String chartname)
-		throws ChartNotFoundException;
+	public abstract ChartHandle getChart(String chartname) throws ChartNotFoundException;
+
 	/** Returns all Chart Handles contained in the WorkBook
 	
 		@return ChartHandle[] an array of all Charts in the WorkBook
 	*/
 	public abstract ChartHandle[] getCharts();
+
 	/** Returns all Named Range Handles
 	    
 	    @return NameHandle[] all of the Named ranges in the WorkBook
 	*/
 	public abstract NameHandle[] getNamedRanges();
+
 	/** Returns the name of this WorkBook
 	
 	    @return String name of WorkBook
 	*/
+	@Override
 	public abstract String getName();
+
 	/** Returns the number of Cells in this WorkBook
 	
 	    @return int number of Cells
 	*/
 	public abstract int getNumCells();
+
 	/** Returns a byte Array containing the 
 	   valid file containing this WorkBook
 	   and associated Storages (such as VB files
@@ -216,15 +231,16 @@ extends Handle, Document{
 	 *  are moved.
 	 *
 	 */
-	// public abstract void initCellRanges(boolean createblanks);
-	
+	// public abstract void initCellRanges(boolean
+	// createblanks);
+
 	/** Returns an array of handles to all
 	    of the WorkSheets in the Workbook.
 	
 	    @return WorkSheetHandle[] Array of all WorkSheets in WorkBook
 	*/
 	public abstract WorkSheetHandle[] getWorkSheets();
-	
+
 	/** returns the handle to a WorkSheet by name.
 	
 		@param index of worksheet (ie: 0)
@@ -232,9 +248,8 @@ extends Handle, Document{
 		@exception WorkSheetNotFoundException if the specified WorkSheet is
 		not found in the WorkBook.
 	*/
-	public abstract WorkSheetHandle getWorkSheet(int i)
-		throws WorkSheetNotFoundException;
-		
+	public abstract WorkSheetHandle getWorkSheet(int i) throws WorkSheetNotFoundException;
+
 	/** returns the handle to a WorkSheet by name.
 	
 	    @param String name of worksheet (ie: "Sheet1")
@@ -242,9 +257,8 @@ extends Handle, Document{
 	    @exception WorkSheetNotFoundException if the specified WorkSheet is
 	    not found in the WorkBook.
 	*/
-	public abstract WorkSheetHandle getWorkSheet(String handstr)
-		throws WorkSheetNotFoundException;
-	
+	public abstract WorkSheetHandle getWorkSheet(String handstr) throws WorkSheetNotFoundException;
+
 	/** Returns a low-level WorkBook.
 	
 	    NOTE: The WorkBook class is NOT a part of the
@@ -254,7 +268,6 @@ extends Handle, Document{
 	
 	*/
 	public abstract io.starter.formats.XLS.WorkBook getWorkBook();
-
 
 	/** Clears all values in a template WorkBook.
 	
@@ -269,6 +282,7 @@ extends Handle, Document{
 	    and set them back to a default.
 	
 	*/
+	@Override
 	public abstract void reset();
 
 	/** Set Encoding mode of new Strings added to file.
@@ -305,6 +319,7 @@ extends Handle, Document{
 	        @param int String Encoding Mode
 	*/
 	public abstract void setStringEncodingMode(int mode);
+
 	/** Set Duplicate String Handling Mode.
 	
 	    The Duplicate String Mode determines the behavior of
@@ -336,32 +351,29 @@ extends Handle, Document{
 	        @param int Duplicate String Handling Mode
 	*/
 	public abstract void setDupeStringMode(int mode);
+
 	/** Copies an existing Chart to another WorkSheet
 	 * 
 	 * @param chartname
 	 * @param sheetname
 	 */
-	public abstract void copyChartToSheet(String chartname, String sheetname)
-		throws ChartNotFoundException, WorkSheetNotFoundException;
+	public abstract void copyChartToSheet(String chartname, String sheetname) throws ChartNotFoundException, WorkSheetNotFoundException;
+
 	/** Copies an existing Chart to another WorkSheet
 	 * 
 	 * @param chart
 	 * @param sheet
 	 */
-	public abstract void copyChartToSheet(
-		ChartHandle chart,
-		WorkSheetHandle sheet)
-		throws ChartNotFoundException, WorkSheetNotFoundException;
+	public abstract void copyChartToSheet(ChartHandle chart, WorkSheetHandle sheet) throws ChartNotFoundException, WorkSheetNotFoundException;
+
 	/**  Copy (duplicate) a worksheet in the workbook and add it to the end of the workbook with a new name
 	    
 	    @param String the Name of the source worksheet;
 	    @param String the Name of the new (destination) worksheet;
 	    @return the new WorkSheetHandle
 	*/
-	public abstract WorkSheetHandle copyWorkSheet(
-		String SourceSheetName,
-		String NewSheetName)
-		throws WorkSheetNotFoundException;
+	public abstract WorkSheetHandle copyWorkSheet(String SourceSheetName, String NewSheetName) throws WorkSheetNotFoundException;
+
 	/** Iterate through the formulas in this WorkBook and call the
 	 * 	calculate method on each.
 	 * 
@@ -374,10 +386,9 @@ extends Handle, Document{
 	 * 
 	 * @throws FunctionNotSupportedException
 	 */
-	public abstract void calculateFormulas()
-		throws FunctionNotSupportedException;
-	
-    /** Removes all of the WorkSheets from this WorkBook.
+	public abstract void calculateFormulas() throws FunctionNotSupportedException;
+
+	/** Removes all of the WorkSheets from this WorkBook.
 	 * 
 	 *  Bytes streamed from this WorkBook will create invalid
 	 * 	Spreadsheet files unless a WorkSheet(s) are added to it.
@@ -385,6 +396,7 @@ extends Handle, Document{
 	 *
 	 */
 	public abstract void removeAllWorkSheets();
+
 	/**	Returns a WorkBookHandle containing an empty 
 	 *  version of this WorkBook.
 	 * 
@@ -401,6 +413,7 @@ extends Handle, Document{
 	 * @see addSheetFromWorkBook
 	 */
 	public abstract WorkBookHandle getNoSheetWorkBook();
+
 	/** Inserts a worksheet from a Source WorkBook.
 	 * 
 	 * 
@@ -408,30 +421,30 @@ extends Handle, Document{
 	 * @param sourceBook  - the WorkBook containing the sheet to copy
 	 * @param sourceSheetName - the name of the sheet to copy
 	 * @param destSheetName - the name of the new sheet in this workbook
-	 * @deprecated
+	 * @throws WorkSheetNotFoundException 
 	 */
-	public abstract boolean addSheetFromWorkBook(
-		WorkBookHandle sourceBook,
-		String sourceSheetName,
-		String destSheetName);
+	public abstract boolean addSheetFromWorkBook(WorkBookHandle sourceBook, String sourceSheetName, String destSheetName) throws WorkSheetNotFoundException;
+
 	/**  Inserts a new worksheet and places it at the end of the workbook
 	
 	    @param WorkSheetHandle the source WorkSheetHandle;
 	    @param String the Name of the new (destination) worksheet;
 	*/
 	public abstract WorkSheetHandle addWorkSheet(WorkSheetHandle sht, String NewSheetName);
+
 	/**  Creates a new worksheet and places it at the end of the workbook
 	    
 	    @param String the Name of the newly created worksheet
 	    @return the new WorkSheetHandle 
 	*/
 	public abstract WorkSheetHandle createWorkSheet(String name);
-	
+
 	/**
 	 * 	Returns the name of this Sheet.
 	 * 
 	 * @see java.lang.Object#toString()
 	 */
+	@Override
 	public abstract String toString();
 
 	public StringBuffer writeBytes(OutputStream bbout);

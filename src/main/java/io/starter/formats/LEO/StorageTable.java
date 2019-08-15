@@ -533,7 +533,7 @@ public class StorageTable  implements Serializable{
 	}
 	
 	public void DEBUG() {
-		io.starter.OpenXLS.util.Logger.log("DIRECTORY CONTENTS:");
+		io.starter.toolkit.Logger.log("DIRECTORY CONTENTS:");
 		for (int i= 0; i < directoryVector.size(); i++) {
 			Storage s= (Storage) directoryVector.get(i);
 			String n= s.getName();
@@ -554,9 +554,9 @@ public class StorageTable  implements Serializable{
 				if (s.myblocks!=null) {
 					int zz= 0;	 
 					if ((s.myblocks.get(zz) instanceof io.starter.formats.LEO.BIGBLOCK))
-						io.starter.OpenXLS.util.Logger.log("BLOCK 1:\t" + zz + "-" + Arrays.toString(((io.starter.formats.LEO.BIGBLOCK)s.myblocks.get(zz)).getBytes()));
+						io.starter.toolkit.Logger.log("BLOCK 1:\t" + zz + "-" + Arrays.toString(((io.starter.formats.LEO.BIGBLOCK)s.myblocks.get(zz)).getBytes()));
 					else
-						io.starter.OpenXLS.util.Logger.log("BLOCK 1:\t" + zz + "-" + Arrays.toString(((io.starter.formats.LEO.SMALLBLOCK)s.myblocks.get(zz)).getBytes()));
+						io.starter.toolkit.Logger.log("BLOCK 1:\t" + zz + "-" + Arrays.toString(((io.starter.formats.LEO.SMALLBLOCK)s.myblocks.get(zz)).getBytes()));
 				} 
 			} else if (n.equals("Workbook")) {
 				; //skip
@@ -569,17 +569,17 @@ public class StorageTable  implements Serializable{
 				int slen= ByteTools.readInt(rec.getBytesAt(24, 4));	// actually position 28
 				if (slen >= 0) {
 					String ss= new String (rec.getBytesAt(28, slen));		// AnsiUserType= a display name of the linked object or embedded object. 
-					io.starter.OpenXLS.util.Logger.log("\tOLE Object:" + ss);
+					io.starter.toolkit.Logger.log("\tOLE Object:" + ss);
 				}
 				// AnsiClipboardFormat (variable)
-//				io.starter.OpenXLS.util.Logger.log("\t" + Arrays.toString(rec.getData()));				
+//				io.starter.toolkit.Logger.log("\t" + Arrays.toString(rec.getData()));				
 			} else if (n.startsWith("000")) {		// pivot cache
 				if (s.myblocks!=null) {
 					for (int zz= 0; zz < s.myblocks.size(); zz++) 
 						if ((s.myblocks.get(zz) instanceof io.starter.formats.LEO.BIGBLOCK))
-							io.starter.OpenXLS.util.Logger.log("\t" + zz + "-" + Arrays.toString(((io.starter.formats.LEO.BIGBLOCK)s.myblocks.get(zz)).getBytes()));
+							io.starter.toolkit.Logger.log("\t" + zz + "-" + Arrays.toString(((io.starter.formats.LEO.BIGBLOCK)s.myblocks.get(zz)).getBytes()));
 						else
-							io.starter.OpenXLS.util.Logger.log("\t" + zz + "-" + Arrays.toString(((io.starter.formats.LEO.SMALLBLOCK)s.myblocks.get(zz)).getBytes()));
+							io.starter.toolkit.Logger.log("\t" + zz + "-" + Arrays.toString(((io.starter.formats.LEO.SMALLBLOCK)s.myblocks.get(zz)).getBytes()));
 				} 
 				BlockByteReader bytes= s.getBlockReader();
 				int len= bytes.getLength();
@@ -592,16 +592,16 @@ public class StorageTable  implements Serializable{
 					rec.setOffset(z);
 					rec.setLength((short) reclen);
 					rec.init();
-				    io.starter.OpenXLS.util.Logger.log("\t\t" + rec.toString());
+				    io.starter.toolkit.Logger.log("\t\t" + rec.toString());
 					z+=reclen+4;
 				}
 			} else {			
 				if (s.myblocks!=null) {
 					for (int zz= 0; zz < s.myblocks.size(); zz++) 
 						if ((s.myblocks.get(zz) instanceof io.starter.formats.LEO.BIGBLOCK))
-							io.starter.OpenXLS.util.Logger.log("\t" + zz + "-" + Arrays.toString(((io.starter.formats.LEO.BIGBLOCK)s.myblocks.get(zz)).getBytes()));
+							io.starter.toolkit.Logger.log("\t" + zz + "-" + Arrays.toString(((io.starter.formats.LEO.BIGBLOCK)s.myblocks.get(zz)).getBytes()));
 						else
-							io.starter.OpenXLS.util.Logger.log("\t" + zz + "-" + Arrays.toString(((io.starter.formats.LEO.SMALLBLOCK)s.myblocks.get(zz)).getBytes()));
+							io.starter.toolkit.Logger.log("\t" + zz + "-" + Arrays.toString(((io.starter.formats.LEO.SMALLBLOCK)s.myblocks.get(zz)).getBytes()));
 				} 
 			}
 		}

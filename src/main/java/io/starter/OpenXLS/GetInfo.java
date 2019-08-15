@@ -72,6 +72,6 @@ private static Properties buildProps;
 	
 	public static void main(String[] args) {
 		// Product name and version
-		io.starter.OpenXLS.util.Logger.log ("This is OpenXLS " + getVersion());
+		io.starter.toolkit.Logger.log ("This is OpenXLS " + getVersion());
 	}
 }

@@ -81,9 +81,9 @@ public class PivotCache implements XLSConstants{
 /*				
 // KSC: TESTING				
 		try {
-io.starter.OpenXLS.util.Logger.log(rec.getClass().getName().substring(rec.getClass().getName().lastIndexOf(".")+1) + ": " + Arrays.toString(((PivotCacheRecord)rec).getRecord()));				
+io.starter.toolkit.Logger.log(rec.getClass().getName().substring(rec.getClass().getName().lastIndexOf(".")+1) + ": " + Arrays.toString(((PivotCacheRecord)rec).getRecord()));				
 		} catch (ClassCastException e) {
-io.starter.OpenXLS.util.Logger.log(rec.getClass().getName().substring(rec.getClass().getName().lastIndexOf(".")+1) + ": " + Arrays.toString(ByteTools.shortToLEBytes(rec.getOpcode())) + Arrays.toString(ByteTools.shortToLEBytes((short)rec.getData().length)) + Arrays.toString(rec.getData()));				
+io.starter.toolkit.Logger.log(rec.getClass().getName().substring(rec.getClass().getName().lastIndexOf(".")+1) + ": " + Arrays.toString(ByteTools.shortToLEBytes(rec.getOpcode())) + Arrays.toString(ByteTools.shortToLEBytes((short)rec.getData().length)) + Arrays.toString(rec.getData()));				
 		}
 */		
 				if (wbh!=null)
@@ -115,7 +115,7 @@ io.starter.OpenXLS.util.Logger.log(rec.getClass().getName().substring(rec.getCla
 		try {
 			// KSC: TESTING
 		    if (wbh.getDebugLevel() > 100)
-		    	io.starter.OpenXLS.util.Logger.log(String.format("creatpivotCache: ref: %s sid %d", ref, sId));
+		    	io.starter.toolkit.Logger.log(String.format("creatpivotCache: ref: %s sid %d", ref, sId));
 				/** 
 				 * the Pivot Cache Storage specifies zero or more streams, each of which specify a PivotCache
 				 * The name of each stream (1) MUST be unique within the storage, and the name MUST be a four digit hexadecimal number stored as text.
@@ -192,12 +192,12 @@ io.starter.OpenXLS.util.Logger.log(rec.getClass().getName().substring(rec.getCla
 		for (BiffRec br: pivotCacheRecs.get(cacheId+1)) {
 			try {
 				newbytes= ByteTools.append(((PivotCacheRecord)br).getRecord(), newbytes);
-//io.starter.OpenXLS.util.Logger.log(br.getClass().getName().substring(br.getClass().getName().lastIndexOf(".")+1) + ": " + Arrays.toString(((PivotCacheRecord)br).getRecord()));				
+//io.starter.toolkit.Logger.log(br.getClass().getName().substring(br.getClass().getName().lastIndexOf(".")+1) + ": " + Arrays.toString(((PivotCacheRecord)br).getRecord()));				
 			} catch (ClassCastException e) {
 				newbytes= ByteTools.append(ByteTools.shortToLEBytes(br.getOpcode()), newbytes);
 				newbytes= ByteTools.append(ByteTools.shortToLEBytes((short)br.getData().length), newbytes);
 				newbytes= ByteTools.append(br.getData(), newbytes);
-//io.starter.OpenXLS.util.Logger.log(br.getClass().getName().substring(br.getClass().getName().lastIndexOf(".")+1) + ": " + Arrays.toString(ByteTools.shortToLEBytes(br.getOpcode())) + Arrays.toString(ByteTools.shortToLEBytes((short)br.getData().length)) + Arrays.toString(br.getData()));				
+//io.starter.toolkit.Logger.log(br.getClass().getName().substring(br.getClass().getName().lastIndexOf(".")+1) + ": " + Arrays.toString(ByteTools.shortToLEBytes(br.getOpcode())) + Arrays.toString(ByteTools.shortToLEBytes((short)br.getData().length)) + Arrays.toString(br.getData()));				
 			}
 		}
 		Storage pcache1= caches.get(cacheId+1);
@@ -233,10 +233,10 @@ io.starter.OpenXLS.util.Logger.log(rec.getClass().getName().substring(rec.getCla
 			sxdb.setNCacheFields(cols.length);
 			sxdb.setStreamID(sId);
 			newbytes= ByteTools.append(sxdb.getRecord(), newbytes);
-//io.starter.OpenXLS.util.Logger.log("SXDB: " + Arrays.toString(sxdb.getRecord()));				
+//io.starter.toolkit.Logger.log("SXDB: " + Arrays.toString(sxdb.getRecord()));				
 			SXDBEx sxdbex= (SXDBEx)SXDBEx.getPrototype();	//TODO: nFormulas						
 			newbytes= ByteTools.append(sxdbex.getRecord(), newbytes);
-//io.starter.OpenXLS.util.Logger.log("SXDBEX: " + Arrays.toString(sxdbex.getRecord()));				
+//io.starter.toolkit.Logger.log("SXDBEX: " + Arrays.toString(sxdbex.getRecord()));				
 			// TODO: cells after row header cell ***should be*** the same type -- true in ALL cases??????
 			if (ch.length>cols.length) { // have multiple rows
 				for (int i= 0; i < cols.length; i++) {
@@ -259,10 +259,10 @@ io.starter.OpenXLS.util.Logger.log(rec.getClass().getName().substring(rec.getCla
 						sxfdb.setCacheField(ch[i].getStringVal());	// row header values
 						sxfdb.setNCacheItems(0);		// only set ACTUAL cache items when put cache field(s)on the pivot table (on row, page, column or data axis)						
 						newbytes= ByteTools.append(sxfdb.getRecord(), newbytes);
-//io.starter.OpenXLS.util.Logger.log("SXFDB: " + Arrays.toString(sxfdb.getRecord()));				
+//io.starter.toolkit.Logger.log("SXFDB: " + Arrays.toString(sxfdb.getRecord()));				
 						SXFDBType sxfdbtype= (SXFDBType) SXFDBType.getPrototype();
 						newbytes= ByteTools.append(sxfdbtype.getRecord(), newbytes);
-//io.starter.OpenXLS.util.Logger.log("SXDFBTYPE: " + Arrays.toString(sxfdbtype.getRecord()));				
+//io.starter.toolkit.Logger.log("SXDFBTYPE: " + Arrays.toString(sxfdbtype.getRecord()));				
 						continue;
 					} 
 					cachefieldindexes[i][z-1]= (byte)i;
@@ -275,7 +275,7 @@ io.starter.OpenXLS.util.Logger.log(rec.getClass().getName().substring(rec.getCla
 						SXString sxstring= (SXString) SXString.getPrototype();
 						sxstring.setCacheItem(c.getStringVal());
 						newbytes= ByteTools.append(sxstring.getRecord(), newbytes);
-//io.starter.OpenXLS.util.Logger.log("SXSTRING: " + Arrays.toString(sxstring.getRecord()));				
+//io.starter.toolkit.Logger.log("SXSTRING: " + Arrays.toString(sxstring.getRecord()));				
 						break;
 					case XLSConstants.TYPE_FP: 
 					case XLSConstants.TYPE_INT:
@@ -283,13 +283,13 @@ io.starter.OpenXLS.util.Logger.log(rec.getClass().getName().substring(rec.getCla
 						SXNum sxnum= (SXNum) SXNum.getPrototype();
 						sxnum.setNum(c.getDoubleVal());
 						newbytes= ByteTools.append(sxnum.getRecord(), newbytes);
-//io.starter.OpenXLS.util.Logger.log("SXNUM: " + Arrays.toString(sxnum.getRecord()));				
+//io.starter.toolkit.Logger.log("SXNUM: " + Arrays.toString(sxnum.getRecord()));				
 						break;
 					case XLSConstants.TYPE_BOOLEAN:
 						SXBool sxbool= (SXBool) SXBool.getPrototype();
 						sxbool.setBool(c.getBooleanVal());
 						newbytes= ByteTools.append(sxbool.getRecord(), newbytes);
-//io.starter.OpenXLS.util.Logger.log("SXBOOL: " + Arrays.toString(sxbool.getRecord()));				
+//io.starter.toolkit.Logger.log("SXBOOL: " + Arrays.toString(sxbool.getRecord()));				
 				//TYPE_FORMULA = 3,		SxFmla *(SxName *SXPair) 
 					case 6:
 						// SXDtr
@@ -303,7 +303,7 @@ io.starter.OpenXLS.util.Logger.log(rec.getClass().getName().substring(rec.getCla
 		byte[] b= new byte[4];
 		System.arraycopy(ByteTools.shortToLEBytes(XLSConstants.EOF), 0, b, 0, 2);
 		newbytes= ByteTools.append(b, newbytes);
-//io.starter.OpenXLS.util.Logger.log("EOF: " + Arrays.toString((b)));				
+//io.starter.toolkit.Logger.log("EOF: " + Arrays.toString((b)));				
 		return newbytes;
 	}	
 }

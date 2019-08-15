@@ -399,7 +399,7 @@ public class DateTimeCalculator
 	 */
 	protected static Ptg calcNow(Ptg[] operands){
 	   GregorianCalendar gc = new GregorianCalendar(TimeZone.getDefault());//java.sql.Date dt = new java.sql.Date();
-      // io.starter.OpenXLS.util.Logger.log(dt.toGMTString());
+      // io.starter.toolkit.Logger.log(dt.toGMTString());
 	   double retdate = DateConverter.getXLSDateVal(gc);
 	   return new PtgNumber(retdate);
 	}

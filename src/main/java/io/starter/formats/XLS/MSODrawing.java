@@ -447,12 +447,12 @@ public final class MSODrawing extends io.starter.formats.XLS.XLSRecord
 			int d1= (SPGRCONTAINERLENGTH+8-(SPCONTAINERLENGTH+otherSPCONTAINERLENGTH));
 			if (d0+d1!=0) {
 				if (DGCONTAINERLENGTH!=(DGCONTAINERATOMS+SPGRCONTAINERLENGTH+SOLVERCONTAINERLENGTH+8)) {  // this may not be 100% since must account for OTHER record's SOLVERCONTAINER LENGTHS
-					io.starter.OpenXLS.util.Logger.log("DGCONTAINERLENGTH DIFF: " + (DGCONTAINERLENGTH-(DGCONTAINERATOMS+SPGRCONTAINERLENGTH+SOLVERCONTAINERLENGTH+8)));
+					io.starter.toolkit.Logger.log("DGCONTAINERLENGTH DIFF: " + (DGCONTAINERLENGTH-(DGCONTAINERATOMS+SPGRCONTAINERLENGTH+SOLVERCONTAINERLENGTH+8)));
 					diff= true;
 				}			  	
 				// ******* sum of SPCONTAINERS ***************
 				if (SPGRCONTAINERLENGTH+8!=SPCONTAINERLENGTH+otherSPCONTAINERLENGTH) {
-					io.starter.OpenXLS.util.Logger.log("SPGRCONTAINERLENGTH DIFF: " + (SPGRCONTAINERLENGTH+8-(SPCONTAINERLENGTH+otherSPCONTAINERLENGTH)));
+					io.starter.toolkit.Logger.log("SPGRCONTAINERLENGTH DIFF: " + (SPGRCONTAINERLENGTH+8-(SPCONTAINERLENGTH+otherSPCONTAINERLENGTH)));
 					diff= true;
 				}
 			}
@@ -505,8 +505,8 @@ public final class MSODrawing extends io.starter.formats.XLS.XLSRecord
      */
     public void updateRecord() {    	
 /*// debug: check algorithm:
-	io.starter.OpenXLS.util.Logger.log(this.toString());    	
-	io.starter.OpenXLS.util.Logger.log(this.debugOutput());
+	io.starter.toolkit.Logger.log(this.toString());    	
+	io.starter.toolkit.Logger.log(this.debugOutput());
 	int origSP= SPCONTAINERLENGTH;
 	int origDG= 0;
 	int origSPGR= 0;
@@ -741,8 +741,8 @@ public final class MSODrawing extends io.starter.formats.XLS.XLSRecord
 		
     	// testing
     	/*
-    	io.starter.OpenXLS.util.Logger.log(this.toString());    	
-    	io.starter.OpenXLS.util.Logger.log(this.debugOutput());
+    	io.starter.toolkit.Logger.log(this.toString());    	
+    	io.starter.toolkit.Logger.log(this.debugOutput());
 		/**/
     }
     
@@ -1015,9 +1015,9 @@ public final class MSODrawing extends io.starter.formats.XLS.XLSRecord
 	  	dgcontainerlength+=DGATOMS;
 	  	/** debugging */
 		/*if (origSPGRL!=spgrcontainerlength || origDGL!=dgcontainerlength) {			
-			io.starter.OpenXLS.util.Logger.log(this.toString());
-			io.starter.OpenXLS.util.Logger.log(this.debugOutput());
-			io.starter.OpenXLS.util.Logger.log("ORIGDG=" + origDGL + " ORIGSPL=" + origSPGRL + " DIFF: " + (origDGL-dgcontainerlength) + "-" + (origSPGRL-spgrcontainerlength));
+			io.starter.toolkit.Logger.log(this.toString());
+			io.starter.toolkit.Logger.log(this.debugOutput());
+			io.starter.toolkit.Logger.log("ORIGDG=" + origDGL + " ORIGSPL=" + origSPGRL + " DIFF: " + (origDGL-dgcontainerlength) + "-" + (origSPGRL-spgrcontainerlength));
 			diff= true;
 		}
 		/**/
@@ -1046,8 +1046,8 @@ public final class MSODrawing extends io.starter.formats.XLS.XLSRecord
 		    } else if (fbt==MSODrawingConstants.MSOFBTSPGRCONTAINER) {	// sum of all spcontainers on the sheet	  
 				System.arraycopy(ByteTools.cLongToLEBytes(spgrcontainerlength), 0, data, data.length-bis.available()-4, 4);
 				/*if (diff) {	// debugging container lengths
-					io.starter.OpenXLS.util.Logger.log(this.toString());
-					io.starter.OpenXLS.util.Logger.log(this.debugOutput());
+					io.starter.toolkit.Logger.log(this.toString());
+					io.starter.toolkit.Logger.log(this.debugOutput());
 				}/**/
 				return;
  		    } else {	// skip atoms

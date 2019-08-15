@@ -5,18 +5,25 @@
  * 
  * This file is part of OpenXLS.
  * 
- * OpenXLS is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as
- * published by the Free Software Foundation, either version 3 of
+ * OpenXLS is free software: you can redistribute it and/or
+ * modify
+ * it under the terms of the GNU Lesser General Public
+ * License as
+ * published by the Free Software Foundation, either version
+ * 3 of
  * the License, or (at your option) any later version.
  * 
- * OpenXLS is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * OpenXLS is distributed in the hope that it will be
+ * useful,
+ * but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+ * the
  * GNU Lesser General Public License for more details.
  * 
- * You should have received a copy of the GNU Lesser General Public
- * License along with OpenXLS.  If not, see
+ * You should have received a copy of the GNU Lesser General
+ * Public
+ * License along with OpenXLS. If not, see
  * <http://www.gnu.org/licenses/>.
  * ---------- END COPYRIGHT NOTICE ----------
  */
@@ -104,53 +111,54 @@ import io.starter.toolkit.TempFileManager;
  * 
  */
 public class WorkBookHandle extends DocumentHandle implements WorkBook, Handle {
-	private static final long serialVersionUID = -7040065539645064209L;
-
 	/**
 	 * A Writer to which a record dump should be written on input. This is used by
 	 * the dumping code in WorkBookFactory.
 	 */
-	public static Writer dump_input = null;
+	public static Writer						dump_input					= null;
 
-	protected io.starter.formats.XLS.WorkBook mybook;
-	protected LEOFile myLEOFile;
-	protected WorkBookFactory myfactory = null;
+	protected io.starter.formats.XLS.WorkBook	mybook;
+	protected LEOFile							myLEOFile;
+	protected WorkBookFactory					myfactory					= null;
 
-	protected ProgressListener plist;
+	protected ProgressListener					plist;
 
 	/** Format constant for BIFF8 (Excel '97-2007). */
-	public static final int FORMAT_XLS = 100;
+	public static final int						FORMAT_XLS					= 100;
 
 	/** Format constant for normal OOXML (Excel 2007). */
-	public static final int FORMAT_XLSX = 101;
+	public static final int						FORMAT_XLSX					= 101;
 
 	/** Format constant for macro-enabled OOXML (Excel 2007). */
-	public static final int FORMAT_XLSM = 102;
+	public static final int						FORMAT_XLSM					= 102;
 
 	/** Format constant for OOXML template (Excel 2007). */
-	public static final int FORMAT_XLTX = 103;
+	public static final int						FORMAT_XLTX					= 103;
 
 	/** Format constant for macro-enabled OOXML template (Excel 2007). */
-	public static final int FORMAT_XLTM = 104;
+	public static final int						FORMAT_XLTM					= 104;
 
-	private static byte[] protobook;
-	private static byte[] protochart;
-	private static byte[] protosheet;
-	public static java.text.SimpleDateFormat simpledateformat = new java.text.SimpleDateFormat(); // static to reuse
+	private static byte[]						protobook;
+	private static byte[]						protochart;
+	private static byte[]						protosheet;
+	public static java.text.SimpleDateFormat	simpledateformat			= new java.text.SimpleDateFormat();	// static
+																												// to
+																												// reuse
 
 	/**
 	 * How many recursion levels to allow formulas to be calculated before throwing
 	 * a circular reference error
 	 */
-	public static int RECURSION_LEVELS_ALLOWED = 107;
+	public static int							RECURSION_LEVELS_ALLOWED	= 107;
 
 	/** This is **/
-	public static String CONVERTMULBLANKS = "deprecated";
+	public static String						CONVERTMULBLANKS			= "deprecated";
 
 	protected static byte[] getPrototypeBook() throws IOException {
 		if (protobook == null)
 
-			protobook = ResourceLoader.getBytesFromJar("/io/starter/OpenXLS/templates/prototysspe.ser");
+			protobook = ResourceLoader
+					.getBytesFromJar("/io/starter/OpenXLS/templates/prototysspe.ser");
 
 		return protobook;
 	}
@@ -172,7 +180,8 @@ public class WorkBookHandle extends DocumentHandle implements WorkBook, Handle {
 	protected static byte[] getPrototypeChart() {
 		if (protochart == null) {
 			try {
-				byte[] bookbytes = ResourceLoader.getBytesFromJar("/io/starter/OpenXLS/templates/prototypechart.ser");
+				byte[] bookbytes = ResourceLoader
+						.getBytesFromJar("/io/starter/OpenXLS/templates/prototypechart.ser");
 				WorkBookHandle chartBook = new WorkBookHandle(bookbytes);
 				ChartHandle ch = chartBook.getCharts()[0];
 				protochart = ch.getSerialBytes();
@@ -221,7 +230,8 @@ public class WorkBookHandle extends DocumentHandle implements WorkBook, Handle {
 				if (!cx[t].isNumber()) {
 					String v = cx[t].getStringVal();
 					if (v.indexOf(searchfor) > -1) {
-						cx[t].setVal(StringTool.replaceText(v, searchfor, replacewith));
+						cx[t].setVal(StringTool
+								.replaceText(v, searchfor, replacewith));
 						foundcount++;
 					}
 				}
@@ -248,6 +258,7 @@ public class WorkBookHandle extends DocumentHandle implements WorkBook, Handle {
 	 * 
 	 * @return
 	 */
+	@Override
 	public java.awt.Color[] getColorTable() {
 		return this.getWorkBook().getColorTable();
 	}
@@ -263,6 +274,7 @@ public class WorkBookHandle extends DocumentHandle implements WorkBook, Handle {
 	}
 
 	/** Gets the date format used by this book. */
+	@Override
 	public DateConverter.DateFormat getDateFormat() {
 		return mybook.getDateFormat();
 	}
@@ -302,11 +314,12 @@ public class WorkBookHandle extends DocumentHandle implements WorkBook, Handle {
 	 * @param address
 	 * @return
 	 */
+	@Override
 	public CellHandle getCell(String address) throws CellNotFoundException, WorkSheetNotFoundException {
 		int shtpos = address.indexOf("!");
 		if (shtpos < 0)
-			throw new CellNotFoundException(
-					address + " not found.  You need to specify a location in the format: Sheet1!A1");
+			throw new CellNotFoundException(address
+					+ " not found.  You need to specify a location in the format: Sheet1!A1");
 		String sheetstr = address.substring(0, shtpos);
 		WorkSheetHandle sht = this.getWorkSheet(sheetstr);
 		String celstr = address.substring(shtpos + 1);
@@ -335,6 +348,7 @@ public class WorkBookHandle extends DocumentHandle implements WorkBook, Handle {
 	 *            name of the PivotTable
 	 * @return PivotTable the PivotTable
 	 */
+	@Override
 	public PivotTableHandle getPivotTable(String ptname) throws PivotTableNotFoundException {
 		Sxview st = mybook.getPivotTableView(ptname);
 		if (st == null)
@@ -347,10 +361,12 @@ public class WorkBookHandle extends DocumentHandle implements WorkBook, Handle {
 	 * 
 	 * @return PivotTable[] all of the WorkBooks PivotTables
 	 */
+	@Override
 	public PivotTableHandle[] getPivotTables() throws PivotTableNotFoundException {
 		Sxview[] sxv = mybook.getAllPivotTableViews();
 		if (sxv == null || sxv.length == 0)
-			throw new PivotTableNotFoundException("There are no PivotTables defined in: " + this.getName());
+			throw new PivotTableNotFoundException(
+					"There are no PivotTables defined in: " + this.getName());
 		PivotTableHandle[] pth = new PivotTableHandle[sxv.length];
 		for (int t = 0; t < pth.length; t++) {
 			pth[t] = new PivotTableHandle(sxv[t], this);
@@ -378,6 +394,7 @@ public class WorkBookHandle extends DocumentHandle implements WorkBook, Handle {
 	 * @param CalcMode
 	 *            Calculation mode to use in workbook.
 	 */
+	@Override
 	public void setFormulaCalculationMode(int CalcMode) {
 		mybook.setCalcMode(CalcMode);
 	}
@@ -399,6 +416,7 @@ public class WorkBookHandle extends DocumentHandle implements WorkBook, Handle {
 	 * @param CalcMode
 	 *            Calculation mode to use in workbook.
 	 */
+	@Override
 	public int getFormulaCalculationMode() {
 		return mybook.getCalcMode();
 	}
@@ -412,6 +430,7 @@ public class WorkBookHandle extends DocumentHandle implements WorkBook, Handle {
 	 * @param boolean
 	 *            whether to protect the book
 	 */
+	@Override
 	public void setProtected(boolean protect) {
 		// TODO: Check that this behavior is correct
 		// This is what the old implementation did
@@ -435,11 +454,15 @@ public class WorkBookHandle extends DocumentHandle implements WorkBook, Handle {
 	 * @param int
 	 *            Default Row Height
 	 */
-	// should be a double as Excel units are 1/20 of what is stored in
+	// should be a double as Excel units are 1/20 of what is
+	// stored in
 	// defaultrowheight
-	// e.g. 12.75 is Excel Units, twips = 12.75*20 = 256 (approx)
-	// should expect users to use Excel units and target method do the 20*
+	// e.g. 12.75 is Excel Units, twips = 12.75*20 = 256
+	// (approx)
+	// should expect users to use Excel units and target method
+	// do the 20*
 	// conversion
+	@Override
 	public void setDefaultRowHeight(int t) {
 		mybook.setDefaultRowHeight(t);
 	}
@@ -453,6 +476,7 @@ public class WorkBookHandle extends DocumentHandle implements WorkBook, Handle {
 	 * This setting is roughly the width of the character '0' The default width of a
 	 * column is 8.
 	 */
+	@Override
 	public void setDefaultColWidth(int t) {
 		mybook.setDefaultColWidth(t);
 	}
@@ -506,7 +530,8 @@ public class WorkBookHandle extends DocumentHandle implements WorkBook, Handle {
 				;
 			}
 		}
-		throw new ImageNotFoundException("Image not found: " + imagename + " in " + this.toString());
+		throw new ImageNotFoundException(
+				"Image not found: " + imagename + " in " + this.toString());
 	}
 
 	/**
@@ -514,6 +539,7 @@ public class WorkBookHandle extends DocumentHandle implements WorkBook, Handle {
 	 * 
 	 * @return NameHandle a Named range in the WorkBook
 	 */
+	@Override
 	public NameHandle getNamedRange(String rangename) throws CellNotFoundException {
 		Name nand = mybook.getName(rangename.toUpperCase()); // case-insensitive
 		if (nand == null)
@@ -565,9 +591,11 @@ public class WorkBookHandle extends DocumentHandle implements WorkBook, Handle {
 	 * 
 	 * @return ChartHandle a Chart in the WorkBook
 	 */
-	// KSC: NOTE: this methodology needs work as a book may contain charts in
+	// KSC: NOTE: this methodology needs work as a book may
+	// contain charts in
 	// different sheets containing the same name
 	// TODO: rethink
+	@Override
 	public ChartHandle getChart(String chartname) throws ChartNotFoundException {
 		return new ChartHandle(mybook.getChart(chartname), this);
 	}
@@ -577,6 +605,7 @@ public class WorkBookHandle extends DocumentHandle implements WorkBook, Handle {
 	 * 
 	 * @return ChartHandle[] an array of all Charts in the WorkBook
 	 */
+	@Override
 	public ChartHandle[] getCharts() {
 		AbstractList<?> cv = mybook.getChartVect();
 		ChartHandle[] cht = new ChartHandle[cv.size()];
@@ -609,6 +638,7 @@ public class WorkBookHandle extends DocumentHandle implements WorkBook, Handle {
 	 * 
 	 * @return NameHandle[] all of the Named ranges in the WorkBook
 	 */
+	@Override
 	public NameHandle[] getNamedRanges() {
 		Name[] nand = mybook.getNames();
 		NameHandle[] nands = new NameHandle[nand.length];
@@ -651,6 +681,7 @@ public class WorkBookHandle extends DocumentHandle implements WorkBook, Handle {
 	 * 
 	 * @return CellHandle array of all book cells
 	 */
+	@Override
 	public CellHandle[] getCells() {
 		BiffRec[] allcz = this.mybook.getCells();
 		CellHandle[] ret = new CellHandle[allcz.length];
@@ -659,15 +690,19 @@ public class WorkBookHandle extends DocumentHandle implements WorkBook, Handle {
 		for (int t = 0; t < ret.length; t++) {
 			ret[t] = new CellHandle(allcz[t], this);
 			if (allcz[t].getOpcode() == XLSConstants.MULBLANK) {
-				// handle Mulblanks: ref a range of cells; to get correct cell address,
-				// traverse thru range and set cellhandle ref to correct column
+				// handle Mulblanks: ref a range of cells; to get correct
+				// cell address,
+				// traverse thru range and set cellhandle ref to correct
+				// column
 				if (allcz[t] == aMul) {
 					c++;
 				} else {
 					aMul = (Mulblank) allcz[t];
 					c = (short) aMul.getColFirst();
 				}
-				ret[t].setBlankRef(c); // for Mulblank use only -sets correct column reference for multiple blank cells
+				ret[t].setBlankRef(c); // for Mulblank use only -sets correct
+										// column reference for multiple blank
+										// cells
 										// ...
 			}
 		}
@@ -679,6 +714,7 @@ public class WorkBookHandle extends DocumentHandle implements WorkBook, Handle {
 	 * 
 	 * @return int number of Cells
 	 */
+	@Override
 	public int getNumCells() {
 		return mybook.getNumCells();
 	}
@@ -701,6 +737,7 @@ public class WorkBookHandle extends DocumentHandle implements WorkBook, Handle {
 	 *             Use the {@link #write} family of methods instead. If you need a
 	 *             byte array use {@link ByteArrayOutputStream}.
 	 */
+	@Override
 	@Deprecated
 	public byte[] getBytes() {
 		try {
@@ -763,7 +800,8 @@ public class WorkBookHandle extends DocumentHandle implements WorkBook, Handle {
 		try {
 			this.write(new File(path), format);
 		} catch (Exception e) {
-			throw new WorkBookException("error writing workbook", WorkBookException.WRITING_ERROR, e);
+			throw new WorkBookException("error writing workbook",
+					WorkBookException.WRITING_ERROR, e);
 		}
 	}
 
@@ -796,7 +834,8 @@ public class WorkBookHandle extends DocumentHandle implements WorkBook, Handle {
 			}
 			this.write(dest, format);
 		} catch (Exception e) {
-			throw new WorkBookException("error writing workbook", WorkBookException.WRITING_ERROR, e);
+			throw new WorkBookException("error writing workbook",
+					WorkBookException.WRITING_ERROR, e);
 		}
 	}
 
@@ -904,8 +943,10 @@ public class WorkBookHandle extends DocumentHandle implements WorkBook, Handle {
 			} catch (IOException e) {
 				throw e;
 			} catch (Exception e) {
-				// TODO: OOXMLAdapter only throws IOException, change its throws
-				throw new WorkBookException("error writing workbook", WorkBookException.WRITING_ERROR, e);
+				// TODO: OOXMLAdapter only throws IOException, change its
+				// throws
+				throw new WorkBookException("error writing workbook",
+						WorkBookException.WRITING_ERROR, e);
 			}
 			break;
 
@@ -1003,6 +1044,7 @@ public class WorkBookHandle extends DocumentHandle implements WorkBook, Handle {
 	 *         bytes streamed
 	 * @deprecated Use {@link #write(OutputStream,int)} instead.
 	 */
+	@Override
 	@Deprecated
 	public StringBuffer writeBytes(OutputStream dest) {
 		StringBuffer sb = this.mybook.getStreamer().writeOut(dest);
@@ -1015,8 +1057,10 @@ public class WorkBookHandle extends DocumentHandle implements WorkBook, Handle {
 	 * 3 WorkSheets: "Sheet1","Sheet2",and "Sheet3".
 	 */
 	public WorkBookHandle() {
-		// Xf.DEFAULTIXFE= 15; // reset to default in cases of having previously read
-		// Excel2007 template which may have set defaultXF differently
+		// Xf.DEFAULTIXFE= 15; // reset to default in cases of
+		// having previously read
+		// Excel2007 template which may have set defaultXF
+		// differently
 		this.initDefault();
 	}
 
@@ -1045,14 +1089,16 @@ public class WorkBookHandle extends DocumentHandle implements WorkBook, Handle {
 		try {
 			byte[] b = getPrototypeBook();
 			if (b == null) {
-				throw new io.starter.formats.XLS.WorkBookException("Unable to load prototype workbook.",
+				throw new io.starter.formats.XLS.WorkBookException(
+						"Unable to load prototype workbook.",
 						WorkBookException.LICENSING_FAILED);
 			}
 			ByteBuffer bbf = ByteBuffer.wrap(b);
 			bbf.order(ByteOrder.LITTLE_ENDIAN);
 			myLEOFile = new LEOFile(bbf);
 		} catch (Exception e) {
-			throw new InvalidFileException("WorkBook could not be instantiated: " + e.toString());
+			throw new InvalidFileException(
+					"WorkBook could not be instantiated: " + e.toString());
 		}
 		this.initFromLeoFile(myLEOFile);
 	}
@@ -1082,7 +1128,8 @@ public class WorkBookHandle extends DocumentHandle implements WorkBook, Handle {
 		} catch (Exception e) {
 			if (e instanceof io.starter.formats.XLS.WorkBookException)
 				throw (io.starter.formats.XLS.WorkBookException) e;
-			throw new io.starter.formats.XLS.WorkBookException("ERROR: instantiating WorkBookHandle failed: " + e,
+			throw new io.starter.formats.XLS.WorkBookException(
+					"ERROR: instantiating WorkBookHandle failed: " + e,
 					WorkBookException.UNSPECIFIED_INIT_ERROR, e);
 		}
 	}
@@ -1098,15 +1145,18 @@ public class WorkBookHandle extends DocumentHandle implements WorkBook, Handle {
 
 			JFileWriter.writeToFile(input, target);
 			this.initFromFile(target.getAbsoluteFile());
-			if (this.myLEOFile != null)// it would be if XLSX or XLSM ... 20090323 KSC
+			if (this.myLEOFile != null)// it would be if XLSX or XLSM ...
+										// 20090323 KSC
 				this.myLEOFile.closefb();
-			// this.myLEOFile.close(); // close now flushes buffers + storages ...
+			// this.myLEOFile.close(); // close now flushes buffers +
+			// storages ...
 			input.close();
 
 			File fdel = new File(target.toString());
 			if (!fdel.delete()) {
 				if (this.DEBUGLEVEL > DEBUG_LOW)
-					Logger.logWarn("Could not delete tempfile: " + target.toString());
+					Logger.logWarn("Could not delete tempfile: "
+							+ target.toString());
 			}
 		} catch (IOException ex) {
 			Logger.logErr("Initializing WorkBookHandle failed.", ex);
@@ -1142,7 +1192,8 @@ public class WorkBookHandle extends DocumentHandle implements WorkBook, Handle {
 				this.initFromFile(ftmp);
 				return;
 			} catch (Exception e) {
-				Logger.logErr("Could not parse XLSX from bytes." + e.toString());
+				Logger.logErr("Could not parse XLSX from bytes."
+						+ e.toString());
 				return;
 			}
 		}
@@ -1159,13 +1210,15 @@ public class WorkBookHandle extends DocumentHandle implements WorkBook, Handle {
 					throw (Error) e;
 				if (e instanceof WorkBookException)
 					throw (WorkBookException) e;
-				String errstr = "Instantiating WorkBookHandle failed: " + e.toString();
-				throw new io.starter.formats.XLS.WorkBookException(errstr, WorkBookException.UNSPECIFIED_INIT_ERROR);
+				String errstr = "Instantiating WorkBookHandle failed: "
+						+ e.toString();
+				throw new io.starter.formats.XLS.WorkBookException(errstr,
+						WorkBookException.UNSPECIFIED_INIT_ERROR);
 			}
 		} else {
-			Logger.logWarn(
-					"Initializing WorkBookHandle failed: byte array does not contain a supported Excel WorkBook.");
-			throw new InvalidFileException("byte array does not contian a supported Excel WorkBook.");
+			Logger.logWarn("Initializing WorkBookHandle failed: byte array does not contain a supported Excel WorkBook.");
+			throw new InvalidFileException(
+					"byte array does not contian a supported Excel WorkBook.");
 		}
 	}
 
@@ -1181,8 +1234,10 @@ public class WorkBookHandle extends DocumentHandle implements WorkBook, Handle {
 	 */
 	public WorkBookHandle(URL url) {
 		/*
-		 * OK, both this method and the (inputstream) constructor set a temp file, is
-		 * this not possible to do without hitting the disk? TODO: look into fix
+		 * OK, both this method and the (inputstream) constructor
+		 * set a temp file, is
+		 * this not possible to do without hitting the disk? TODO:
+		 * look into fix
 		 */
 		this(getFileFromURL(url));
 	}
@@ -1211,7 +1266,8 @@ public class WorkBookHandle extends DocumentHandle implements WorkBook, Handle {
 		this.setDebugLevel(debug);
 		File f = new File(filePath);
 		this.initFromFile(f);
-		this.file = f; // XXX KSC: Save for potential re-input of pass-through ooxml files
+		this.file = f; // XXX KSC: Save for potential re-input of pass-through
+						// ooxml files
 
 	}
 
@@ -1245,7 +1301,8 @@ public class WorkBookHandle extends DocumentHandle implements WorkBook, Handle {
 		if (plist != null)
 			myfactory.register(plist); // register progress notifier
 		try {
-			// iterate sheets,inputting cell values, named ranges and formula strings
+			// iterate sheets,inputting cell values, named ranges and
+			// formula strings
 			OOXMLReader oe = new OOXMLReader();
 			WorkBookHandle bk = new WorkBookHandle();
 			bk.removeAllWorkSheets();
@@ -1255,7 +1312,8 @@ public class WorkBookHandle extends DocumentHandle implements WorkBook, Handle {
 			this.sheethandles = bk.sheethandles;
 			this.mybook = bk.mybook;
 		} catch (Exception e) {
-			throw new WorkBookException("WorkBookHandle OOXML Read failed: " + e.toString(),
+			throw new WorkBookException(
+					"WorkBookHandle OOXML Read failed: " + e.toString(),
 					WorkBookException.UNSPECIFIED_INIT_ERROR, e);
 		}
 
@@ -1285,12 +1343,14 @@ public class WorkBookHandle extends DocumentHandle implements WorkBook, Handle {
 			fincheck.close();
 
 		} catch (FileNotFoundException e) {
-			Logger.logErr("WorkBookHandle: Cannot open file " + fname + ": " + e);
+			Logger.logErr("WorkBookHandle: Cannot open file " + fname + ": "
+					+ e);
 		} catch (Exception e1) {
 			Logger.logErr("Invalid XLSX/OOXML File.");
 		}
 		this.name = fname; // 20081231 KSC: set here
-		if (finch.toUpperCase().startsWith("PK")) { // it's a zip file... give XLSX parsing a shot
+		if (finch.toUpperCase().startsWith("PK")) { // it's a zip file... give
+													// XLSX parsing a shot
 			if (this.file != null)
 				OOXMLAdapter.refreshPassThroughFiles(this);
 			if (initXLSX(fname))
@@ -1309,7 +1369,8 @@ public class WorkBookHandle extends DocumentHandle implements WorkBook, Handle {
 					sheet.readCSV(new BufferedReader(new FileReader(fx)));
 					return;
 				} catch (Exception e) {
-					throw new WorkBookException("Error encountered importing CSV: " + e.toString(),
+					throw new WorkBookException(
+							"Error encountered importing CSV: " + e.toString(),
 							WorkBookException.ILLEGAL_INIT_ERROR);
 				}
 			} else {
@@ -1321,9 +1382,10 @@ public class WorkBookHandle extends DocumentHandle implements WorkBook, Handle {
 			this.initFromLeoFile(myLEOFile);
 		} else {
 			// total failure to load
-			Logger.logErr(
-					"Initializing WorkBookHandle failed: " + fname + " does not contain a supported Excel WorkBook.");
-			throw new InvalidFileException(fname + " does not contian a supported Excel WorkBook.");
+			Logger.logErr("Initializing WorkBookHandle failed: " + fname
+					+ " does not contain a supported Excel WorkBook.");
+			throw new InvalidFileException(
+					fname + " does not contian a supported Excel WorkBook.");
 		}
 	}
 
@@ -1342,7 +1404,8 @@ public class WorkBookHandle extends DocumentHandle implements WorkBook, Handle {
 			bbf.order(ByteOrder.LITTLE_ENDIAN);
 			myLEOFile = new LEOFile(bbf);
 		} catch (Exception e) {
-			throw new InvalidFileException("WorkBook could not be instantiated: " + e.toString());
+			throw new InvalidFileException(
+					"WorkBook could not be instantiated: " + e.toString());
 		}
 		this.initFromLeoFile(myLEOFile);
 	}
@@ -1381,7 +1444,8 @@ public class WorkBookHandle extends DocumentHandle implements WorkBook, Handle {
 			myfactory.register(plist); // register progress notifier
 		myfactory.setDebugLevel(this.DEBUGLEVEL);
 
-		mybook = (io.starter.formats.XLS.WorkBook) myfactory.getWorkBook(blockByteReader, myLEOFile);
+		mybook = (io.starter.formats.XLS.WorkBook) myfactory
+				.getWorkBook(blockByteReader, myLEOFile);
 
 		if (dump_input != null) {
 			try {
@@ -1401,7 +1465,8 @@ public class WorkBookHandle extends DocumentHandle implements WorkBook, Handle {
 	void postLoad() {
 		initHlinks();
 		initMerges();
-		mybook.initializeNames(); // must initialize name expressions AFTER loading sheet records
+		mybook.initializeNames(); // must initialize name expressions AFTER
+									// loading sheet records
 		mybook.mergeMSODrawingRecords();
 		mybook.initializeIndirectFormulas();
 		initPivotCache(); // if any
@@ -1442,6 +1507,7 @@ public class WorkBookHandle extends DocumentHandle implements WorkBook, Handle {
 	/**
 	 * Closes the WorkBook and releases resources.
 	 */
+	@Override
 	public void close() {
 		try {
 			if (myLEOFile != null)
@@ -1449,7 +1515,8 @@ public class WorkBookHandle extends DocumentHandle implements WorkBook, Handle {
 			myLEOFile = null;
 		} catch (Exception e) {
 			if (DEBUGLEVEL > 3)
-				Logger.logWarn("Closing Document: " + toString() + " failed: " + e.toString());
+				Logger.logWarn("Closing Document: " + toString() + " failed: "
+						+ e.toString());
 		}
 		if (mybook != null)
 			mybook.close(); // clear out object refs to release memory
@@ -1475,12 +1542,14 @@ public class WorkBookHandle extends DocumentHandle implements WorkBook, Handle {
 	 * 
 	 * @return WorkSheetHandle[] Array of all WorkSheets in WorkBook
 	 */
+	@Override
 	public WorkSheetHandle[] getWorkSheets() {
 		try {
 			if (myfactory != null) {
 				int numsheets = mybook.getNumWorkSheets();
 				if (numsheets == 0)
-					throw new WorkSheetNotFoundException("WorkBook has No Sheets.");
+					throw new WorkSheetNotFoundException(
+							"WorkBook has No Sheets.");
 				WorkSheetHandle[] sheets = new WorkSheetHandle[numsheets];
 				for (int i = 0; i < numsheets; i++) {
 					Boundsheet bs = mybook.getWorkSheetByNumber(i);
@@ -1507,6 +1576,7 @@ public class WorkBookHandle extends DocumentHandle implements WorkBook, Handle {
 	 * @exception WorkSheetNotFoundException
 	 *                if the specified WorkSheet is not found in the WorkBook.
 	 */
+	@Override
 	public WorkSheetHandle getWorkSheet(int sheetnum) throws WorkSheetNotFoundException {
 		Boundsheet st = mybook.getWorkSheetByNumber(sheetnum);
 		if (sheethandles.get(st.getSheetName()) != null)
@@ -1529,6 +1599,7 @@ public class WorkBookHandle extends DocumentHandle implements WorkBook, Handle {
 	 * @exception WorkSheetNotFoundException
 	 *                if the specified WorkSheet is not found in the WorkBook.
 	 */
+	@Override
 	public WorkSheetHandle getWorkSheet(String handstr) throws WorkSheetNotFoundException {
 		if (sheethandles.get(handstr) != null) {
 			if (mybook.getWorkSheetByName(handstr) != null)
@@ -1547,7 +1618,8 @@ public class WorkBookHandle extends DocumentHandle implements WorkBook, Handle {
 				throw new WorkSheetNotFoundException(handstr);
 			}
 		}
-		throw new WorkSheetNotFoundException("Cannot find WorkSheet " + handstr);
+		throw new WorkSheetNotFoundException(
+				"Cannot find WorkSheet " + handstr);
 	}
 
 	/**
@@ -1568,6 +1640,7 @@ public class WorkBookHandle extends DocumentHandle implements WorkBook, Handle {
 	 * notice in new versions of OpenXLS.
 	 * 
 	 */
+	@Override
 	public io.starter.formats.XLS.WorkBook getWorkBook() {
 		return this.mybook;
 	}
@@ -1604,6 +1677,7 @@ public class WorkBookHandle extends DocumentHandle implements WorkBook, Handle {
 	 * @param int
 	 *            String Encoding Mode
 	 */
+	@Override
 	public void setStringEncodingMode(int mode) {
 		mybook.setStringEncodingMode(mode);
 	}
@@ -1643,6 +1717,7 @@ public class WorkBookHandle extends DocumentHandle implements WorkBook, Handle {
 	 * @param int
 	 *            Duplicate String Handling Mode
 	 */
+	@Override
 	public void setDupeStringMode(int mode) {
 		mybook.setDupeStringMode(mode);
 	}
@@ -1653,8 +1728,8 @@ public class WorkBookHandle extends DocumentHandle implements WorkBook, Handle {
 	 * @param chartname
 	 * @param sheetname
 	 */
-	public void copyChartToSheet(String chartname, String sheetname)
-			throws ChartNotFoundException, WorkSheetNotFoundException {
+	@Override
+	public void copyChartToSheet(String chartname, String sheetname) throws ChartNotFoundException, WorkSheetNotFoundException {
 		mybook.copyChartToSheet(chartname, sheetname);
 	}
 
@@ -1664,8 +1739,8 @@ public class WorkBookHandle extends DocumentHandle implements WorkBook, Handle {
 	 * @param chart
 	 * @param sheet
 	 */
-	public void copyChartToSheet(ChartHandle chart, WorkSheetHandle sheet)
-			throws ChartNotFoundException, WorkSheetNotFoundException {
+	@Override
+	public void copyChartToSheet(ChartHandle chart, WorkSheetHandle sheet) throws ChartNotFoundException, WorkSheetNotFoundException {
 		mybook.copyChartToSheet(chart.getTitle(), sheet.getSheetName());
 	}
 
@@ -1679,16 +1754,18 @@ public class WorkBookHandle extends DocumentHandle implements WorkBook, Handle {
 	 *            the Name of the new (destination) worksheet;
 	 * @return the new WorkSheetHandle
 	 */
-	public WorkSheetHandle copyWorkSheet(String SourceSheetName, String NewSheetName)
-			throws WorkSheetNotFoundException {
+	@Override
+	public WorkSheetHandle copyWorkSheet(String SourceSheetName, String NewSheetName) throws WorkSheetNotFoundException {
 		try {
 			mybook.copyWorkSheet(SourceSheetName, NewSheetName);
 		} catch (Exception e) {
-			throw new WorkBookException("Failed to copy WorkSheet: " + SourceSheetName + ": " + e.toString(),
+			throw new WorkBookException("Failed to copy WorkSheet: "
+					+ SourceSheetName + ": " + e.toString(),
 					WorkBookException.RUNTIME_ERROR);
 		}
 		mybook.getRefTracker().clearPtgLocationCaches(NewSheetName);
-		// update the merged cells (requires a WBH, that's why it's here)
+		// update the merged cells (requires a WBH, that's why it's
+		// here)
 		WorkSheetHandle wsh = this.getWorkSheet(NewSheetName);
 		if (wsh != null) {
 			List<?> mc = wsh.getMysheet().getMergedCellsRecs();
@@ -1699,8 +1776,10 @@ public class WorkBookHandle extends DocumentHandle implements WorkBook, Handle {
 			}
 			// now conditional formats
 			/*
-			 * mc = wsh.getMysheet().getConditionalFormats(); for (int i=0;i<mc.size();i++)
-			 * { Condfmt mrg = (Condfmt)mc.get(i); if (mrg != null)mrg.initCells(this); }
+			 * mc = wsh.getMysheet().getConditionalFormats(); for (int
+			 * i=0;i<mc.size();i++)
+			 * { Condfmt mrg = (Condfmt)mc.get(i); if (mrg !=
+			 * null)mrg.initCells(this); }
 			 */
 		}
 		return wsh;
@@ -1714,6 +1793,7 @@ public class WorkBookHandle extends DocumentHandle implements WorkBook, Handle {
 	 * @see #forceRecalc()
 	 * @see #recalc()
 	 */
+	@Override
 	public void calculateFormulas() {
 		markFormulasDirty();
 		recalc();
@@ -1744,14 +1824,16 @@ public class WorkBookHandle extends DocumentHandle implements WorkBook, Handle {
 	 */
 	public void recalc() {
 		int calcmode = mybook.getCalcMode();
-		mybook.setCalcMode(CALCULATE_AUTO); // ensure referenced functions are calcualted as necesary!
+		mybook.setCalcMode(CALCULATE_AUTO); // ensure referenced functions are
+											// calcualted as necesary!
 		Formula[] formulas = mybook.getFormulas();
 		for (int idx = 0; idx < formulas.length; idx++) {
 			try {
 				formulas[idx].clearCachedValue();
 				formulas[idx].calculate();
 			} catch (FunctionNotSupportedException fe) {
-				Logger.logErr("WorkBookHandle.recalc:  Error calculating Formula " + fe.toString());
+				Logger.logErr("WorkBookHandle.recalc:  Error calculating Formula "
+						+ fe.toString());
 			}
 		}
 		// KSC: Clear out lookup caches!
@@ -1769,6 +1851,7 @@ public class WorkBookHandle extends DocumentHandle implements WorkBook, Handle {
 	 * must add sheets to this WorkBook for it to be valid.
 	 *
 	 */
+	@Override
 	public void removeAllWorkSheets() {
 
 		try {
@@ -1795,15 +1878,18 @@ public class WorkBookHandle extends DocumentHandle implements WorkBook, Handle {
 		this.mybook.closeSheets(); // replaced below with this
 
 		/*
-		 * WHY ARE WE DOING THIS??? // init new book // save records then reset to avoid
+		 * WHY ARE WE DOING THIS??? // init new book // save records
+		 * then reset to avoid
 		 * ByteStreamer.stream records expansion Object[] recs=
 		 * this.getWorkBook().getStreamer().getBiffRecords();
 		 * 
-		 * // keep Excel 2007 status boolean isExcel2007= this.getIsExcel2007();
+		 * // keep Excel 2007 status boolean isExcel2007=
+		 * this.getIsExcel2007();
 		 * WorkBookHandle ret = new WorkBookHandle(this.getBytes());
 		 * ret.setIsExcel2007(isExcel2007);
 		 * 
-		 * this.getWorkBook().getStreamer().setBiffRecords(Arrays.asList(recs));
+		 * this.getWorkBook().getStreamer().setBiffRecords(Arrays.
+		 * asList(recs));
 		 * this.mybook = ret.getWorkBook(); /
 		 **/
 
@@ -1822,6 +1908,7 @@ public class WorkBookHandle extends DocumentHandle implements WorkBook, Handle {
 	 * @return WorkBookHandle - the empty WorkBookHandle duplicate
 	 * @see addSheetFromWorkBook
 	 */
+	@Override
 	public WorkBookHandle getNoSheetWorkBook() {
 		// to avoid ByteStreamer.stream records expansion
 		Object[] recs = this.getWorkBook().getStreamer().getBiffRecords();
@@ -1843,17 +1930,14 @@ public class WorkBookHandle extends DocumentHandle implements WorkBook, Handle {
 	 *            - the name of the sheet to copy
 	 * @param destSheetName
 	 *            - the name of the new sheet in this workbook
+	 * @throws WorkSheetNotFoundException 
 	 * @deprecated - use addWorkSheet(WorkSheetHandle sht, String NewSheetName){
 	 */
+	@Override
 	@Deprecated
-	public boolean addSheetFromWorkBook(WorkBookHandle sourceBook, String sourceSheetName, String destSheetName) {
-		try {
-			WorkSheetHandle sheet = this.addWorkSheet(sourceBook.getWorkSheet(sourceSheetName), destSheetName);
-			return true;
-		} catch (WorkSheetNotFoundException e) {
-			Logger.logErr("Error adding sheet from workbook" + e);
-		}
-		return false;
+	public boolean addSheetFromWorkBook(WorkBookHandle sourceBook, String sourceSheetName, String destSheetName) throws WorkSheetNotFoundException {
+		return this.addWorkSheet(sourceBook
+				.getWorkSheet(sourceSheetName), destSheetName) != null;
 	}
 
 	/**
@@ -1870,69 +1954,13 @@ public class WorkBookHandle extends DocumentHandle implements WorkBook, Handle {
 	 *            - the name of the sheet to copy
 	 * @param destSheetName
 	 *            - the name of the new sheet in this workbook
+	 * @throws WorkSheetNotFoundException 
 	 * @deprecated - use addWorkSheet(WorkSheetHandle sht, String NewSheetName){
 	 */
 	@Deprecated
-	public boolean addSheetFromWorkBookWithFormatting(WorkBookHandle sourceBook, String sourceSheetName,
-			String destSheetName) {
-		try {
-			WorkSheetHandle sheet = this.addWorkSheet(sourceBook.getWorkSheet(sourceSheetName), destSheetName);
-			return true;
-		} catch (WorkSheetNotFoundException e) {
-			Logger.logErr("Error adding sheet from workbook" + e);
-		}
-		return false;
-		/**
-		 * // TODO: Handle if sheet name already exists! WorkSheetHandle sourceSheet =
-		 * sourceBook.getWorkSheet(sourceSheetName);
-		 * sourceSheet.getSheet().populateForTransfer(); // copy all formatting + images
-		 * for this sheet List chts = sourceSheet.getSheet().getCharts(); // 20080630
-		 * KSC: Moved from populateForTransfer as it's necessary for ALL copies/adds
-		 * for(int i=0;i<chts.size();i++) { Chart cxi = (Chart)chts.get(i);
-		 * cxi.populateForTransfer(); } byte[] bao = sourceSheet.getSerialBytes();
-		 * mybook.addBoundsheet(bao,destSheetName,StringTool.stripPath(sourceBook.getName()),true);
-		 * // 20080114 KSC: if only has charts/no images, msodg won't be present; must
-		 * create msodg here if (mybook.msodg==null && mybook.getCharts().length > 0 &&
-		 * sourceBook.getWorkBook().msodg!=null) {
-		 * mybook.setMsodrawinggroup(sourceBook.getWorkBook().msodg);
-		 * mybook.msodg.initNewMsodrawingGroup(); // generate and add required records
-		 * for drawing records } WorkSheetHandle wsh = this.getWorkSheet(destSheetName);
-		 * // 20080303 KSC: added for merged cells (stolen from addSheetFromWorkBook //
-		 * update the merged cells (requires a WBH, that's why it's here) if (wsh!=null)
-		 * { List mc = wsh.getMysheet().getMergedCellsRecs(); for (int
-		 * i=0;i<mc.size();i++) { Mergedcells mrg = (Mergedcells)mc.get(i); if (mrg !=
-		 * null) mrg.initCells(this); } } // 20080303 KSC: must also init cond. formats
-		 * // 20090606 KSC: now via sheet List mc = mybook.getConditionalFormats(); List
-		 * mc = wsh.getMysheet().getConditionalFormats(); for (int i=0;i<mc.size();i++)
-		 * { Condfmt mrg = (Condfmt)mc.get(i); if (mrg != null) mrg.initCells(this); }
-		 * /* TODO: Finish!! Name[] n= sourceBook.getWorkBook().getNames(); for (int i=
-		 * 0; i < n.length; i++) { this.getWorkBook().addNameUpdateSheetRefs(n[i],
-		 * sourceBook.getName()); }
-		 */// 20080709 KSC: try below as above isn't finished according to comments
-			// handle moving the built-in name records. These handle such items as print
-			// area, header/footer, etc
-		/*
-		 * Name[] ns = this.getWorkBook().getNames(); for (int i=0;i<ns.length;i++) { if
-		 * (ns[i].isBuiltIn() && ((ns[i].getIxals() ==
-		 * sourceSheet.getSheetNum()+1)||(ns[i].getItab() ==
-		 * sourceSheet.getSheetNum()+1)) ) { // it's a built in record, move it to the
-		 * new sheet byte b = ns[i].builtInType; int sheetnum = wsh.getSheetNum(); int
-		 * xref = this.getWorkBook().getExternSheet(true).insertLocation(sheetnum,
-		 * sheetnum); Name n = (Name)ns[i].clone(); n.setBuiltIn(b);
-		 * n.setExternsheetRef(xref); n.updateSheetReferences(wsh.getSheet());
-		 * n.setSheet(wsh.getSheet()); this.getWorkBook().insertName(n); // need to set
-		 * ixalis for the original sheet and the new sheet, as the cannot be 'global'
-		 * names any more, which // is the default for built in // update the ixals
-		 * field. This is wierd as it doesn't use the externsheet reference, rather the
-		 * boundsheet order. wt? // oh, also it's one based. Lame. who wrote this pos at
-		 * microsoft? n.setIxals((short)(wsh.getSheetNum()+1));
-		 * n.setItab((short)(wsh.getSheetNum()+1)); } }
-		 * 
-		 * 
-		 * }catch(WorkSheetNotFoundException a){
-		 * Logger.logWarn("adding sheet from WorkBook failed: " + a); return false; }
-		 * return true;
-		 */
+	public boolean addSheetFromWorkBookWithFormatting(WorkBookHandle sourceBook, String sourceSheetName, String destSheetName) throws WorkSheetNotFoundException {
+		return this.addWorkSheet(sourceBook
+				.getWorkSheet(sourceSheetName), destSheetName) != null;
 	}
 
 	/**
@@ -1963,8 +1991,10 @@ public class WorkBookHandle extends DocumentHandle implements WorkBook, Handle {
 	 * @param String
 	 *            the Name of the new (destination) worksheet;
 	 */
+	@Override
 	public WorkSheetHandle addWorkSheet(WorkSheetHandle sourceSheet, String NewSheetName) {
-		sourceSheet.getSheet().populateForTransfer(); // copy all formatting + images for this sheet
+		sourceSheet.getSheet().populateForTransfer(); // copy all formatting +
+														// images for this sheet
 		List<?> chts = sourceSheet.getSheet().getCharts();
 		for (int i = 0; i < chts.size(); i++) {
 			Chart cxi = (Chart) chts.get(i);
@@ -1972,8 +2002,10 @@ public class WorkBookHandle extends DocumentHandle implements WorkBook, Handle {
 		}
 		byte[] bao = sourceSheet.getSerialBytes();
 		try {
-			mybook.addBoundsheet(bao, sourceSheet.getSheetName(), NewSheetName,
-					StringTool.stripPath(sourceSheet.getWorkBook().getName()), true);
+			mybook.addBoundsheet(bao, sourceSheet
+					.getSheetName(), NewSheetName, StringTool
+							.stripPath(sourceSheet.getWorkBook()
+									.getName()), true);
 			WorkSheetHandle wsh = this.getWorkSheet(NewSheetName);
 			if (wsh != null) {
 				List<?> mc = wsh.getMysheet().getMergedCellsRecs();
@@ -1986,7 +2018,9 @@ public class WorkBookHandle extends DocumentHandle implements WorkBook, Handle {
 
 			return wsh;
 		} catch (Exception e) {
-			throw new WorkBookException("Failed to copy WorkSheet: " + e.toString(), WorkBookException.RUNTIME_ERROR);
+			throw new WorkBookException(
+					"Failed to copy WorkSheet: " + e.toString(),
+					WorkBookException.RUNTIME_ERROR);
 		}
 	}
 
@@ -2017,14 +2051,18 @@ public class WorkBookHandle extends DocumentHandle implements WorkBook, Handle {
 			// this is a sheetless chart - TODO:
 		}
 		/*
-		 * a chart needs a supbook, externsheet, & MSO object in the book stream. I
-		 * think this is due to the fact that the referenced series are usually stored
-		 * in the fashon 'Sheet1!A4:B6' The sheet1 reference requires a supbook, though
+		 * a chart needs a supbook, externsheet, & MSO object in the
+		 * book stream. I
+		 * think this is due to the fact that the referenced series
+		 * are usually stored
+		 * in the fashon 'Sheet1!A4:B6' The sheet1 reference
+		 * requires a supbook, though
 		 * the reference is internal.
 		 */
 
 		try {
-			ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(getPrototypeChart()));
+			ObjectInputStream ois = new ObjectInputStream(
+					new ByteArrayInputStream(getPrototypeChart()));
 			Chart newchart = (Chart) ois.readObject();
 			newchart.setWorkBook(this.getWorkBook());
 			if (this.getIsExcel2007())
@@ -2032,7 +2070,8 @@ public class WorkBookHandle extends DocumentHandle implements WorkBook, Handle {
 			mybook.addPreChart();
 			mybook.addChart(newchart, name, wsh.getSheet());
 			/*
-			 * add font recs if nec: for the default chart: default chart text fonts are # 5
+			 * add font recs if nec: for the default chart: default
+			 * chart text fonts are # 5
 			 * & 6 title # 7 axis # 8
 			 */
 			ChartHandle bs = new ChartHandle(newchart, this);
@@ -2043,19 +2082,23 @@ public class WorkBookHandle extends DocumentHandle implements WorkBook, Handle {
 				nfonts++;
 			}
 			Font f = mybook.getFont(8); // axis title font
-			if (f.toString().equals("Arial,400,200 java.awt.Color[r=0,g=0,b=0] font style:[falsefalsefalsefalse00]")) {
-				// it's default text font -- change to default axis title font
+			if (f.toString()
+					.equals("Arial,400,200 java.awt.Color[r=0,g=0,b=0] font style:[falsefalsefalsefalse00]")) {
+				// it's default text font -- change to default axis title
+				// font
 				f = new Font("Arial", Font.BOLD, 240);
 				bs.setAxisFont(f);
 			}
 			f = mybook.getFont(7); // chart title font
-			if (f.toString().equals("Arial,400,200 java.awt.Color[r=0,g=0,b=0] font style:[falsefalsefalsefalse00]")) {
+			if (f.toString()
+					.equals("Arial,400,200 java.awt.Color[r=0,g=0,b=0] font style:[falsefalsefalsefalse00]")) {
 				// it's default text font -- change to default title font
 				f = new Font("Arial", Font.BOLD, 360);
 				bs.setTitleFont(f);
 			}
 			bs.removeSeries(0); // remove the "dummied" series
-			bs.setAxisTitle(ChartHandle.XAXIS, null); // remove default axis titles, if any
+			bs.setAxisTitle(ChartHandle.XAXIS, null); // remove default axis
+														// titles, if any
 			bs.setAxisTitle(ChartHandle.YAXIS, null); // ""
 			return bs;
 		} catch (Exception e) {
@@ -2073,7 +2116,8 @@ public class WorkBookHandle extends DocumentHandle implements WorkBook, Handle {
 		try {
 			mybook.deleteChart(chartname, wsh.getSheet());
 		} catch (ChartNotFoundException e) {
-			throw new ChartNotFoundException("Removing Chart: " + chartname + " failed: " + e);
+			throw new ChartNotFoundException(
+					"Removing Chart: " + chartname + " failed: " + e);
 		} catch (Exception e) {
 			Logger.logErr("Removing Chart: " + chartname + " failed: " + e);
 		}
@@ -2120,18 +2164,22 @@ public class WorkBookHandle extends DocumentHandle implements WorkBook, Handle {
 	 *            the name of the newly created worksheet
 	 * @return the new WorkSheetHandle
 	 */
+	@Override
 	public WorkSheetHandle createWorkSheet(String name) {
 		try {
 			this.getWorkSheet(name);
-			throw new WorkBookException("Attempting to add worksheet with duplicate name. " + name
-					+ " already exists in " + this.toString(), WorkBookException.RUNTIME_ERROR);
+			throw new WorkBookException(
+					"Attempting to add worksheet with duplicate name. " + name
+							+ " already exists in " + this.toString(),
+					WorkBookException.RUNTIME_ERROR);
 		} catch (WorkSheetNotFoundException ex) {
 			; // good!
 		}
 
 		Boundsheet bo = null;
 		try {
-			ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(getPrototypeSheet()));
+			ObjectInputStream ois = new ObjectInputStream(
+					new ByteArrayInputStream(getPrototypeSheet()));
 			bo = (Boundsheet) ois.readObject();
 			mybook.addBoundsheet(bo, null, name, null, false);
 			try {
@@ -2155,6 +2203,7 @@ public class WorkBookHandle extends DocumentHandle implements WorkBook, Handle {
 	/**
 	 * Returns an array of all FormatHandles in the workbook
 	 */
+	@Override
 	public FormatHandle[] getFormats() {
 		List<?> l = this.mybook.getXfrecs();
 		FormatHandle[] formats = new FormatHandle[l.size()];
@@ -2162,8 +2211,10 @@ public class WorkBookHandle extends DocumentHandle implements WorkBook, Handle {
 		int i = 0;
 		while (its.hasNext()) {
 			Xf x = (Xf) its.next();
-			// passing (this) with the format handle breaks the relationship to the font.
-			// if you need to pass it in we will have to handle it differently
+			// passing (this) with the format handle breaks the
+			// relationship to the font.
+			// if you need to pass it in we will have to handle it
+			// differently
 			try {
 				formats[i] = new FormatHandle();
 				formats[i].setWorkBook(this.getWorkBook());
@@ -2189,9 +2240,11 @@ public class WorkBookHandle extends DocumentHandle implements WorkBook, Handle {
 	public FormatHandle[] getConditionalFormats() {
 		// the idea is to create a fake IXFE for use by
 		// sheetster to find formats
-		// int cfxe = this.getWorkBook().getNumFormats() + 50000; // there would have to
+		// int cfxe = this.getWorkBook().getNumFormats() + 50000; //
+		// there would have to
 		// be 50k styles on the sheet to conflict here....
-		// int cfxe = this.getWorkBook().getNumXfs() + 50000; // there would have to be
+		// int cfxe = this.getWorkBook().getNumXfs() + 50000; //
+		// there would have to be
 		// 50k styles on the sheet to conflict here....
 
 		List<FormatHandle> retl = new Vector<FormatHandle>();
@@ -2231,5 +2284,15 @@ public class WorkBookHandle extends DocumentHandle implements WorkBook, Handle {
 	 */
 	public static void setFormulaRecursionLevels(int recursion_allowed) {
 		RECURSION_LEVELS_ALLOWED = recursion_allowed;
+	}
+
+	public String getWorkingDirectory() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public void initSharedFormulas() {
+		// TODO Auto-generated method stub
+
 	}
 }

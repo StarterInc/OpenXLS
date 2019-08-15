@@ -480,7 +480,7 @@ class refPtgs extends TreeMap implements Serializable {
 					break;				
 			}		
 		}
-//io.starter.OpenXLS.util.Logger.log("");		
+//io.starter.toolkit.Logger.log("");		
 		
 		return false;
 	}

@@ -745,7 +745,7 @@ s     * @return
 											else 
 												rc[2]-=(clist.length-npoints);
 // KSC: TESTING: REMOVE WHEN DONE											
-//io.starter.OpenXLS.util.Logger.log("Truncate list: old range: " + ranges[idx] + " new range: " + cells.getSheet().getQualifiedSheetName() + "!" + ExcelTools.formatLocation(rc));
+//io.starter.toolkit.Logger.log("Truncate list: old range: " + ranges[idx] + " new range: " + cells.getSheet().getQualifiedSheetName() + "!" + ExcelTools.formatLocation(rc));
 											ranges[idx]= cells.getSheet().getQualifiedSheetName() + "!" + ExcelTools.formatLocation(rc);
 										}
 											

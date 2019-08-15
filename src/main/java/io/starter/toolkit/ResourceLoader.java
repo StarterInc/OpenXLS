@@ -244,7 +244,10 @@ public class ResourceLoader extends InitialContextImpl implements Serializable, 
 	 * Loads the named resource from the class path.
 	 */
 	public static byte[] getBytesFromJar(String name) throws IOException {
-		InputStream source = ResourceLoader.class.getResourceAsStream(name);
+
+		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+		InputStream source = classLoader.getResourceAsStream("io/starter/OpenXLS/templates/prototype.ser");
+
 		if (source == null)
 			return null;
 

@@ -22,38 +22,39 @@
  */
 package io.starter.formats.XLS;
 
+import io.starter.OpenXLS.Cell;
 
-/** <b>No WorkSheet Found.</b>
-
+/**
+ * <b>No WorkSheet Found.</b>
+ * 
  * @see Cell
  * @see WorkBook
-*/
+ */
+public final class WorkSheetNotFoundException extends java.lang.Exception {
 
-public final class WorkSheetNotFoundException extends java.lang.Exception{
-    
-    /** 
-	* serialVersionUID
-	*/
+	/**
+	 * serialVersionUID
+	 */
 	private static final long serialVersionUID = -1722195057857012811L;
 	String message = "";
-    
-    public WorkSheetNotFoundException(String n){
-        super();
-        message = n;
-    }
-    
-    public String getMessage()
-    {
-        // This method is derived from class java.lang.Throwable
-        // to do: code goes here
-        return this.toString();
-    }
 
-    public String toString()
-    {
-        // This method is derived from class java.lang.Throwable
-        // to do: code goes here
-        return message;
-    }
+	public WorkSheetNotFoundException(String n) {
+		super();
+		message = n;
+	}
+
+	@Override
+	public String getMessage() {
+		// This method is derived from class java.lang.Throwable
+		// to do: code goes here
+		return this.toString();
+	}
+
+	@Override
+	public String toString() {
+		// This method is derived from class java.lang.Throwable
+		// to do: code goes here
+		return message;
+	}
 
 }

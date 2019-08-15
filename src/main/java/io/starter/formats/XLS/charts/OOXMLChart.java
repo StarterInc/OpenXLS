@@ -63,7 +63,7 @@ public class OOXMLChart extends Chart {
 	 */
 	public OOXMLChart(Chart c, WorkBookHandle wbh) {	
 		// Walk up the superclass hierarchy
-		//io.starter.OpenXLS.util.Logger.log("BEFORE: chartArr: " + Arrays.toString(chartArr.toArray()));		
+		//io.starter.toolkit.Logger.log("BEFORE: chartArr: " + Arrays.toString(chartArr.toArray()));		
 	  for (Class obj = c.getClass();
 	    !obj.equals(Object.class);
 	     obj = obj.getSuperclass())

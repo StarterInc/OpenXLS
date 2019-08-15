@@ -271,7 +271,7 @@ public final class Unicodestring implements  XLSConstants, Serializable{
                 cchExtRst = ByteTools.readInt(ustrdata[5], ustrdata[6], ustrdata[7], ustrdata[8]);
 // report error???
 if ((ustrdata.length-dlen-offer-cchExtRst)!=formatlen)
-io.starter.OpenXLS.util.Logger.log("Unicodestring.initEasternEncoding: Format runs are not correct");
+io.starter.toolkit.Logger.log("Unicodestring.initEasternEncoding: Format runs are not correct");
                 ExtRst = new byte[cchExtRst];
                 System.arraycopy(ustrdata, (dlen + offer + formatlen), ExtRst, 0, cchExtRst); // Extendadata
 //report error???

@@ -632,10 +632,10 @@ public class Base64
 
             return 3;
             }catch( Exception e){
-                io.starter.OpenXLS.util.Logger.log(""+source[srcOffset]+ ": " + ( DECODABET[ source[ srcOffset     ] ]  ) );
-                io.starter.OpenXLS.util.Logger.log(""+source[srcOffset+1]+  ": " + ( DECODABET[ source[ srcOffset + 1 ] ]  ) );
-                io.starter.OpenXLS.util.Logger.log(""+source[srcOffset+2]+  ": " + ( DECODABET[ source[ srcOffset + 2 ] ]  ) );
-                io.starter.OpenXLS.util.Logger.log(""+source[srcOffset+3]+  ": " + ( DECODABET[ source[ srcOffset + 3 ] ]  ) );
+                io.starter.toolkit.Logger.log(""+source[srcOffset]+ ": " + ( DECODABET[ source[ srcOffset     ] ]  ) );
+                io.starter.toolkit.Logger.log(""+source[srcOffset+1]+  ": " + ( DECODABET[ source[ srcOffset + 1 ] ]  ) );
+                io.starter.toolkit.Logger.log(""+source[srcOffset+2]+  ": " + ( DECODABET[ source[ srcOffset + 2 ] ]  ) );
+                io.starter.toolkit.Logger.log(""+source[srcOffset+3]+  ": " + ( DECODABET[ source[ srcOffset + 3 ] ]  ) );
                 return -1;
             }   //e nd catch
         }

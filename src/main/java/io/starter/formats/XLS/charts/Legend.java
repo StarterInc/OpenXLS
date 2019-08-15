@@ -315,7 +315,7 @@ public class Legend extends GenericChartObject implements ChartObject, ChartCons
 	    else
 		legendsWidth += StringTool.getApproximateStringWidth(jf, " ");
 	    
-//	    io.starter.OpenXLS.util.Logger.log(this.getParentChart().toString() + String.format(": legend box x: %.1f legend box w: %.0f chart x: %.1f w: %.1f cw: %.1f font size: %.0f L.W: %.1f Auto? %b Vertical? %b",  
+//	    io.starter.toolkit.Logger.log(this.getParentChart().toString() + String.format(": legend box x: %.1f legend box w: %.0f chart x: %.1f w: %.1f cw: %.1f font size: %.0f L.W: %.1f Auto? %b Vertical? %b",  
 //		    x, (float)coords[2], chartMetrics.get("x"), w, cw, (float) jf.getSize(), legendsWidth, fAutoPosition, fVert));	    
 	    p.setLegendW((int)legendsWidth);
 	    if (((x + legendsWidth) > cw) || (position==Legend.RIGHT || position==Legend.CORNER)) {
@@ -348,11 +348,11 @@ public class Legend extends GenericChartObject implements ChartObject, ChartCons
 		    
 		    if (totalWidth > (cw-w)) {	// can fit in space between plot area and 
 			//KSC: TESTINGs
-			//io.starter.OpenXLS.util.Logger.log("Original Lcoords:  w" + w + " cw:" + cw + " coords:" + Arrays.toString(retcoords));				
+			//io.starter.toolkit.Logger.log("Original Lcoords:  w" + w + " cw:" + cw + " coords:" + Arrays.toString(retcoords));				
 			float newX= (int)Math.ceil(cw-w);
 			if (originalDist > 0 && (w+x) > newX)
 			    chartMetrics.put("w", newX-originalDist);
-			//io.starter.OpenXLS.util.Logger.log("After Lcoords:  w" + w + " cw:" + cw + " coords:" + Arrays.toString(retcoords));				
+			//io.starter.toolkit.Logger.log("After Lcoords:  w" + w + " cw:" + cw + " coords:" + Arrays.toString(retcoords));				
 		    } 
 		}
 	    } else if (totalWidth > cw) {	// legends are displayed horizontally, can't fit in canvas width
@@ -422,12 +422,12 @@ public class Legend extends GenericChartObject implements ChartObject, ChartCons
 				double cw= chartMetrics.get("canvasw");
 				double w= chartMetrics.get("w");
 // KSC: TESTING
-//io.starter.OpenXLS.util.Logger.log("Original Lcoords:  w" + w + " cw:" + cw + " coords:" + Arrays.toString(retcoords));				
+//io.starter.toolkit.Logger.log("Original Lcoords:  w" + w + " cw:" + cw + " coords:" + Arrays.toString(retcoords));				
 				double ldist= retcoords[0]-w; 	// original distance between legend and edge of plot area
 				retcoords[0]= (int)Math.ceil(cw-retcoords[2]);
 				if (ldist > 0 && (chartMetrics.get("w")+chartMetrics.get("x")) > retcoords[0])
 					chartMetrics.put("w", retcoords[0]-ldist);
-//io.starter.OpenXLS.util.Logger.log("After Lcoords:  w" + w + " cw:" + cw + " coords:" + Arrays.toString(retcoords));				
+//io.starter.toolkit.Logger.log("After Lcoords:  w" + w + " cw:" + cw + " coords:" + Arrays.toString(retcoords));				
 			}
 				
 		}

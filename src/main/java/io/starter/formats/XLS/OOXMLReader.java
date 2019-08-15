@@ -665,7 +665,7 @@ public class OOXMLReader extends OOXMLAdapter implements OOXMLConstants {
                      else if (tnm.equals("rgbColor")) {    
                     	 // save custom indexed colors
                     	 String clr= "#" + xpp.getAttributeValue(0).substring(2);
-                    	 //io.starter.OpenXLS.util.Logger.log(clr);
+                    	 //io.starter.toolkit.Logger.log(clr);
                     	 // usually the same as COLORTABLE but sometimes different too :)
                     	 try {
                     		 bk.getWorkBook().getColorTable()[indexedColor++]= FormatHandle.HexStringToColor(clr);

@@ -1,3 +1,5 @@
+package io.starter.OpenXLS;
+
 /*
  * --------- BEGIN COPYRIGHT NOTICE ---------
  * Copyright 2002-2012 Extentech Inc.
@@ -5,22 +7,28 @@
  * 
  * This file is part of OpenXLS.
  * 
- * OpenXLS is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as
- * published by the Free Software Foundation, either version 3 of
+ * OpenXLS is free software: you can redistribute it and/or
+ * modify
+ * it under the terms of the GNU Lesser General Public
+ * License as
+ * published by the Free Software Foundation, either version
+ * 3 of
  * the License, or (at your option) any later version.
  * 
- * OpenXLS is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * OpenXLS is distributed in the hope that it will be
+ * useful,
+ * but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+ * the
  * GNU Lesser General Public License for more details.
  * 
- * You should have received a copy of the GNU Lesser General Public
- * License along with OpenXLS.  If not, see
+ * You should have received a copy of the GNU Lesser General
+ * Public
+ * License along with OpenXLS. If not, see
  * <http://www.gnu.org/licenses/>.
  * ---------- END COPYRIGHT NOTICE ----------
  */
-package docs.samples.Formulas;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -28,10 +36,6 @@ import java.io.FileOutputStream;
 
 import org.junit.Test;
 
-import io.starter.OpenXLS.CellHandle;
-import io.starter.OpenXLS.FormulaHandle;
-import io.starter.OpenXLS.WorkBookHandle;
-import io.starter.OpenXLS.WorkSheetHandle;
 import io.starter.formats.XLS.CellNotFoundException;
 import io.starter.formats.XLS.FormulaNotFoundException;
 import io.starter.formats.XLS.FunctionNotSupportedException;
@@ -74,11 +78,12 @@ public class FormulaTest {
  * Test the manipulation of Formulas within a worksheet.
  */
 class testformula {
-	WorkBookHandle book = null;
-	WorkSheetHandle sheet = null;
-	String sheetname = "Sheet1";
-	String wd = System.getProperty("user.dir") + "/docs/samples/Formulas/";
-	String finpath = wd + "testFormula.xls";
+	WorkBookHandle	book		= null;
+	WorkSheetHandle	sheet		= null;
+	String			sheetname	= "Sheet1";
+	String			wd			= System.getProperty("user.dir")
+			+ "/docs/samples/Formulas/";
+	String			finpath		= wd + "testFormula.xls";
 
 	/**
 	 * thrash multiple changes to formula references and recalc
@@ -102,7 +107,8 @@ class testformula {
 				Logger.logInfo(calced.toString());
 			}
 			Logger.logInfo("done setting 100k vals");
-			wbx.write(new FileOutputStream(new File(wd + "testFormulas_out.xls")), WorkBookHandle.FORMAT_XLS);
+			wbx.write(new FileOutputStream(new File(
+					wd + "testFormulas_out.xls")), WorkBookHandle.FORMAT_XLS);
 
 		} catch (Exception ex) {
 			Logger.logErr("testFormulas.testMultiChange: " + ex.toString());
@@ -124,18 +130,18 @@ class testformula {
 
 			// output the calculated values
 			FormulaHandle form = myformulacell.getFormulaHandle();
-			io.starter.OpenXLS.util.Logger.log(form.calculate().toString());
+			io.starter.toolkit.Logger.log(form.calculate().toString());
 
 			// change the values then recalc
 			mycell1.setVal(99);
 			mycell2.setVal(420);
-			io.starter.OpenXLS.util.Logger.log(form.calculate().toString());
+			io.starter.toolkit.Logger.log(form.calculate().toString());
 
 			testWrite("testCalculation_out.xls");
 		} catch (CellNotFoundException e) {
-			io.starter.OpenXLS.util.Logger.log("cell not found" + e);
+			io.starter.toolkit.Logger.log("cell not found" + e);
 		} catch (FormulaNotFoundException e) {
-			io.starter.OpenXLS.util.Logger.log("No formula to change" + e);
+			io.starter.toolkit.Logger.log("No formula to change" + e);
 		} catch (Exception e) {
 			Logger.logErr("TestFormulas failed.", e);
 		}
@@ -153,9 +159,9 @@ class testformula {
 			form.changeFormulaLocation("A3", "G10");
 			testWrite("testChangeSingleCellLoc_out.xls");
 		} catch (CellNotFoundException e) {
-			io.starter.OpenXLS.util.Logger.log("cell not found" + e);
+			io.starter.toolkit.Logger.log("cell not found" + e);
 		} catch (FormulaNotFoundException e) {
-			io.starter.OpenXLS.util.Logger.log("No formula to change" + e);
+			io.starter.toolkit.Logger.log("No formula to change" + e);
 		}
 	}
 
@@ -171,9 +177,9 @@ class testformula {
 			boolean b = myhandle.changeFormulaLocation("A1:B2", "D1:D28");
 			testWrite("testHandlerFunctions_out.xls");
 		} catch (CellNotFoundException e) {
-			io.starter.OpenXLS.util.Logger.log("cell not found" + e);
+			io.starter.toolkit.Logger.log("cell not found" + e);
 		} catch (FormulaNotFoundException e) {
-			io.starter.OpenXLS.util.Logger.log("No formula to change" + e);
+			io.starter.toolkit.Logger.log("No formula to change" + e);
 		}
 	}
 
@@ -190,9 +196,9 @@ class testformula {
 			boolean b = myhandle.addCellToRange("A1:B2", secondcell);
 			testWrite("testCellHandlerFunctions_out.xls");
 		} catch (CellNotFoundException e) {
-			io.starter.OpenXLS.util.Logger.log("cell not found" + e);
+			io.starter.toolkit.Logger.log("cell not found" + e);
 		} catch (FormulaNotFoundException e) {
-			io.starter.OpenXLS.util.Logger.log("No formula to change" + e);
+			io.starter.toolkit.Logger.log("No formula to change" + e);
 		}
 	}
 
@@ -208,7 +214,8 @@ class testformula {
 			sheet.removeRow(2, true);
 			testWrite("testFormula_out.xls");
 		} catch (Exception e) {
-			io.starter.OpenXLS.util.Logger.log("Exception in testFORMULA.testFormulaSeries(): " + e);
+			io.starter.toolkit.Logger
+					.log("Exception in testFORMULA.testFormulaSeries(): " + e);
 		}
 	}
 
@@ -287,53 +294,53 @@ class testformula {
 
 				f.setFormula("LOG(10,2)");
 				i = (Double) f.calculate();
-				io.starter.OpenXLS.util.Logger.log(i.toString());
+				io.starter.toolkit.Logger.log(i.toString());
 
 				f.setFormula("ROUND(32.443,1)");
 				i = (Double) f.calculate();
-				io.starter.OpenXLS.util.Logger.log(i.toString());
+				io.starter.toolkit.Logger.log(i.toString());
 
 				f.setFormula("MOD(45,6)");
 				i = (Double) f.calculate();
-				io.starter.OpenXLS.util.Logger.log(i.toString());
+				io.starter.toolkit.Logger.log(i.toString());
 
 				f.setFormula("DATE(1998,2,4)");
 				i = (Double) f.calculate();
-				io.starter.OpenXLS.util.Logger.log(i.toString());
+				io.starter.toolkit.Logger.log(i.toString());
 
 				f.setFormula("SUM(1998,2,4)");
 				i = (Double) f.calculate();
-				io.starter.OpenXLS.util.Logger.log(i.toString());
+				io.starter.toolkit.Logger.log(i.toString());
 
 				f.setFormula("IF(TRUE,1,0)");
 				i = (Double) f.calculate();
-				io.starter.OpenXLS.util.Logger.log(i.toString());
+				io.starter.toolkit.Logger.log(i.toString());
 
 				f.setFormula("ISERR(\"test\")");
 				b = (Boolean) f.calculate();
-				io.starter.OpenXLS.util.Logger.log(b.toString());
+				io.starter.toolkit.Logger.log(b.toString());
 
 				// many operand ptgfuncvar
 				f.setFormula("SUM(12,3,2,4,5,1)");
 				i = (Double) f.calculate();
-				io.starter.OpenXLS.util.Logger.log(i.toString());
+				io.starter.toolkit.Logger.log(i.toString());
 
 				// test with a sub-calc
 				f.setFormula("IF((1<2),1,0)");
 				i = (Double) f.calculate();
-				io.starter.OpenXLS.util.Logger.log(i.toString());
+				io.starter.toolkit.Logger.log(i.toString());
 
 				f.setFormula("IF((1<2),MOD(45,6),1)");
 				i = (Double) f.calculate();
-				io.starter.OpenXLS.util.Logger.log(i.toString());
+				io.starter.toolkit.Logger.log(i.toString());
 
 				f.setFormula("IF((1<2),if((true),8,1),1)");
 				i = (Double) f.calculate();
-				io.starter.OpenXLS.util.Logger.log(i.toString());
+				io.starter.toolkit.Logger.log(i.toString());
 
 				f.setFormula("IF((SUM(23,2,3,4)<12),if((true),8,1),DATE(1998,2,4))");
 				i = (Double) f.calculate();
-				io.starter.OpenXLS.util.Logger.log(i.toString());
+				io.starter.toolkit.Logger.log(i.toString());
 
 			} catch (CellNotFoundException e) {
 				Logger.logErr("TestFormulas failed.", e);
@@ -351,7 +358,7 @@ class testformula {
 		try {
 			sheet = book.getWorkSheet(sheetnm);
 		} catch (WorkSheetNotFoundException e) {
-			io.starter.OpenXLS.util.Logger.log("couldn't find worksheet" + e);
+			io.starter.toolkit.Logger.log("couldn't find worksheet" + e);
 		}
 
 	}

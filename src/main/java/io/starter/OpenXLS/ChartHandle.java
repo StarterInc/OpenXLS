@@ -5,18 +5,25 @@
  * 
  * This file is part of OpenXLS.
  * 
- * OpenXLS is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as
- * published by the Free Software Foundation, either version 3 of
+ * OpenXLS is free software: you can redistribute it and/or
+ * modify
+ * it under the terms of the GNU Lesser General Public
+ * License as
+ * published by the Free Software Foundation, either version
+ * 3 of
  * the License, or (at your option) any later version.
  * 
- * OpenXLS is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * OpenXLS is distributed in the hope that it will be
+ * useful,
+ * but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+ * the
  * GNU Lesser General Public License for more details.
  * 
- * You should have received a copy of the GNU Lesser General Public
- * License along with OpenXLS.  If not, see
+ * You should have received a copy of the GNU Lesser General
+ * Public
+ * License along with OpenXLS. If not, see
  * <http://www.gnu.org/licenses/>.
  * ---------- END COPYRIGHT NOTICE ----------
  */
@@ -45,6 +52,7 @@ import io.starter.formats.XLS.Font;
 import io.starter.formats.XLS.FormatConstants;
 import io.starter.formats.XLS.OOXMLAdapter;
 import io.starter.formats.XLS.WorkSheetNotFoundException;
+import io.starter.formats.XLS.charts.Axis;
 import io.starter.formats.XLS.charts.Chart;
 import io.starter.formats.XLS.charts.ChartConstants;
 import io.starter.formats.XLS.charts.ChartType;
@@ -74,57 +82,63 @@ import io.starter.toolkit.Logger;
  */
 public class ChartHandle implements ChartConstants {
 	// 20080114 KSC: delegate so visible
-	public static final int BARCHART = ChartConstants.BARCHART;
-	public static final int COLCHART = ChartConstants.COLCHART;
-	public static final int LINECHART = ChartConstants.LINECHART;
-	public static final int PIECHART = ChartConstants.PIECHART;
-	public static final int AREACHART = ChartConstants.AREACHART;
-	public static final int SCATTERCHART = ChartConstants.SCATTERCHART;
-	public static final int RADARCHART = ChartConstants.RADARCHART;
-	public static final int SURFACECHART = ChartConstants.SURFACECHART;
-	public static final int DOUGHNUTCHART = ChartConstants.DOUGHNUTCHART;
-	public static final int BUBBLECHART = ChartConstants.BUBBLECHART;
-	public static final int OFPIECHART = ChartConstants.OFPIECHART;
-	public static final int PYRAMIDCHART = ChartConstants.PYRAMIDCHART;
-	public static final int CYLINDERCHART = ChartConstants.CYLINDERCHART;
-	public static final int CONECHART = ChartConstants.CONECHART;
-	public static final int PYRAMIDBARCHART = ChartConstants.PYRAMIDBARCHART;
-	public static final int CYLINDERBARCHART = ChartConstants.CYLINDERBARCHART;
-	public static final int CONEBARCHART = ChartConstants.CONEBARCHART;
-	public static final int RADARAREACHART = ChartConstants.RADARAREACHART;
-	public static final int STOCKCHART = ChartConstants.STOCKCHART;
+	public static final int		BARCHART			= ChartConstants.BARCHART;
+	public static final int		COLCHART			= ChartConstants.COLCHART;
+	public static final int		LINECHART			= ChartConstants.LINECHART;
+	public static final int		PIECHART			= ChartConstants.PIECHART;
+	public static final int		AREACHART			= ChartConstants.AREACHART;
+	public static final int		SCATTERCHART		= ChartConstants.SCATTERCHART;
+	public static final int		RADARCHART			= ChartConstants.RADARCHART;
+	public static final int		SURFACECHART		= ChartConstants.SURFACECHART;
+	public static final int		DOUGHNUTCHART		= ChartConstants.DOUGHNUTCHART;
+	public static final int		BUBBLECHART			= ChartConstants.BUBBLECHART;
+	public static final int		OFPIECHART			= ChartConstants.OFPIECHART;
+	public static final int		PYRAMIDCHART		= ChartConstants.PYRAMIDCHART;
+	public static final int		CYLINDERCHART		= ChartConstants.CYLINDERCHART;
+	public static final int		CONECHART			= ChartConstants.CONECHART;
+	public static final int		PYRAMIDBARCHART		= ChartConstants.PYRAMIDBARCHART;
+	public static final int		CYLINDERBARCHART	= ChartConstants.CYLINDERBARCHART;
+	public static final int		CONEBARCHART		= ChartConstants.CONEBARCHART;
+	public static final int		RADARAREACHART		= ChartConstants.RADARAREACHART;
+	public static final int		STOCKCHART			= ChartConstants.STOCKCHART;
 
 	// legacy
-	public static final int BAR = BARCHART;
-	public static final int COL = COLCHART;
-	public static final int LINE = LINECHART;
-	public static final int PIE = PIECHART;
-	public static final int AREA = AREACHART;
-	public static final int SCATTER = SCATTERCHART;
-	public static final int RADAR = RADARCHART;
-	public static final int SURFACE = SURFACECHART;
-	public static final int DOUGHNUT = DOUGHNUTCHART;
-	public static final int BUBBLE = BUBBLECHART;
-	public static final int RADARAREA = RADARAREACHART;
-	public static final int PYRAMID = PYRAMIDCHART;
-	public static final int CYLINDER = CYLINDERCHART;
-	public static final int CONE = CONECHART;
-	public static final int PYRAMIDBAR = PYRAMIDBARCHART;
-	public static final int CYLINDERBAR = CYLINDERBARCHART;
-	public static final int CONEBAR = CONEBARCHART;
+	public static final int		BAR					= BARCHART;
+	public static final int		COL					= COLCHART;
+	public static final int		LINE				= LINECHART;
+	public static final int		PIE					= PIECHART;
+	public static final int		AREA				= AREACHART;
+	public static final int		SCATTER				= SCATTERCHART;
+	public static final int		RADAR				= RADARCHART;
+	public static final int		SURFACE				= SURFACECHART;
+	public static final int		DOUGHNUT			= DOUGHNUTCHART;
+	public static final int		BUBBLE				= BUBBLECHART;
+	public static final int		RADARAREA			= RADARAREACHART;
+	public static final int		PYRAMID				= PYRAMIDCHART;
+	public static final int		CYLINDER			= CYLINDERCHART;
+	public static final int		CONE				= CONECHART;
+	public static final int		PYRAMIDBAR			= PYRAMIDBARCHART;
+	public static final int		CYLINDERBAR			= CYLINDERBARCHART;
+	public static final int		CONEBAR				= CONEBARCHART;
 	// axis types
-	public static final int XAXIS = ChartConstants.XAXIS;
-	public static final int YAXIS = ChartConstants.YAXIS;
-	public static final int ZAXIS = ChartConstants.ZAXIS;
-	public static final int XVALAXIS = ChartConstants.XVALAXIS; // an X axis type but VAL records
+	public static final int		XAXIS				= ChartConstants.XAXIS;
+	public static final int		YAXIS				= ChartConstants.YAXIS;
+	public static final int		ZAXIS				= ChartConstants.ZAXIS;
+	public static final int		XVALAXIS			= ChartConstants.XVALAXIS;			// an
+																						// X
+																						// axis
+																						// type
+																						// but
+																						// VAL
+																						// records
 	// coordinates
-	public static final int X = 0;
-	public static final int Y = 1;
-	public static final int WIDTH = 2;
-	public static final int HEIGHT = 3;
+	public static final int		X					= 0;
+	public static final int		Y					= 1;
+	public static final int		WIDTH				= 2;
+	public static final int		HEIGHT				= 3;
 
-	protected WorkBookHandle wbh;
-	private Chart mychart;
+	protected WorkBookHandle	wbh;
+	private Chart				mychart;
 
 	/**
 	 * Constructor which creates a new ChartHandle from an existing Chart Object
@@ -171,7 +185,8 @@ public class ChartHandle implements ChartConstants {
 	}
 
 	public int[] getEncompassingDataRange() {
-		return getEncompassingDataRange(this.mychart.getChartSeries().getDataRangeJSON());
+		return getEncompassingDataRange(this.mychart.getChartSeries()
+				.getDataRangeJSON());
 	}
 
 	/**
@@ -188,7 +203,8 @@ public class ChartHandle implements ChartConstants {
 			int[] retVals = ExcelTools.getRangeRowCol(catrange);
 			int nSeries = jsonDataRange.getJSONArray("Series").length();
 			for (int i = 0; i < nSeries; i++) {
-				JSONObject series = (JSONObject) jsonDataRange.getJSONArray("Series").get(i);
+				JSONObject series = (JSONObject) jsonDataRange
+						.getJSONArray("Series").get(i);
 				String serrange = series.get("v").toString();
 				if (!serrange.startsWith(sheet))
 					continue;
@@ -231,13 +247,15 @@ public class ChartHandle implements ChartConstants {
 				}
 			}
 			return retVals;
-		} catch (Exception e) {
-		}
+		} catch (Exception e) {}
 		return null;
 		/*
-		 * while (ptgs.hasNext()) { PtgRef pr= (PtgRef) ptgs.next(); // PtgRef pr=
-		 * (PtgRef)refs[i]; int[] locs = pr.getIntLocation(); for (int x=0;x<2;x++) {
-		 * if((locs[x]<retValues[x]))retValues[x]=locs[x]; } for (int x=2;x<4;x++) {
+		 * while (ptgs.hasNext()) { PtgRef pr= (PtgRef) ptgs.next();
+		 * // PtgRef pr=
+		 * (PtgRef)refs[i]; int[] locs = pr.getIntLocation(); for
+		 * (int x=0;x<2;x++) {
+		 * if((locs[x]<retValues[x]))retValues[x]=locs[x]; } for
+		 * (int x=2;x<4;x++) {
 		 * if((locs[x]>retValues[x]))retValues[x]=locs[x]; } i++; }
 		 */
 	}
@@ -271,7 +289,8 @@ public class ChartHandle implements ChartConstants {
 	 *         wedge of data in the Chart
 	 */
 	public String[] getSeries() {
-		return mychart.getSeries(-1); // -1 is flag for all rather than for a specific chart
+		return mychart.getSeries(-1); // -1 is flag for all rather than for a
+										// specific chart
 	}
 
 	/**
@@ -285,7 +304,8 @@ public class ChartHandle implements ChartConstants {
 	 * @return String[] each item being a Cell Range representing the Category Data
 	 */
 	public String[] getCategories() {
-		return getCategories(-1); // -1 is flag for all rather than for a specific chart
+		return getCategories(-1); // -1 is flag for all rather than for a
+									// specific chart
 	}
 
 	/**
@@ -389,7 +409,8 @@ public class ChartHandle implements ChartConstants {
 	 * @see ChartSeriesHandle
 	 */
 	public ChartSeriesHandle getChartSeriesHandleByName(String legend) {
-		Series s = mychart.getSeries(legend, -1); // -1 is flag for all rather than for a specific chart
+		Series s = mychart.getSeries(legend, -1); // -1 is flag for all rather
+													// than for a specific chart
 		return new ChartSeriesHandle(s, this.wbh);
 	}
 
@@ -516,7 +537,9 @@ public class ChartHandle implements ChartConstants {
 	 * @see getAxisMaxScale()
 	 */
 	public double getAxisMaxScale(int axisType) {
-		double[] minmax = mychart.getMinMax(this.wbh); // -1 is flag for all rather than for a specific chart
+		double[] minmax = mychart.getMinMax(this.wbh); // -1 is flag for all
+														// rather than for a
+														// specific chart
 		return mychart.getAxes().getMinMax(minmax[0], minmax[1], axisType)[1];
 	}
 
@@ -662,7 +685,9 @@ public class ChartHandle implements ChartConstants {
 	 * @see getAxisMinScale(int axisType)
 	 */
 	public double getAxisMinScale() {
-		double[] minmax = mychart.getMinMax(this.wbh); // -1 is flag for all rather than for a specific chart
+		double[] minmax = mychart.getMinMax(this.wbh); // -1 is flag for all
+														// rather than for a
+														// specific chart
 		return mychart.getAxes().getMinMax(minmax[0], minmax[1])[0];
 	}
 
@@ -952,8 +977,10 @@ public class ChartHandle implements ChartConstants {
 	 */
 	public boolean changeTextValue(String originalval, String newval) {
 		/*
-		 * KSC: TODO: Refactor *** for(int x=0;x<mychart.aivals.size();x++){ Ai ser =
-		 * (Ai)mychart.aivals.get(x); if(ser.toString().equalsIgnoreCase(originalval)){
+		 * KSC: TODO: Refactor *** for(int
+		 * x=0;x<mychart.aivals.size();x++){ Ai ser =
+		 * (Ai)mychart.aivals.get(x);
+		 * if(ser.toString().equalsIgnoreCase(originalval)){
 		 * return ser.setText(newval); } }
 		 */
 		return mychart.changeTextValue(originalval, newval);
@@ -975,8 +1002,10 @@ public class ChartHandle implements ChartConstants {
 		Logger.logErr("ChartHandle.setLocationPolicy is broken");
 
 		/*
-		 * TODO: Refactor for(int x=0;x<mychart.aivals.size();x++){ Ai ser =
-		 * (Ai)mychart.aivals.get(x); if(ser.setLocationPolicy(loc,l)){ return true; } }
+		 * TODO: Refactor for(int x=0;x<mychart.aivals.size();x++){
+		 * Ai ser =
+		 * (Ai)mychart.aivals.get(x);
+		 * if(ser.setLocationPolicy(loc,l)){ return true; } }
 		 */
 		return false;
 	}
@@ -1008,7 +1037,9 @@ public class ChartHandle implements ChartConstants {
 	 *            chartType - representing the chart type
 	 */
 	public void setChartType(int chartType) {
-		mychart.setChartType(chartType, 0, EnumSet.noneOf(ChartOptions.class)); // no specific options
+		mychart.setChartType(chartType, 0, EnumSet.noneOf(ChartOptions.class)); // no
+																				// specific
+																				// options
 	}
 
 	/**
@@ -1025,7 +1056,8 @@ public class ChartHandle implements ChartConstants {
 	public enum ChartOptions {
 		CLUSTERED,
 		/** bar, col charts only */
-		STACKED, PERCENTSTACKED,
+		STACKED,
+		PERCENTSTACKED,
 		/** 100% stacked */
 		THREED,
 		/** 3d Effect */
@@ -1170,7 +1202,8 @@ public class ChartHandle implements ChartConstants {
 	 *            where 1-9 indicate an overlay chart)
 	 */
 	public void setChartType(int chartType, int nChart) {
-		mychart.setChartType(chartType, nChart, EnumSet.noneOf(ChartOptions.class)); // no specific options
+		mychart.setChartType(chartType, nChart, EnumSet
+				.noneOf(ChartOptions.class)); // no specific options
 	}
 
 	/**
@@ -1215,8 +1248,10 @@ public class ChartHandle implements ChartConstants {
 	 * @return boolean whether the Cell Reference was found and modified
 	 */
 	/*
-	 * TODO: NEEDED?? public boolean setLocationLocked(String loc, boolean l){ int x
-	 * = Ptg.PTG_LOCATION_POLICY_UNLOCKED; if(l)x = Ptg.PTG_LOCATION_POLICY_LOCKED;
+	 * TODO: NEEDED?? public boolean setLocationLocked(String
+	 * loc, boolean l){ int x
+	 * = Ptg.PTG_LOCATION_POLICY_UNLOCKED; if(l)x =
+	 * Ptg.PTG_LOCATION_POLICY_LOCKED;
 	 * return setLocationPolicy(loc, x); }
 	 */
 
@@ -1303,13 +1338,13 @@ public class ChartHandle implements ChartConstants {
 	 * @return a ChartSeriesHandle representing the new or altered Series
 	 * @throws CellNotFoundException
 	 */
-	public ChartSeriesHandle setSeries(int index, String legendCell, String categoryRange, String seriesRange,
-			String bubbleRange) throws CellNotFoundException {
+	public ChartSeriesHandle setSeries(int index, String legendCell, String categoryRange, String seriesRange, String bubbleRange) throws CellNotFoundException {
 		String legendText = "";
 		try {
 			CellHandle ICell = null;
 			if (legendCell != null && !legendCell.equals("")) {
-				// 20070707 KSC: allow addition of new cell ranges for legendCell (see
+				// 20070707 KSC: allow addition of new cell ranges for
+				// legendCell (see
 				// OpenXLS.handleChartElement)
 				try {
 					ICell = wbh.getCell(legendCell);
@@ -1326,7 +1361,9 @@ public class ChartHandle implements ChartConstants {
 			}
 			return setSeries(index, legendCell, legendText, categoryRange, seriesRange, bubbleRange);
 		} catch (WorkSheetNotFoundException e) {
-			throw new CellNotFoundException("Error locating cell for adding series range: " + legendCell);
+			throw new CellNotFoundException(
+					"Error locating cell for adding series range: "
+							+ legendCell);
 		}
 	}
 
@@ -1358,9 +1395,9 @@ public class ChartHandle implements ChartConstants {
 	 * @return a ChartSeriesHandle representing the new or altered Series
 	 * @throws CellNotFoundException
 	 */
-	public ChartSeriesHandle setSeries(int index, String legendCell, String legendText, String categoryRange,
-			String seriesRange, String bubbleRange) throws CellNotFoundException {
-		return setSeries(index, legendCell, legendText, categoryRange, seriesRange, bubbleRange, 0); // for default
+	public ChartSeriesHandle setSeries(int index, String legendCell, String legendText, String categoryRange, String seriesRange, String bubbleRange) throws CellNotFoundException {
+		return setSeries(index, legendCell, legendText, categoryRange, seriesRange, bubbleRange, 0); // for
+																										// default
 																										// chart
 	}
 
@@ -1395,9 +1432,9 @@ public class ChartHandle implements ChartConstants {
 	 * @return a ChartSeriesHandle representing the new or altered Series
 	 * @throws CellNotFoundException
 	 */
-	public ChartSeriesHandle setSeries(int index, String legendCell, String legendText, String categoryRange,
-			String seriesRange, String bubbleRange, int nChart) throws CellNotFoundException {
-		// if (index < mychart.getAllSeries(nChart).size() && index >= 0) {
+	public ChartSeriesHandle setSeries(int index, String legendCell, String legendText, String categoryRange, String seriesRange, String bubbleRange, int nChart) throws CellNotFoundException {
+		// if (index < mychart.getAllSeries(nChart).size() && index
+		// >= 0) {
 		try {
 			Series s = (Series) mychart.getAllSeries(nChart).get(index);
 			ChartSeriesHandle csh = new ChartSeriesHandle(s, this.wbh);
@@ -1429,9 +1466,9 @@ public class ChartHandle implements ChartConstants {
 	 * @return ChartSeriesHandle representing the new series
 	 * @throws CellNotFoundException
 	 */
-	private ChartSeriesHandle addSeriesRange(String legendAddress, String legendText, String categoryRange,
-			String seriesRange, String bubbleRange) throws CellNotFoundException {
-		return addSeriesRange(legendAddress, legendText, categoryRange, seriesRange, bubbleRange, 0); // for default
+	private ChartSeriesHandle addSeriesRange(String legendAddress, String legendText, String categoryRange, String seriesRange, String bubbleRange) throws CellNotFoundException {
+		return addSeriesRange(legendAddress, legendText, categoryRange, seriesRange, bubbleRange, 0); // for
+																										// default
 																										// chart
 	}
 
@@ -1458,13 +1495,14 @@ public class ChartHandle implements ChartConstants {
 	 * @return ChartSeriesHandle representing the new series
 	 * @throws CellNotFoundException
 	 */
-	private ChartSeriesHandle addSeriesRange(String legendAddress, String legendText, String categoryRange,
-			String seriesRange, String bubbleRange, int nChart) throws CellNotFoundException {
+	private ChartSeriesHandle addSeriesRange(String legendAddress, String legendText, String categoryRange, String seriesRange, String bubbleRange, int nChart) throws CellNotFoundException {
 		Series s = null;
 		if (bubbleRange == null || bubbleRange.equals(""))
-			s = mychart.addSeries(seriesRange, categoryRange, "", legendAddress, legendText, nChart);
+			s = mychart
+					.addSeries(seriesRange, categoryRange, "", legendAddress, legendText, nChart);
 		else
-			s = mychart.addSeries(seriesRange, categoryRange, bubbleRange, legendAddress, legendText, nChart);
+			s = mychart
+					.addSeries(seriesRange, categoryRange, bubbleRange, legendAddress, legendText, nChart);
 		if (nChart > 0) { // must update SeriesList record for overlay charts
 			// TODO: FINISH
 		}
@@ -1500,9 +1538,11 @@ public class ChartHandle implements ChartConstants {
 	 *            Sheet1!A2:A5); or null if chart is not of type Bubble.
 	 * @return ChartSeriesHandle referencing the newly added series
 	 */
-	public ChartSeriesHandle addSeriesRange(String legendCell, String categoryRange, String seriesRange,
-			String bubbleRange) throws CellNotFoundException {
-		return this.addSeriesRange(legendCell, categoryRange, seriesRange, bubbleRange, 0); // target default chart
+	public ChartSeriesHandle addSeriesRange(String legendCell, String categoryRange, String seriesRange, String bubbleRange) throws CellNotFoundException {
+		return this
+				.addSeriesRange(legendCell, categoryRange, seriesRange, bubbleRange, 0); // target
+																							// default
+																							// chart
 	}
 
 	/**
@@ -1536,8 +1576,7 @@ public class ChartHandle implements ChartConstants {
 	 *            where 1-9 indicate an overlay chart)
 	 * @return ChartSeriesHandle referencing the newly added series
 	 */
-	public ChartSeriesHandle addSeriesRange(String legendCell, String categoryRange, String seriesRange,
-			String bubbleRange, int nChart) throws CellNotFoundException {
+	public ChartSeriesHandle addSeriesRange(String legendCell, String categoryRange, String seriesRange, String bubbleRange, int nChart) throws CellNotFoundException {
 		String legendText = "";
 		String legendAddr = "";
 		try {
@@ -1546,7 +1585,8 @@ public class ChartHandle implements ChartConstants {
 				try {
 					ICell = wbh.getCell(legendCell);
 					if (legendCell.indexOf("!") == -1)
-						legendAddr = ICell.getWorkSheetName() + "!" + ICell.getCellAddress();
+						legendAddr = ICell.getWorkSheetName() + "!"
+								+ ICell.getCellAddress();
 					else
 						legendAddr = legendCell;
 				} catch (CellNotFoundException c) {
@@ -1555,7 +1595,8 @@ public class ChartHandle implements ChartConstants {
 						String sheetstr = legendCell.substring(0, shtpos);
 						WorkSheetHandle sht = wbh.getWorkSheet(sheetstr);
 						String celstr = legendCell.substring(shtpos + 1);
-						ICell = sht.add("", celstr); // TODO: Why is this being added?
+						ICell = sht.add("", celstr); // TODO: Why is this being
+														// added?
 						legendAddr = celstr;
 					}
 				}
@@ -1566,13 +1607,18 @@ public class ChartHandle implements ChartConstants {
 			}
 			Series s = null;
 			if (bubbleRange == null)
-				s = mychart.addSeries(seriesRange, categoryRange, "", legendAddr, legendText, nChart);
+				s = mychart
+						.addSeries(seriesRange, categoryRange, "", legendAddr, legendText, nChart);
 			else
-				s = mychart.addSeries(seriesRange, categoryRange, bubbleRange, legendAddr, legendText, nChart);
-			setDimensionsRecord(); // update chart DIMENSIONS record upon update of series
+				s = mychart
+						.addSeries(seriesRange, categoryRange, bubbleRange, legendAddr, legendText, nChart);
+			setDimensionsRecord(); // update chart DIMENSIONS record upon update
+									// of series
 			return new ChartSeriesHandle(s, wbh);
 		} catch (WorkSheetNotFoundException e) {
-			throw new CellNotFoundException("Error locating cell for adding series range: " + legendCell);
+			throw new CellNotFoundException(
+					"Error locating cell for adding series range: "
+							+ legendCell);
 		}
 	}
 
@@ -1595,9 +1641,10 @@ public class ChartHandle implements ChartConstants {
 	 *      String seriesRange, String bubbleRange)
 	 * @return ChartSeriesHandle referencing the newly added series
 	 */
-	public ChartSeriesHandle addSeriesRange(CellHandle legendCell, CellRange categoryRange, CellRange seriesRange,
-			CellRange bubbleRange) {
-		return this.addSeriesRange(legendCell, categoryRange, seriesRange, bubbleRange, 0); // 0=default chart
+	public ChartSeriesHandle addSeriesRange(CellHandle legendCell, CellRange categoryRange, CellRange seriesRange, CellRange bubbleRange) {
+		return this
+				.addSeriesRange(legendCell, categoryRange, seriesRange, bubbleRange, 0); // 0=default
+																							// chart
 	}
 
 	/**
@@ -1624,18 +1671,21 @@ public class ChartHandle implements ChartConstants {
 	 *      String seriesRange, String bubbleRange)
 	 * @return ChartSeriesHandle referencing the newly added series
 	 */
-	public ChartSeriesHandle addSeriesRange(CellHandle legendCell, CellRange categoryRange, CellRange seriesRange,
-			CellRange bubbleRange, int nChart) {
+	public ChartSeriesHandle addSeriesRange(CellHandle legendCell, CellRange categoryRange, CellRange seriesRange, CellRange bubbleRange, int nChart) {
 		Series s = null;
 		if (bubbleRange == null)
-			s = mychart.addSeries(seriesRange.toString(), categoryRange.toString(), "",
-					legendCell.getWorkSheetName() + "!" + legendCell.getCellAddress(), legendCell.getStringVal(),
-					nChart);
+			s = mychart.addSeries(seriesRange.toString(), categoryRange
+					.toString(), "", legendCell.getWorkSheetName() + "!"
+							+ legendCell.getCellAddress(), legendCell
+									.getStringVal(), nChart);
 		else
-			s = mychart.addSeries(seriesRange.toString(), categoryRange.toString(), bubbleRange.toString(),
-					legendCell.getWorkSheetName() + "!" + legendCell.getCellAddress(), legendCell.getStringVal(),
-					nChart);
-		setDimensionsRecord(); // 20080417 KSC: update chart DIMENSIONS record upon update of series
+			s = mychart.addSeries(seriesRange.toString(), categoryRange
+					.toString(), bubbleRange
+							.toString(), legendCell.getWorkSheetName() + "!"
+									+ legendCell.getCellAddress(), legendCell
+											.getStringVal(), nChart);
+		setDimensionsRecord(); // 20080417 KSC: update chart DIMENSIONS record
+								// upon update of series
 		return new ChartSeriesHandle(s, wbh);
 	}
 
@@ -1664,7 +1714,8 @@ public class ChartHandle implements ChartConstants {
 	 */
 	public void removeSeries(int index, int nChart) {
 		Vector<?> seriesperchart = mychart.getAllSeries(nChart);
-		Series seriestodelete = (Series) seriesperchart.get(index); // series to delete
+		Series seriestodelete = (Series) seriesperchart.get(index); // series to
+																	// delete
 		mychart.removeSeries(seriestodelete);
 		setDimensionsRecord();
 	}
@@ -1692,9 +1743,11 @@ public class ChartHandle implements ChartConstants {
 	 *            categoryRange - The Cell Range representing the categories (X
 	 *            Axis) for the entire Chart
 	 */
-	public void addAllSeries(String[] valueRanges, String[] legendCells, String[] bubbleSizeRanges,
-			String categoryRange) {
-		addAllSeries(valueRanges, legendCells, bubbleSizeRanges, categoryRange, 0); // do for default chart
+	public void addAllSeries(String[] valueRanges, String[] legendCells, String[] bubbleSizeRanges, String categoryRange) {
+		addAllSeries(valueRanges, legendCells, bubbleSizeRanges, categoryRange, 0); // do
+																					// for
+																					// default
+																					// chart
 	}
 
 	/**
@@ -1723,23 +1776,33 @@ public class ChartHandle implements ChartConstants {
 	 *            number and drawing order of the desired chart (default= 0 max=9
 	 *            where 1-9 indicate an overlay chart)
 	 */
-	private void addAllSeries(String[] valueRanges, String[] legendCells, String[] bubbleSizeRanges,
-			String categoryRange, int nChart) {
+	private void addAllSeries(String[] valueRanges, String[] legendCells, String[] bubbleSizeRanges, String categoryRange, int nChart) {
 		// first, remove all existing series
 		Vector<?> v = mychart.getAllSeries();
 		for (int i = 0; i < v.size(); i++) {
 			mychart.removeSeries((Series) v.get(i));
 		}
 		try {
-			HashMap<String, Double> chartMetrics = mychart.getMetrics(wbh); // build or retrieve Chart Metrics -->
-																			// dimensions + series data ...
-			this.mychart.getLegend().resetPos(chartMetrics.get("y"), chartMetrics.get("h"), chartMetrics.get("canvash"),
-					legendCells.length);
-		} catch (Exception e) {
-		}
+			HashMap<String, Double> chartMetrics = mychart.getMetrics(wbh); // build
+																			// or
+																			// retrieve
+																			// Chart
+																			// Metrics
+																			// -->
+																			// dimensions
+																			// +
+																			// series
+																			// data
+																			// ...
+			this.mychart.getLegend()
+					.resetPos(chartMetrics.get("y"), chartMetrics
+							.get("h"), chartMetrics
+									.get("canvash"), legendCells.length);
+		} catch (Exception e) {}
 		setDimensionsRecord();
 		// now add series
-		boolean hasBubbles = ((bubbleSizeRanges != null && bubbleSizeRanges.length == valueRanges.length));
+		boolean hasBubbles = ((bubbleSizeRanges != null
+				&& bubbleSizeRanges.length == valueRanges.length));
 		for (int i = valueRanges.length - 1; i >= 0; i--) {
 			try {
 				if (!hasBubbles) // usual case
@@ -1798,7 +1861,8 @@ public class ChartHandle implements ChartConstants {
 		String legendRef = theHandle.getSeriesLegendReference();
 		if (legendRef != null && !legendRef.equals("")) {
 			String sheetnm = legendRef.substring(0, legendRef.indexOf("!"));
-			legendRef = legendRef.substring(legendRef.indexOf("!") + 1, legendRef.length());
+			legendRef = legendRef
+					.substring(legendRef.indexOf("!") + 1, legendRef.length());
 			int[] rc = ExcelTools.getRowColFromString(legendRef);
 			rc[0] = rc[0] + 1;
 			legendRef = sheetnm + "!" + ExcelTools.formatLocation(rc);
@@ -1810,7 +1874,8 @@ public class ChartHandle implements ChartConstants {
 		String categoryRange = theHandle.getCategoryRange();
 		String seriesRange = theHandle.getSeriesRange();
 		String sheetnm = seriesRange.substring(0, seriesRange.indexOf("!"));
-		seriesRange = seriesRange.substring(seriesRange.indexOf("!") + 1, seriesRange.length());
+		seriesRange = seriesRange
+				.substring(seriesRange.indexOf("!") + 1, seriesRange.length());
 		int[] rc = ExcelTools.getRangeRowCol(seriesRange);
 		// fiddle it, since exceltools doesn't translate back/forth
 		int[] newRc = new int[4];
@@ -1820,9 +1885,11 @@ public class ChartHandle implements ChartConstants {
 		newRc[3] = rc[2] + 1;
 		seriesRange = sheetnm + "!" + ExcelTools.formatRange(newRc);
 		try {
-			return this.addSeriesRange(legendRef, "", categoryRange, seriesRange, "", nChart);
+			return this
+					.addSeriesRange(legendRef, "", categoryRange, seriesRange, "", nChart);
 		} catch (CellNotFoundException e) {
-			Logger.logErr("ChartHandle.appendRowSeriesToChart: Unable to append series to chart: " + e);
+			Logger.logErr("ChartHandle.appendRowSeriesToChart: Unable to append series to chart: "
+					+ e);
 		}
 		return null;
 	}
@@ -1860,13 +1927,16 @@ public class ChartHandle implements ChartConstants {
 			String[] s = ExcelTools.stripSheetNameFromRange(seriesRange);
 			String sheetnm = s[0];
 			seriesRange = s[1];
-			// String sheetnm = seriesRange.substring(0, seriesRange.indexOf("!"));
-			// seriesRange = seriesRange.substring( seriesRange.indexOf("!")+1,
+			// String sheetnm = seriesRange.substring(0,
+			// seriesRange.indexOf("!"));
+			// seriesRange = seriesRange.substring(
+			// seriesRange.indexOf("!")+1,
 			// seriesRange.length());
 			// Strip 2nd sheet ref, if any 20080213 KSC
 			// int n= seriesRange.indexOf('!');
 			// int m= seriesRange.indexOf(':');
-			// seriesRange= seriesRange.substring(0, m+1) + seriesRange.substring(n+1);
+			// seriesRange= seriesRange.substring(0, m+1) +
+			// seriesRange.substring(n+1);
 
 			int[] rc = ExcelTools.getRangeRowCol(seriesRange);
 			int[] newRc = new int[4];
@@ -1882,10 +1952,14 @@ public class ChartHandle implements ChartConstants {
 			sheetnm = s[0];
 			seriesRange = s[1];
 			/*
-			 * sheetnm = seriesRange.substring(0, seriesRange.indexOf("!")); seriesRange =
-			 * seriesRange.substring( seriesRange.indexOf("!")+1, seriesRange.length()); //
-			 * Strip 2nd sheet ref, if any 20080213 KSC n= seriesRange.indexOf('!'); m=
-			 * seriesRange.indexOf(':'); seriesRange= seriesRange.substring(0, m+1) +
+			 * sheetnm = seriesRange.substring(0,
+			 * seriesRange.indexOf("!")); seriesRange =
+			 * seriesRange.substring( seriesRange.indexOf("!")+1,
+			 * seriesRange.length()); //
+			 * Strip 2nd sheet ref, if any 20080213 KSC n=
+			 * seriesRange.indexOf('!'); m=
+			 * seriesRange.indexOf(':'); seriesRange=
+			 * seriesRange.substring(0, m+1) +
 			 * seriesRange.substring(n+1);
 			 */
 			rc = ExcelTools.getRangeRowCol(seriesRange);
@@ -1900,54 +1974,82 @@ public class ChartHandle implements ChartConstants {
 	}
 
 	/*
-	 * NOT IMPLEMENTED YET adjust chart cell references upon row insertion or
-	 * deletion NOTE: Assumes we're on the correct sheet NOT COMPLETELY IMPLEMENTED
+	 * NOT IMPLEMENTED YET adjust chart cell references upon row
+	 * insertion or
+	 * deletion NOTE: Assumes we're on the correct sheet NOT
+	 * COMPLETELY IMPLEMENTED
 	 * YEt
 	 * 
 	 * @param rownum
 	 * 
 	 * @param shiftamt +1= insert row, -1= delete row
 	 * 
-	 * public void adjustCellRefs(int rownum, int shiftamt) { Vector v =
-	 * mychart.getAllSeries(); boolean bSeriesRows= false; boolean bMod= false; for
-	 * (int i=0;i<v.size();i++) { Series s = (Series)v.get(i); try { // SERIES Ai ai
-	 * = s.getSeriesValueAi(); Ptg[] p=ai.getCellRangePtgs(); // should only be 1
-	 * ptg try { int[] loc= p[0].getIntLocation(); if (loc.length==4 &&
-	 * loc[0]==loc[2]) bSeriesRows= true; if (shiftamt > 0) { // insert row i.e.
-	 * shift ai location down if ((loc.length==2 && loc[0]>=rownum) ||
-	 * (loc[0]>=rownum || loc[2]>=rownum)) { adjustAiLocation(ai,
-	 * p[0].getIntLocation(), shiftamt); bMod= true; } } else { if ((loc.length==2
-	 * && loc[0]==rownum) || (loc[0]>=rownum && loc[2]<=rownum)) { // remove it
-	 * this.removeSeries(i); bMod= true; continue; } } } catch(Exception e) {
+	 * public void adjustCellRefs(int rownum, int shiftamt) {
+	 * Vector v =
+	 * mychart.getAllSeries(); boolean bSeriesRows= false;
+	 * boolean bMod= false; for
+	 * (int i=0;i<v.size();i++) { Series s = (Series)v.get(i);
+	 * try { // SERIES Ai ai
+	 * = s.getSeriesValueAi(); Ptg[] p=ai.getCellRangePtgs(); //
+	 * should only be 1
+	 * ptg try { int[] loc= p[0].getIntLocation(); if
+	 * (loc.length==4 &&
+	 * loc[0]==loc[2]) bSeriesRows= true; if (shiftamt > 0) { //
+	 * insert row i.e.
+	 * shift ai location down if ((loc.length==2 &&
+	 * loc[0]>=rownum) ||
+	 * (loc[0]>=rownum || loc[2]>=rownum)) {
+	 * adjustAiLocation(ai,
+	 * p[0].getIntLocation(), shiftamt); bMod= true; } } else {
+	 * if ((loc.length==2
+	 * && loc[0]==rownum) || (loc[0]>=rownum && loc[2]<=rownum))
+	 * { // remove it
+	 * this.removeSeries(i); bMod= true; continue; } } }
+	 * catch(Exception e) {
 	 * 
 	 * } } catch (Exception e) {
 	 * 
 	 * } try { // CATEGORY Ai ai= s.getCategoryValueAi(); Ptg[]
-	 * p=ai.getCellRangePtgs(); try { int[] loc= p[0].getIntLocation(); if (shiftamt
-	 * > 0) { // insert row i.e. shift ai location down if ((loc.length==2 &&
-	 * loc[0]>=rownum) || (loc[0]>=rownum || loc[2]>=rownum)) { adjustAiLocation(ai,
-	 * p[0].getIntLocation(), shiftamt); bMod= true; } } else { if ((loc.length==2
-	 * && loc[0]==rownum) || (loc[0]>=rownum && loc[2]<=rownum)) { // remove it ????
-	 * this.removeSeries(i); bMod= true; } } } catch(Exception e) {
+	 * p=ai.getCellRangePtgs(); try { int[] loc=
+	 * p[0].getIntLocation(); if (shiftamt
+	 * > 0) { // insert row i.e. shift ai location down if
+	 * ((loc.length==2 &&
+	 * loc[0]>=rownum) || (loc[0]>=rownum || loc[2]>=rownum)) {
+	 * adjustAiLocation(ai,
+	 * p[0].getIntLocation(), shiftamt); bMod= true; } } else {
+	 * if ((loc.length==2
+	 * && loc[0]==rownum) || (loc[0]>=rownum && loc[2]<=rownum))
+	 * { // remove it ????
+	 * this.removeSeries(i); bMod= true; } } } catch(Exception
+	 * e) {
 	 * 
 	 * } } catch (Exception e) {
 	 * 
-	 * } try { // LEGEND Ai ai= s.getLegendAi(); Ptg[] p=ai.getCellRangePtgs();
-	 * int[] loc= p[0].getIntLocation(); if (shiftamt > 0) { // insert row i.e.
-	 * shift ai location down if ((loc.length==2 && loc[0]>=rownum) ||
-	 * (loc[0]>=rownum || loc[2]>=rownum)) { adjustAiLocation(ai,
-	 * p[0].getIntLocation(), shiftamt); bMod= true; } } else { if ((loc.length==2
-	 * && loc[0]==rownum) || (loc[0]>=rownum && loc[2]<=rownum)) { // remove it
-	 * this.removeSeries(i); bMod= true; } } } catch(Exception e) {
+	 * } try { // LEGEND Ai ai= s.getLegendAi(); Ptg[]
+	 * p=ai.getCellRangePtgs();
+	 * int[] loc= p[0].getIntLocation(); if (shiftamt > 0) { //
+	 * insert row i.e.
+	 * shift ai location down if ((loc.length==2 &&
+	 * loc[0]>=rownum) ||
+	 * (loc[0]>=rownum || loc[2]>=rownum)) {
+	 * adjustAiLocation(ai,
+	 * p[0].getIntLocation(), shiftamt); bMod= true; } } else {
+	 * if ((loc.length==2
+	 * && loc[0]==rownum) || (loc[0]>=rownum && loc[2]<=rownum))
+	 * { // remove it
+	 * this.removeSeries(i); bMod= true; } } } catch(Exception
+	 * e) {
 	 * 
 	 * } } if (bMod)// one or more series elements were modified
-	 * setDimensionsRecord(); // update dimensions i.e. Data Range
+	 * setDimensionsRecord(); // update dimensions i.e. Data
+	 * Range
 	 * 
 	 * }
 	 */
 
 	/*
-	 * doesn't appear to be used right now move the ai location (row) according to
+	 * doesn't appear to be used right now move the ai location
+	 * (row) according to
 	 * shift amount
 	 * 
 	 * @param ai
@@ -1956,13 +2058,20 @@ public class ChartHandle implements ChartConstants {
 	 * 
 	 * @param shift
 	 *
-	 * private void adjustAiLocation(Ai ai, int[] loc, int shift) { String oldloc=
-	 * ExcelTools.formatLocation(loc); if (loc.length>2) // get 2nd part of range
-	 * oldloc += ":" + ExcelTools.formatLocation(new int[]{loc[2], loc[3]}); oldloc=
-	 * this.getSheet().getSheetName() + "!" + oldloc; if (loc.length==2)// single
-	 * cell loc[0]+=shift; else { // range loc[0]+=shift; loc[2]+=shift; } String
-	 * newloc= ExcelTools.formatLocation(loc); if (loc.length>2) // get 2nd part of
-	 * range newloc += ":" + ExcelTools.formatLocation(new int[]{loc[2], loc[3]});
+	 * private void adjustAiLocation(Ai ai, int[] loc, int
+	 * shift) { String oldloc=
+	 * ExcelTools.formatLocation(loc); if (loc.length>2) // get
+	 * 2nd part of range
+	 * oldloc += ":" + ExcelTools.formatLocation(new
+	 * int[]{loc[2], loc[3]}); oldloc=
+	 * this.getSheet().getSheetName() + "!" + oldloc; if
+	 * (loc.length==2)// single
+	 * cell loc[0]+=shift; else { // range loc[0]+=shift;
+	 * loc[2]+=shift; } String
+	 * newloc= ExcelTools.formatLocation(loc); if (loc.length>2)
+	 * // get 2nd part of
+	 * range newloc += ":" + ExcelTools.formatLocation(new
+	 * int[]{loc[2], loc[3]});
 	 * ai.changeAiLocation(oldloc, newloc); }
 	 * 
 	 */
@@ -2011,11 +2120,13 @@ public class ChartHandle implements ChartConstants {
 					String tnm = xpp.getName();
 					if (tnm.equals("ChartFonts")) {
 						for (int x = 0; x < xpp.getAttributeCount(); x++) {
-							this.setChartFont(xpp.getAttributeName(x), xpp.getAttributeValue(x));
+							this.setChartFont(xpp.getAttributeName(x), xpp
+									.getAttributeValue(x));
 						}
 					} else if (tnm.equals("ChartFontRec")) {
 						String fName = "";
-						int fontId = 0, fSize = 0, fWeight = 0, fColor = 0, fUnderline = 0;
+						int fontId = 0, fSize = 0, fWeight = 0, fColor = 0,
+								fUnderline = 0;
 						boolean bIsBold = false;
 						for (int x = 0; x < xpp.getAttributeCount(); x++) {
 							String attr = xpp.getAttributeName(x);
@@ -2025,9 +2136,11 @@ public class ChartHandle implements ChartConstants {
 							} else if (attr.equals("id")) {
 								fontId = Integer.parseInt(val);
 							} else if (attr.equals("size")) {
-								fSize = Font.PointsToFontHeight(Double.parseDouble(val));
+								fSize = Font.PointsToFontHeight(Double
+										.parseDouble(val));
 							} else if (attr.equals("color")) {
-								fColor = FormatHandle.HexStringToColorInt(val, FormatHandle.colorFONT);
+								fColor = FormatHandle
+										.HexStringToColorInt(val, FormatHandle.colorFONT);
 								if (fColor == 0)
 									fColor = 32767; // necessary?
 							} else if (attr.equals("weight")) {
@@ -2039,7 +2152,8 @@ public class ChartHandle implements ChartConstants {
 							}
 						}
 						while (this.getWorkBook().getNumFonts() < fontId - 1) {
-							this.getWorkBook().insertFont(new Font("Arial", FormatConstants.PLAIN, 10));
+							this.getWorkBook().insertFont(new Font("Arial",
+									FormatConstants.PLAIN, 10));
 						}
 						if (this.getWorkBook().getNumFonts() < fontId) {
 							Font f = new Font(fName, fWeight, fSize);
@@ -2047,7 +2161,8 @@ public class ChartHandle implements ChartConstants {
 							f.setBold(bIsBold);
 							f.setUnderlineStyle((byte) fUnderline);
 							this.getWorkBook().insertFont(f);
-						} else { // TODO: this will screw up linked fonts, perhaps, so what to do?
+						} else { // TODO: this will screw up linked fonts,
+									// perhaps, so what to do?
 							Font f = this.getWorkBook().getFont(fontId);
 							f.setFontWeight(fWeight);
 							f.setFontName(fName);
@@ -2056,48 +2171,72 @@ public class ChartHandle implements ChartConstants {
 							f.setBold(bIsBold);
 							f.setUnderlineStyle((byte) fUnderline);
 						}
-					} else if (tnm.equals("FormatChartArea")) { // TODO: something!
+					} else if (tnm.equals("FormatChartArea")) { // TODO:
+																// something!
 						// ChartBorder
 						// ChartProperties
 					} else if (tnm.equals("Series")) { // series -->
 						// Legend Range Category shape typex typey
-						String legend = "", series = "", category = "", bubble = "";
+						String legend = "", series = "", category = "",
+								bubble = "";
 						String dataTypeX = "", dataTypeY = "";
 						String shape = "";
 						for (int x = 0; x < xpp.getAttributeCount(); x++) {
-							if (xpp.getAttributeName(x).equalsIgnoreCase("Legend"))
+							if (xpp.getAttributeName(x)
+									.equalsIgnoreCase("Legend"))
 								legend = xpp.getAttributeValue(x);
-							else if (xpp.getAttributeName(x).equalsIgnoreCase("Range"))
+							else if (xpp.getAttributeName(x)
+									.equalsIgnoreCase("Range"))
 								series = xpp.getAttributeValue(x);
-							else if (xpp.getAttributeName(x).equalsIgnoreCase("Category"))
+							else if (xpp.getAttributeName(x)
+									.equalsIgnoreCase("Category"))
 								category = xpp.getAttributeValue(x);
-							else if (xpp.getAttributeName(x).equalsIgnoreCase("Bubbles"))
+							else if (xpp.getAttributeName(x)
+									.equalsIgnoreCase("Bubbles"))
 								bubble = xpp.getAttributeValue(x);
-							else if (xpp.getAttributeName(x).equalsIgnoreCase("TypeX"))
+							else if (xpp.getAttributeName(x)
+									.equalsIgnoreCase("TypeX"))
 								dataTypeX = xpp.getAttributeValue(x);
-							else if (xpp.getAttributeName(x).equalsIgnoreCase("TypeY"))
+							else if (xpp.getAttributeName(x)
+									.equalsIgnoreCase("TypeY"))
 								dataTypeY = xpp.getAttributeValue(x);
-							else if (xpp.getAttributeName(x).equalsIgnoreCase("Shape"))
+							else if (xpp.getAttributeName(x)
+									.equalsIgnoreCase("Shape"))
 								shape = xpp.getAttributeValue(x);
 						}
 						// 20070709 KSC: can't add until all cells are added
 						// ch.addSeriesRange(legend, category, series);
-						String[] s = { legend, series, category, bubble, dataTypeX, dataTypeY, shape };
-						HashMap<String[], ChartHandle> map = (HashMap<String[], ChartHandle>) maps.get("chartseries");
+						String[] s = { legend, series, category, bubble,
+								dataTypeX, dataTypeY, shape };
+						HashMap<String[], ChartHandle> map = (HashMap<String[], ChartHandle>) maps
+								.get("chartseries");
 						map.put(s, this);
-					} else if (tnm.equals("ChartOptions")) { // handle chart-type-specific options such as legend
+					} else if (tnm.equals("ChartOptions")) { // handle
+																// chart-type-specific
+																// options such
+																// as legend
 																// options
-						// 20070716 KSC: handle chart-type-specific options in a very generic way ...
+						// 20070716 KSC: handle chart-type-specific options in a
+						// very generic way ...
 						for (int x = 0; x < xpp.getAttributeCount(); x++) {
-							this.setChartOption(xpp.getAttributeName(x), xpp.getAttributeValue(x));
+							this.setChartOption(xpp.getAttributeName(x), xpp
+									.getAttributeValue(x));
 						}
 					} else if (tnm.equals("ThreeD")) { // handle three-d options
-						// handle threeD record options in a very generic way ...
-						this.make3D(); // default chart - TODO; if mutliple charts, handle
-						for (int x = 0; x < xpp.getAttributeCount(); x++) { // now add threed rec options
-							this.setChartOption(xpp.getAttributeName(x), xpp.getAttributeValue(x));
+						// handle threeD record options in a very generic way
+						// ...
+						this.make3D(); // default chart - TODO; if mutliple
+										// charts, handle
+						for (int x = 0; x < xpp.getAttributeCount(); x++) { // now
+																			// add
+																			// threed
+																			// rec
+																			// options
+							this.setChartOption(xpp.getAttributeName(x), xpp
+									.getAttributeValue(x));
 						}
-					} else if (tnm.endsWith("Axis")) { // handle axis specs (Label + options ...)
+					} else if (tnm.endsWith("Axis")) { // handle axis specs
+														// (Label + options ...)
 						// 20070720 KSC: handle Axis record options ...
 						int type = 0;
 						String axis = xpp.getName();
@@ -2107,38 +2246,52 @@ public class ChartHandle implements ChartConstants {
 							type = YAXIS;
 						else if (axis.equalsIgnoreCase("ZAxis"))
 							type = ZAXIS;
-						if (xpp.getAttributeCount() > 0) { // then has axis options
+						if (xpp.getAttributeCount() > 0) { // then has axis
+															// options
 							for (int x = 0; x < xpp.getAttributeCount(); x++) {
-								this.setAxisOption(type, xpp.getAttributeName(x), xpp.getAttributeValue(x));
+								this.setAxisOption(type, xpp
+										.getAttributeName(x), xpp
+												.getAttributeValue(x));
 							}
-						} else { // no axis options means no axis present; remove
+						} else { // no axis options means no axis present;
+									// remove
 							this.removeAxis(type);
 						}
 					} else if (tnm.equals("Series")) { // handle series data
 						// Legend Range Category
-						String legend = "", series = "", category = "", bubble = "";
+						String legend = "", series = "", category = "",
+								bubble = "";
 						String dataTypeX = "", dataTypeY = "";
 						String shape = "";
 						for (int x = 0; x < xpp.getAttributeCount(); x++) {
-							if (xpp.getAttributeName(x).equalsIgnoreCase("Legend"))
+							if (xpp.getAttributeName(x)
+									.equalsIgnoreCase("Legend"))
 								legend = xpp.getAttributeValue(x);
-							else if (xpp.getAttributeName(x).equalsIgnoreCase("Range"))
+							else if (xpp.getAttributeName(x)
+									.equalsIgnoreCase("Range"))
 								series = xpp.getAttributeValue(x);
-							else if (xpp.getAttributeName(x).equalsIgnoreCase("Category"))
+							else if (xpp.getAttributeName(x)
+									.equalsIgnoreCase("Category"))
 								category = xpp.getAttributeValue(x);
-							else if (xpp.getAttributeName(x).equalsIgnoreCase("Bubbles"))
+							else if (xpp.getAttributeName(x)
+									.equalsIgnoreCase("Bubbles"))
 								bubble = xpp.getAttributeValue(x);
-							else if (xpp.getAttributeName(x).equalsIgnoreCase("TypeX"))
+							else if (xpp.getAttributeName(x)
+									.equalsIgnoreCase("TypeX"))
 								dataTypeX = xpp.getAttributeValue(x);
-							else if (xpp.getAttributeName(x).equalsIgnoreCase("TypeY"))
+							else if (xpp.getAttributeName(x)
+									.equalsIgnoreCase("TypeY"))
 								dataTypeY = xpp.getAttributeValue(x);
-							else if (xpp.getAttributeName(x).equalsIgnoreCase("Shape"))
+							else if (xpp.getAttributeName(x)
+									.equalsIgnoreCase("Shape"))
 								shape = xpp.getAttributeValue(x);
 						}
 						// 20070709 KSC: can't add until all cells are added
 						// ch.addSeriesRange(legend, category, series);
-						String[] s = { legend, series, category, bubble, dataTypeX, dataTypeY, shape };
-						HashMap<String[], ChartHandle> map = (HashMap<String[], ChartHandle>) maps.get("chartseries");
+						String[] s = { legend, series, category, bubble,
+								dataTypeX, dataTypeY, shape };
+						HashMap<String[], ChartHandle> map = (HashMap<String[], ChartHandle>) maps
+								.get("chartseries");
 						map.put(s, this);
 					}
 				} else if (eventType == XmlPullParser.END_TAG) {
@@ -2148,7 +2301,8 @@ public class ChartHandle implements ChartConstants {
 				eventType = xpp.next();
 			}
 		} catch (Exception e) {
-			Logger.logWarn("ChartHandle.parseXML <" + xpp.getName() + ">: " + e.toString());
+			Logger.logWarn("ChartHandle.parseXML <" + xpp.getName() + ">: "
+					+ e.toString());
 			// TODO: propogate Exception???
 		}
 	}
@@ -2168,8 +2322,9 @@ public class ChartHandle implements ChartConstants {
 		sb.append(" Fill=\"" + this.getPlotAreaBgColor() + "\"");
 		// Position
 		short[] coords = mychart.getCoords();
-		sb.append(" Left=\"" + coords[0] + "\" Top=\"" + coords[1] + "\" Width=\"" + coords[2] + "\" Height=\""
-				+ coords[3] + "\"");
+		sb.append(" Left=\"" + coords[0] + "\" Top=\"" + coords[1]
+				+ "\" Width=\"" + coords[2] + "\" Height=\"" + coords[3]
+				+ "\"");
 		sb.append(">\n");
 
 		// Chart Fonts
@@ -2179,13 +2334,15 @@ public class ChartHandle implements ChartConstants {
 		// Format Chart Area
 		sb.append(t(2) + "<FormatChartArea>\n");
 		sb.append(t(3) + "<ChartBorder></ChartBorder>\n"); // KSC: TODO: BORDER
-		sb.append(t(3) + "<ChartProperties></ChartProperties>\n"); // TODO: Properties
+		sb.append(t(3) + "<ChartProperties></ChartProperties>\n"); // TODO:
+																	// Properties
 		sb.append(t(2) + "</FormatChartArea>\n");
 		// Source Data
 		sb.append(t(2) + "<SourceData>\n");
 		ChartSeriesHandle[] series = this.getAllChartSeriesHandles();
 		for (int i = 0; i < series.length; i++) {
-			sb.append(t(3) + "<Series Legend=\"" + series[i].getSeriesLegendReference() + "\"");
+			sb.append(t(3) + "<Series Legend=\""
+					+ series[i].getSeriesLegendReference() + "\"");
 			sb.append(" Range=\"" + series[i].getSeriesRange() + "\"");
 			sb.append(" Category=\"" + series[i].getCategoryRange() + "\"");
 			if (series[i].hasBubbleSizes()) {
@@ -2193,7 +2350,8 @@ public class ChartHandle implements ChartConstants {
 			}
 			sb.append(" TypeX=\"" + series[i].getCategoryDataType() + "\"");
 			sb.append(" TypeY=\"" + series[i].getSeriesDataType() + "\"");
-			// controls shape of complex datapoints such as pyramid, cylinder, cone +
+			// controls shape of complex datapoints such as pyramid,
+			// cylinder, cone +
 			// stacked 3d bars
 			sb.append(" Shape=\"" + series[i].getShape() + "\"");
 			sb.append("/>\n");
@@ -2242,9 +2400,12 @@ public class ChartHandle implements ChartConstants {
 			mychart.getChartSeries().resetSeriesNumber(); // reset series idx
 			// retrieve pertinent chart data
 			// axes id's TODO: HANDLE MULTIPLE AXES per chart ...
-			String catAxisId = Integer.toString((int) (Math.random() * 1000000));
-			String valAxisId = Integer.toString((int) (Math.random() * 1000000));
-			String serAxisId = Integer.toString((int) (Math.random() * 1000000));
+			String catAxisId = Integer
+					.toString((int) (Math.random() * 1000000));
+			String valAxisId = Integer
+					.toString((int) (Math.random() * 1000000));
+			String serAxisId = Integer
+					.toString((int) (Math.random() * 1000000));
 			OOXMLChart thischart;
 			if ((mychart instanceof OOXMLChart))
 				thischart = (OOXMLChart) mychart;
@@ -2262,14 +2423,16 @@ public class ChartHandle implements ChartConstants {
 			if (chartEmbeds != null) {
 				int j = 0;
 				for (int i = 0; i < chartEmbeds.size(); i++) {
-					if (((String[]) chartEmbeds.get(i))[0].equals("userShape")) {
+					if (((String[]) chartEmbeds.get(i))[0]
+							.equals("userShape")) {
 						j++;
 						cooxml.append("<c:userShapes r:id=\"rId" + j + "\"/>");
 					}
 				}
 			}
 		} catch (Exception e) {
-			Logger.logErr("ChartHandle.getOOXML: error generating OOXML.  Chart not created: " + e.toString());
+			Logger.logErr("ChartHandle.getOOXML: error generating OOXML.  Chart not created: "
+					+ e.toString());
 		}
 		return cooxml.toString();
 	}
@@ -2286,10 +2449,13 @@ public class ChartHandle implements ChartConstants {
 	 * @return String OOXML
 	 */
 	public String getChartDrawingOOXML(int id) {
-		TwoCellAnchor t = new TwoCellAnchor(((OOXMLChart) mychart).getEditMovement());
-		t.setAsChart(id, OOXMLAdapter.stripNonAscii(this.getOOXMLName()).toString(),
-				TwoCellAnchor.convertBoundsFromBIFF8(this.getSheet(), mychart.getBounds())); // adjust BIFF8 bounds to
-																								// OOXML units
+		TwoCellAnchor t = new TwoCellAnchor(
+				((OOXMLChart) mychart).getEditMovement());
+		t.setAsChart(id, OOXMLAdapter.stripNonAscii(this.getOOXMLName())
+				.toString(), TwoCellAnchor.convertBoundsFromBIFF8(this
+						.getSheet(), mychart.getBounds())); // adjust BIFF8
+															// bounds to
+															// OOXML units
 		return t.getOOXML();
 	}
 
@@ -2324,15 +2490,21 @@ public class ChartHandle implements ChartConstants {
 		 */
 		try {
 			OOXMLChart thischart = (OOXMLChart) mychart;
-			int drawingOrder = 0; // drawing order of the chart (0=default, 1-9 for multiple charts in 1)
+			int drawingOrder = 0; // drawing order of the chart (0=default, 1-9
+									// for multiple charts in 1)
 			boolean hasPivotTableSource = false;
 
 			// remove any undesired formatting from default chart:
 			this.setTitle(""); // clear any previously set
 			mychart.getAxes().setPlotAreaBgColor(FormatConstants.COLOR_WHITE);
-			mychart.getAxes().setPlotAreaBorder(-1, -1); // remove plot area border
+			mychart.getAxes().setPlotAreaBorder(-1, -1); // remove plot area
+															// border
 
-			java.util.Stack<String> lastTag = new java.util.Stack<String>(); // keep track of element hierarchy
+			java.util.Stack<String> lastTag = new java.util.Stack<String>(); // keep
+																				// track
+																				// of
+																				// element
+																				// hierarchy
 
 			XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
 			factory.setNamespaceAware(true);
@@ -2342,9 +2514,12 @@ public class ChartHandle implements ChartConstants {
 			int eventType = xpp.getEventType();
 			while (eventType != XmlPullParser.END_DOCUMENT) {
 				if (eventType == XmlPullParser.START_TAG) {
-					String tnm = xpp.getName(); // main entry= chartSpace, children: lang, chart
+					String tnm = xpp.getName(); // main entry= chartSpace,
+												// children: lang, chart
 					lastTag.push(tnm); // keep track of element hierarchy
-					if (tnm.equals("chart")) { // beginning of DrawingML for a single image or chart; children: title,
+					if (tnm.equals("chart")) { // beginning of DrawingML for a
+												// single image or chart;
+												// children: title,
 												// plotArea, legend,
 						/**
 						 * <sequence> 5
@@ -2372,20 +2547,26 @@ public class ChartHandle implements ChartConstants {
 					} else if (tnm.equals("lang")) {
 						thischart.lang = xpp.getAttributeValue(0);
 					} else if (tnm.equals("roundedCorners")) {
-						thischart.roundedCorners = xpp.getAttributeValue(0).equals("1");
+						thischart.roundedCorners = xpp.getAttributeValue(0)
+								.equals("1");
 					} else if (tnm.equals("pivotSource")) { // has a pivot table
 						hasPivotTableSource = true;
 					} else if (tnm.equals("view3D")) {
 						ThreeD.parseOOXML(xpp, lastTag, thischart);
 					} else if (tnm.equals("layout")) {
-						thischart.plotAreaLayout = (Layout) Layout.parseOOXML(xpp, lastTag).cloneElement();
+						thischart.plotAreaLayout = (Layout) Layout
+								.parseOOXML(xpp, lastTag).cloneElement();
 					} else if (tnm.equals("legend")) {
 						thischart.showLegend(true, false);
 						thischart.ooxmlLegend = (io.starter.formats.OOXML.Legend) io.starter.formats.OOXML.Legend
-								.parseOOXML(xpp, lastTag, this.wbh).cloneElement();
-						thischart.ooxmlLegend.fill2003Legend(thischart.getLegend());
-						// Parse actual CHART TYPE element (barChart, pieChart, etc.)
-					} else if (tnm.equals(OOXMLConstants.twoDchartTypes[ChartHandle.BARCHART])
+								.parseOOXML(xpp, lastTag, this.wbh)
+								.cloneElement();
+						thischart.ooxmlLegend
+								.fill2003Legend(thischart.getLegend());
+						// Parse actual CHART TYPE element (barChart, pieChart,
+						// etc.)
+					} else if (tnm
+							.equals(OOXMLConstants.twoDchartTypes[ChartHandle.BARCHART])
 							|| tnm.equals(OOXMLConstants.twoDchartTypes[ChartHandle.LINECHART])
 							|| tnm.equals(OOXMLConstants.twoDchartTypes[ChartHandle.PIECHART])
 							|| tnm.equals(OOXMLConstants.twoDchartTypes[ChartHandle.AREACHART])
@@ -2402,36 +2583,62 @@ public class ChartHandle implements ChartConstants {
 							|| tnm.equals(OOXMLConstants.threeDchartTypes[ChartHandle.AREACHART])
 							|| tnm.equals(OOXMLConstants.threeDchartTypes[ChartHandle.SCATTERCHART])
 							|| tnm.equals(OOXMLConstants.threeDchartTypes[ChartHandle.SURFACECHART])) { // specific
-																										// chart type-
-						ChartType.parseOOXML(xpp, this.wbh, mychart, drawingOrder++);
+																										// chart
+																										// type-
+						ChartType
+								.parseOOXML(xpp, this.wbh, mychart, drawingOrder++);
 						lastTag.pop();
 					} else if (tnm.equals("title")) {
-						thischart.setOOXMLTitle((Title) Title.parseOOXML(xpp, lastTag, this.wbh).cloneElement(),
-								this.wbh);
+						thischart.setOOXMLTitle((Title) Title
+								.parseOOXML(xpp, lastTag, this.wbh)
+								.cloneElement(), this.wbh);
 						this.setTitle(thischart.getOOXMLTitle().getTitle());
-					} else if (tnm.equals("spPr")) { // shape properties -- can be for plot area or chart space
+					} else if (tnm.equals("spPr")) { // shape properties -- can
+														// be for plot area or
+														// chart space
 						String parent = lastTag.get(lastTag.size() - 2);
 						if (parent.equals("plotArea")) {
-							thischart.setSpPr(0, (SpPr) SpPr.parseOOXML(xpp, lastTag, this.wbh).cloneElement());
+							thischart.setSpPr(0, (SpPr) SpPr
+									.parseOOXML(xpp, lastTag, this.wbh)
+									.cloneElement());
 						} else if (parent.equals("chartSpace")) {
-							thischart.setSpPr(1, (SpPr) SpPr.parseOOXML(xpp, lastTag, this.wbh).cloneElement());
+							thischart.setSpPr(1, (SpPr) SpPr
+									.parseOOXML(xpp, lastTag, this.wbh)
+									.cloneElement());
 						}
 					} else if (tnm.equals("txPr")) { // text formatting
-						thischart.setTxPr((TxPr) TxPr.parseOOXML(xpp, lastTag, this.wbh).cloneElement());
+						thischart.setTxPr((TxPr) TxPr
+								.parseOOXML(xpp, lastTag, this.wbh)
+								.cloneElement());
 					} else if (tnm.equals("catAx")) { // child of plotArea
-						mychart.getAxes().parseOOXML(XAXIS, xpp, tnm, lastTag, this.wbh);
+						mychart.getAxes()
+								.parseOOXML(XAXIS, xpp, tnm, lastTag, this.wbh);
 					} else if (tnm.equals("valAx")) { // child of plotArea
-						if (mychart.getAxes().hasAxis(ChartConstants.XAXIS)) // usual, have a catAx then a valAx
-							mychart.getAxes().parseOOXML(ChartConstants.YAXIS, xpp, tnm, lastTag, this.wbh);
-						else if (mychart.getAxes().hasAxis(ChartConstants.YAXIS)) // for bubble charts, has two valAxes
-																					// and no
+						if (mychart.getAxes().hasAxis(ChartConstants.XAXIS)) // usual,
+																				// have
+																				// a
+																				// catAx
+																				// then
+																				// a
+																				// valAx
+							mychart.getAxes()
+									.parseOOXML(ChartConstants.YAXIS, xpp, tnm, lastTag, this.wbh);
+						else if (mychart.getAxes()
+								.hasAxis(ChartConstants.YAXIS)) // for bubble
+																// charts, has
+																// two valAxes
+																// and no
 							// catAx
-							mychart.getAxes().parseOOXML(ChartConstants.XVALAXIS, xpp, tnm, lastTag, this.wbh);
+							mychart.getAxes()
+									.parseOOXML(ChartConstants.XVALAXIS, xpp, tnm, lastTag, this.wbh);
 						else // 2nd val axis is Y axis
-							mychart.getAxes().parseOOXML(ChartConstants.YAXIS, xpp, tnm, lastTag, this.wbh);
+							mychart.getAxes()
+									.parseOOXML(ChartConstants.YAXIS, xpp, tnm, lastTag, this.wbh);
 					} else if (tnm.equals("serAx")) { // series axis - 3d charts
-						mychart.getAxes().parseOOXML(ZAXIS, xpp, tnm, lastTag, this.wbh);
-					} else if (tnm.equals("dateAx")) { // TODO: not finished: figure out!
+						mychart.getAxes()
+								.parseOOXML(ZAXIS, xpp, tnm, lastTag, this.wbh);
+					} else if (tnm.equals("dateAx")) { // TODO: not finished:
+														// figure out!
 						// ??
 					}
 
@@ -2519,13 +2726,13 @@ public class ChartHandle implements ChartConstants {
 		int nPoints = 0;
 		for (int i = 0; i < series.length; i++) {
 			try {
-				int[] coords = ExcelTools.getRangeCoords(series[i].getSeriesRange());
+				int[] coords = ExcelTools
+						.getRangeCoords(series[i].getSeriesRange());
 				if (coords[3] > coords[1])
 					nPoints = Math.max(nPoints, coords[3] - coords[1] + 1); // c1-c0
 				else
 					nPoints = Math.max(nPoints, coords[2] - coords[0] + 1); // r1-r0
-			} catch (Exception e) {
-			}
+			} catch (Exception e) {}
 		}
 		mychart.setDimensionsRecord(0, nPoints, 0, nSeries);
 	}
@@ -2645,7 +2852,7 @@ public class ChartHandle implements ChartConstants {
 	 *            where 1-9 indicate an overlay chart)
 	 * @return ThreeD rec
 	 */
-	private ThreeD initThreeD(int nChart) {
+	ThreeD initThreeD(int nChart) {
 		return mychart.initThreeD(nChart, this.getChartType(nChart));
 	}
 
@@ -2696,10 +2903,13 @@ public class ChartHandle implements ChartConstants {
 	}
 
 	/*
-	 * returns the desired axis If bCreateIfNecessary, will creates if doesn't exist
+	 * returns the desired axis If bCreateIfNecessary, will
+	 * creates if doesn't exist
 	 * 
-	 * @return Axis Object / private Axis getAxis(int axisType, boolean
-	 * bCreateIfNecessary) { return mychart.getAxis(axisType, bCreateIfNecessary); }
+	 * @return Axis Object / private Axis getAxis(int axisType,
+	 * boolean
+	 * bCreateIfNecessary) { return mychart.getAxis(axisType,
+	 * bCreateIfNecessary); }
 	 */
 
 	/**
@@ -2772,7 +2982,8 @@ public class ChartHandle implements ChartConstants {
 	 *            bounds - left or x value, top or y value, width, height
 	 * @see ChartHandle.X, ChartHandle.Y, ChartHandle.WIDTH, ChartHandle.HEIGHT
 	 */
-	// NOTE: THIS SHOULD BE RENAMED TO setCoords as Bounds and Coords are very
+	// NOTE: THIS SHOULD BE RENAMED TO setCoords as Bounds and
+	// Coords are very
 	// distinct
 	public void setBounds(short[] bounds) {
 		mychart.setCoords(bounds);
@@ -2785,7 +2996,8 @@ public class ChartHandle implements ChartConstants {
 	 * @return short[4] bounds - left or x value, top or y value, width, height
 	 * @see ChartHandle.X, ChartHandle.Y, ChartHandle.WIDTH, ChartHandle.HEIGHT
 	 */
-	// NOTE: THIS SHOULD BE RENAMED TO setCoords as Bounds and Coords are very
+	// NOTE: THIS SHOULD BE RENAMED TO setCoords as Bounds and
+	// Coords are very
 	// distinct
 	public short[] getBounds() {
 		return mychart.getCoords();
@@ -2853,24 +3065,31 @@ public class ChartHandle implements ChartConstants {
 	/*
 	 * For internal debugging use only
 	 *
-	 * public void writeChartRecs(String fName) { mychart.writeChartRecs(fName); }
+	 * public void writeChartRecs(String fName) {
+	 * mychart.writeChartRecs(fName); }
 	 * 
 	 * /** set DataLabels option for this chart
 	 * 
 	 * @param String type - see below
 	 * 
-	 * @param boolean bShowLegendKey - true if show legend key, false otherwise
-	 * <p>possible String type values: <br>Series <br>Category <br>Value
-	 * <br>Percentage (Only for Pie Charts) <br>Bubble (Only for Bubble Charts)
-	 * <br>X Value (Only for Bubble Charts) <br>Y Value (Only for Bubble Charts)
+	 * @param boolean bShowLegendKey - true if show legend key,
+	 * false otherwise
+	 * <p>possible String type values: <br>Series <br>Category
+	 * <br>Value
+	 * <br>Percentage (Only for Pie Charts) <br>Bubble (Only for
+	 * Bubble Charts)
+	 * <br>X Value (Only for Bubble Charts) <br>Y Value (Only
+	 * for Bubble Charts)
 	 * <br>CandP
 	 * 
 	 * <br><br>NOTE: not 100% implemented at this time
 	 */
 	public void setDataLabel(String/* [] */ type, boolean bShowLegendKey) {
 		/*
-		 * for now, only 1 option is valid - multiple legend settings e.g. Category and
-		 * Value are not figured out yet for (int i= 0; i < type.length; i++)
+		 * for now, only 1 option is valid - multiple legend
+		 * settings e.g. Category and
+		 * Value are not figured out yet for (int i= 0; i <
+		 * type.length; i++)
 		 * mychart.setChartOption("DataLabel", type[i]);
 		 */
 		if (!bShowLegendKey)
@@ -2929,7 +3148,9 @@ public class ChartHandle implements ChartConstants {
 	 * @deprecated
 	 */
 	@Deprecated
-	public void makeStacked(int nChart) { // bar, col, line, area, pyramid col + bar, cone col + bar, cylinder col + bar
+	public void makeStacked(int nChart) { // bar, col, line, area, pyramid col +
+											// bar, cone col + bar, cylinder col
+											// + bar
 		int chartType = this.getChartType(nChart);
 		this.setChartOption("Stacked", "true", nChart);
 		switch (chartType) {
@@ -2970,7 +3191,9 @@ public class ChartHandle implements ChartConstants {
 	 * @deprecated
 	 */
 	@Deprecated
-	public void make100PercentStacked(int nChart) { // bar, col, line, pyramid col + bar, cone col + bar, cylinder col +
+	public void make100PercentStacked(int nChart) { // bar, col, line, pyramid
+													// col + bar, cone col +
+													// bar, cylinder col +
 													// bar
 		int chartType = this.getChartType(nChart);
 		this.setChartOption("Stacked", "true", nChart);
@@ -3067,7 +3290,8 @@ public class ChartHandle implements ChartConstants {
 	 *             is100PercentStacked) instead
 	 */
 	@Deprecated
-	public void make3D() { // bar, col, line, pie, area, bubble, pyramid, cone, cylinder
+	public void make3D() { // bar, col, line, pie, area, bubble, pyramid, cone,
+							// cylinder
 		make3D(0);
 	}
 
@@ -3086,7 +3310,8 @@ public class ChartHandle implements ChartConstants {
 	 *             is100%Stacked) instead
 	 */
 	@Deprecated
-	public void make3D(int nChart) { // bar, col, line, pie, area, bubble, pyramid, cone, cylinder
+	public void make3D(int nChart) { // bar, col, line, pie, area, bubble,
+										// pyramid, cone, cylinder
 		int chartType = this.getChartType(nChart);
 		ThreeD td = null;
 		switch (chartType) {
@@ -3114,7 +3339,8 @@ public class ChartHandle implements ChartConstants {
 			break;
 		case ChartConstants.PIECHART:
 		case ChartConstants.LINECHART:
-			this.initThreeD(nChart); // just create a threeD rec w/ no extra options
+			this.initThreeD(nChart); // just create a threeD rec w/ no extra
+										// options
 			break;
 		case ChartConstants.BUBBLECHART:
 			this.setChartOption("Percentage", "25", nChart);
@@ -3170,7 +3396,8 @@ public class ChartHandle implements ChartConstants {
 			this.setChartOption("Percentage", "25");
 			break;
 		// ShowLdrLines="true" Percentage="25"/>
-		// exploded donut: ShowLdrLines="true" Donut="50" Percentage="25"
+		// exploded donut: ShowLdrLines="true" Donut="50"
+		// Percentage="25"
 		// SmoothedLine="true"/>
 		}
 	}
@@ -3202,18 +3429,25 @@ public class ChartHandle implements ChartConstants {
 	}
 
 	/*
-	 * NOT IMPLEMENTED YET TODO: IMPLEMENT Make this Chart have smoothed lines
+	 * NOT IMPLEMENTED YET TODO: IMPLEMENT Make this Chart have
+	 * smoothed lines
 	 * (Scatter only)
 	 *
-	 * public void makeSmoothedLines() { // scatter //Percentage="25"
+	 * public void makeSmoothedLines() { // scatter
+	 * //Percentage="25"
 	 * SmoothedLine="true }
 	 * 
-	 * public void makeWireFrame() { // surface // NO ColorFill, only //
-	 * Percentage="25" SmoothedLine="true" // AnRot="20" Perspective="true"
-	 * ThreeDScaling="true" TwoDWalls="true"/> // all else should be default for
-	 * surface charts } public void makeContour() { // surface -- for wireframe
+	 * public void makeWireFrame() { // surface // NO ColorFill,
+	 * only //
+	 * Percentage="25" SmoothedLine="true" // AnRot="20"
+	 * Perspective="true"
+	 * ThreeDScaling="true" TwoDWalls="true"/> // all else
+	 * should be default for
+	 * surface charts } public void makeContour() { // surface
+	 * -- for wireframe
 	 * surface, no ColorFill //ColorFill="true" Percentage="25"
-	 * SmoothedLine="true"/> // AnElev="90" pcDist="0" Perspective="true"
+	 * SmoothedLine="true"/> // AnElev="90" pcDist="0"
+	 * Perspective="true"
 	 * ThreeDScaling="true" TwoDWalls="true" }
 	 */
 
@@ -3251,20 +3485,27 @@ public class ChartHandle implements ChartConstants {
 		JSONObject theChart = new JSONObject();
 		try {
 			JSONObject titles = new JSONObject();
-			int type = this.getChartType(); // necessary for parsing AXIS options: horizontal charts "switch" axes ...
+			int type = this.getChartType(); // necessary for parsing AXIS
+											// options: horizontal charts
+											// "switch" axes ...
 
 			// titles/labels
 			titles.put("title", this.getTitle());
-			titles.put("XAxis", (type != ChartConstants.BARCHART) ? (this.getXAxisLabel()) : this.getYAxisLabel()); // bar
-																													// axes
-																													// are
-																													// reversed
-																													// ...
-			titles.put("YAxis", (type != ChartConstants.BARCHART) ? (this.getYAxisLabel()) : this.getXAxisLabel());
+			titles.put("XAxis", (type != ChartConstants.BARCHART)
+					? (this.getXAxisLabel())
+					: this.getYAxisLabel()); // bar
+												// axes
+												// are
+												// reversed
+												// ...
+			titles.put("YAxis", (type != ChartConstants.BARCHART)
+					? (this.getYAxisLabel())
+					: this.getXAxisLabel());
 			try {
 				titles.put("ZAxis", this.getZAxisLabel());
 			} catch (Exception e) {
-				Logger.logWarn("ChartHandle.getJSON failed getting zaxislable:" + e.toString());
+				Logger.logWarn("ChartHandle.getJSON failed getting zaxislable:"
+						+ e.toString());
 			}
 			theChart.put("titles", titles);
 
@@ -3272,7 +3513,8 @@ public class ChartHandle implements ChartConstants {
 			short[] coords = mychart.getCoords();
 			theChart.put("width", coords[ChartHandle.WIDTH]);
 			theChart.put("height", coords[ChartHandle.HEIGHT]);
-			theChart.put("row", mychart.getRow0()); // TODO: may not be necessary, see usage ...
+			theChart.put("row", mychart.getRow0()); // TODO: may not be
+													// necessary, see usage ...
 			theChart.put("col", mychart.getCol0());
 			// Plot Area Background color
 			int plotAreabg = this.getPlotAreaBgColor();
@@ -3281,18 +3523,19 @@ public class ChartHandle implements ChartConstants {
 			theChart.put("fill", FormatConstants.SVGCOLORSTRINGS[plotAreabg]);
 
 			Double[] jMinMax = new Double[3];
-			JSONObject chartObjectJSON = this.mychart.getChartObject().getJSON(this.mychart.getChartSeries(), this.wbh,
-					jMinMax);
+			JSONObject chartObjectJSON = this.mychart.getChartObject()
+					.getJSON(this.mychart.getChartSeries(), this.wbh, jMinMax);
 			double yMax = 1.0, yMin = 0.0;
 			int nSeries = 0;
 			try { // it's possible to not have any series defined ...
 				theChart.put("Series", chartObjectJSON.getJSONArray("Series"));
 				// 20080416 KSC: Save SeriesJSON for later comparisons
 				mychart.setSeriesJSON(chartObjectJSON.getJSONArray("Series"));
-				theChart.put("SeriesFills", chartObjectJSON.getJSONArray("SeriesFills")); // 20090729 KSC: capture bar
-																							// colors or fills
-			} catch (Exception e) {
-			}
+				theChart.put("SeriesFills", chartObjectJSON
+						.getJSONArray("SeriesFills")); // 20090729 KSC: capture
+														// bar
+														// colors or fills
+			} catch (Exception e) {}
 			theChart.put("type", chartObjectJSON.getJSONObject("type"));
 			yMin = jMinMax[0].doubleValue();
 			yMax = jMinMax[1].doubleValue();
@@ -3300,29 +3543,35 @@ public class ChartHandle implements ChartConstants {
 
 			// Axes + Category Labels + Grid Lines
 			try {
-				// inputJSONObject(theChart, this.getAxis(YAXIS, false).getJSON(this.wbh, type,
+				// inputJSONObject(theChart, this.getAxis(YAXIS,
+				// false).getJSON(this.wbh, type,
 				// yMax, yMin, nSeries));
-				theChart.put("y",
-						mychart.getAxes().getJSON(YAXIS, this.wbh, type, yMax, yMin, nSeries).getJSONObject("y"));
-				theChart.put("back_grid", mychart.getAxes().getJSON(YAXIS, this.wbh, type, yMax, yMin, nSeries)
-						.getJSONObject("back_grid"));
-			} catch (Exception e) {
-			}
-			try {
-				// inputJSONObject(theChart, this.getAxis(XAXIS, false).getJSON(this.wbh, type,
-				// yMax, yMin, nSeries));
-				theChart.put("x",
-						mychart.getAxes().getJSON(XAXIS, this.wbh, type, yMax, yMin, nSeries).getJSONObject("x"));
+				theChart.put("y", mychart.getAxes()
+						.getJSON(YAXIS, this.wbh, type, yMax, yMin, nSeries)
+						.getJSONObject("y"));
 				theChart.put("back_grid", mychart.getAxes()
-						.getJSON(ChartConstants.YAXIS, this.wbh, type, yMax, yMin, nSeries).getJSONObject("back_grid"));
-			} catch (Exception e) {
-			}
+						.getJSON(YAXIS, this.wbh, type, yMax, yMin, nSeries)
+						.getJSONObject("back_grid"));
+			} catch (Exception e) {}
+			try {
+				// inputJSONObject(theChart, this.getAxis(XAXIS,
+				// false).getJSON(this.wbh, type,
+				// yMax, yMin, nSeries));
+				theChart.put("x", mychart.getAxes()
+						.getJSON(XAXIS, this.wbh, type, yMax, yMin, nSeries)
+						.getJSONObject("x"));
+				theChart.put("back_grid", mychart.getAxes()
+						.getJSON(ChartConstants.YAXIS, this.wbh, type, yMax, yMin, nSeries)
+						.getJSONObject("back_grid"));
+			} catch (Exception e) {}
 			// TODO: 3d Charts (z axis)
 
 			/*
 			 * /* Chart Fonts sb.append(t(2) + "<ChartFontRecs>" +
-			 * this.getChartFontRecsXML()); sb.append("\n" + t(2) + "</ChartFontRecs>\n");
-			 * sb.append(t(2) + "<ChartFonts" + this.getChartFontsXML() + "/>\n");
+			 * this.getChartFontRecsXML()); sb.append("\n" + t(2) +
+			 * "</ChartFontRecs>\n");
+			 * sb.append(t(2) + "<ChartFonts" + this.getChartFontsXML()
+			 * + "/>\n");
 			 */
 			/*
 			 * Format Chart Area
@@ -3332,13 +3581,19 @@ public class ChartHandle implements ChartConstants {
 			// Chart Legend
 			if (this.hasDataLegend()) {
 				short s = this.mychart.getLegend().getLegendPosition();
-				String[] legends = this.mychart.getLegends(-1); // -1 is flag for all rather than for a specific chart
+				String[] legends = this.mychart.getLegends(-1); // -1 is flag
+																// for all
+																// rather than
+																// for a
+																// specific
+																// chart
 				String l = "";
 				for (int i = 0; i < legends.length; i++)
 					l += legends[i] + ",";
 				if (l.length() > 0)
 					l = l.substring(0, l.length() - 1);
-				theChart.put("legend", new JSONObject("{position:" + s + ",labels:[" + l + "]}"));
+				theChart.put("legend", new JSONObject(
+						"{position:" + s + ",labels:[" + l + "]}"));
 			}
 
 		} catch (JSONException e) {
@@ -3358,7 +3613,8 @@ public class ChartHandle implements ChartConstants {
 		if (source != null) {
 			try {
 				for (int j = 0; j < input.names().length(); j++) {
-					source.put(input.names().getString(j), input.get(input.names().getString(j)));
+					source.put(input.names().getString(j), input
+							.get(input.names().getString(j)));
 				}
 			} catch (JSONException e) {
 				Logger.logErr("Error inputting JSON Object: " + e);
@@ -3403,14 +3659,16 @@ public class ChartHandle implements ChartConstants {
 			// Series Data
 			// 20080516 KSC: See above JSONObject chartObjectJSON=
 			// ((GenericChartObject)this.mychart.getChartObject()).getJSON(
-			// this.getAllChartSeriesHandles(), this.getCategories()[0], this.wbh, minMax);
-			JSONObject chartObjectJSON = this.mychart.getChartObject().getJSON(this.mychart.getChartSeries(), this.wbh,
-					jMinMax);
+			// this.getAllChartSeriesHandles(), this.getCategories()[0],
+			// this.wbh, minMax);
+			JSONObject chartObjectJSON = this.mychart.getChartObject()
+					.getJSON(this.mychart.getChartSeries(), this.wbh, jMinMax);
 
 			try {
 				retJSON.put("Series", chartObjectJSON.getJSONArray("Series"));
 			} catch (Exception e) {
-				Logger.logWarn("ChartHandle.getCurrentSeries problem:" + e.toString());
+				Logger.logWarn("ChartHandle.getCurrentSeries problem:"
+						+ e.toString());
 			}
 
 			// Retrieve Axis Scale info
@@ -3420,18 +3678,25 @@ public class ChartHandle implements ChartConstants {
 			yMax = jMinMax[1].doubleValue();
 			nSeries = jMinMax[2].intValue();
 
-			int type = this.getChartType(); // necessary for parsing AXIS options: horizontal charts "switch" axes ...
+			int type = this.getChartType(); // necessary for parsing AXIS
+											// options: horizontal charts
+											// "switch" axes ...
 			// Axes + Category Labels + Grid Lines
 			/*
-			 * KSC: TAKE OUT JSON STUFF FOR NOW; WILL REFACTOR LATER try {
-			 * inputJSONObject(retJSON, mychart.getAxes().getMinMaxJSON(YAXIS, this.wbh,
-			 * type, yMax, yMin, nSeries)); } catch (Exception e) { } try {
-			 * inputJSONObject(retJSON, mychart.getAxes().getMinMaxJSON(XAXIS, this.wbh,
+			 * KSC: TAKE OUT JSON STUFF FOR NOW; WILL REFACTOR LATER try
+			 * {
+			 * inputJSONObject(retJSON,
+			 * mychart.getAxes().getMinMaxJSON(YAXIS, this.wbh,
+			 * type, yMax, yMin, nSeries)); } catch (Exception e) { }
+			 * try {
+			 * inputJSONObject(retJSON,
+			 * mychart.getAxes().getMinMaxJSON(XAXIS, this.wbh,
 			 * type, yMax, yMin, nSeries)); } catch (Exception e) { }
 			 */
 			// TODO: 3d Charts (z axis)
 		} catch (JSONException e) {
-			Logger.logErr("ChartHandle.getCurrentSeries: Error getting Series JSON: " + e);
+			Logger.logErr("ChartHandle.getCurrentSeries: Error getting Series JSON: "
+					+ e);
 		}
 		return retJSON;
 	}
@@ -3487,67 +3752,95 @@ public class ChartHandle implements ChartConstants {
 	 * @return String SVG
 	 */
 	public String getSVG(double scale) {
-		HashMap<String, Double> chartMetrics = mychart.getMetrics(wbh); // build or retrieve Chart Metrics -->
-																		// dimensions + series data ...
+		HashMap<String, Double> chartMetrics = mychart.getMetrics(wbh); // build
+																		// or
+																		// retrieve
+																		// Chart
+																		// Metrics
+																		// -->
+																		// dimensions
+																		// +
+																		// series
+																		// data
+																		// ...
 
 		StringBuffer svg = new StringBuffer();
 		// required header
-		// svg.append("<?xml version=\"1.0\" standalone=\"no\"?>\r\n"); // referneces
+		// svg.append("<?xml version=\"1.0\"
+		// standalone=\"no\"?>\r\n"); // referneces
 		// the DTD
-		// svg.append("<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\"
+		// svg.append("<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG
+		// 1.1//EN\"
 		// \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\r\n");
 
 		// Define SVG Canvas:
-		svg.append("<svg width='" + (chartMetrics.get("canvasw") * scale) + "px' height='"
-				+ (chartMetrics.get("canvash") * scale)
+		svg.append("<svg width='" + (chartMetrics.get("canvasw") * scale)
+				+ "px' height='" + (chartMetrics.get("canvash") * scale)
 				+ "px' version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\"  xmlns:xlink=\"http://www.w3.org/1999/xlink\">\r\n");
 		svg.append("<g transform='scale(" + scale
 				+ ")'  onclick='null;' onmousedown='handleClick(evt);' style='width:100%; height:"
-				+ (chartMetrics.get("canvash") * scale) + "px'>"); // scale chart -default scale=1 == 100%
+				+ (chartMetrics.get("canvash") * scale) + "px'>"); // scale
+																	// chart
+																	// -default
+																	// scale=1
+																	// == 100%
 		// JavaScript hooks
 		svg.append(getJavaScript());
 
-		// Data Legend Box -- do before drawing plot area as legends box may change plot
+		// Data Legend Box -- do before drawing plot area as legends
+		// box may change plot
 		// area coordinates
-		String legendSVG = getLegendSVG(chartMetrics); // but have to append it after because should overlap the
+		String legendSVG = getLegendSVG(chartMetrics); // but have to append it
+														// after because should
+														// overlap the
 														// plotarea
 
 		String bgclr = this.mychart.getPlotAreaBgColor();
 		// setup gradients
 		svg.append("<defs>");
 		svg.append("<linearGradient id='bg_gradient' x1='0' y1='0' x2='0' y2='100%'>");
-		svg.append("<stop offset='0' style='stop-color:" + bgclr + "; stop-opacity:1'/>");
-		svg.append("<stop offset='" + chartMetrics.get("w") + "' style='stop-color:white; stop-opacity:.5'/>");
+		svg.append("<stop offset='0' style='stop-color:" + bgclr
+				+ "; stop-opacity:1'/>");
+		svg.append("<stop offset='" + chartMetrics.get("w")
+				+ "' style='stop-color:white; stop-opacity:.5'/>");
 		svg.append("</linearGradient>");
 		svg.append("</defs>");
 
 		// PLOT AREA BG + RECT
 		// rectangle around entire chart canvas
-		if (!(mychart instanceof OOXMLChart) || !((OOXMLChart) mychart).roundedCorners)
-			svg.append("<rect x='0' y='0' width='" + chartMetrics.get("canvasw") + "' height='"
-					+ chartMetrics.get("canvash")
+		if (!(mychart instanceof OOXMLChart)
+				|| !((OOXMLChart) mychart).roundedCorners)
+			svg.append("<rect x='0' y='0' width='" + chartMetrics.get("canvasw")
+					+ "' height='" + chartMetrics.get("canvash")
 					+ "' style='fill-opacity:1;fill:white' stroke='#CCCCCC' stroke-width='1' stroke-linecap='butt' stroke-linejoin='miter' stroke-miterlimit='4'/>\r\n");
 		else // OOXML rounded corners
-			svg.append("<rect x='0' y='0' width='" + chartMetrics.get("canvasw") + "' height='"
-					+ chartMetrics.get("canvash") + "' rx='20' ry='20" + /* rounded corners */
+			svg.append("<rect x='0' y='0' width='" + chartMetrics.get("canvasw")
+					+ "' height='" + chartMetrics.get("canvash")
+					+ "' rx='20' ry='20" + /* rounded corners */
 					"' style='fill-opacity:1;fill:white' stroke='#CCCCCC' stroke-width='1' stroke-linecap='butt' stroke-linejoin='miter' stroke-miterlimit='4'/>\r\n");
 
 		// actual plot area
 		svg.append("<rect fill='" + bgclr
 				+ "'  style='fill-opacity:1;fill:url(#bg_gradient)' stroke='none' stroke-opacity='.5' stroke-width='1' stroke-linecap='butt' stroke-linejoin='miter' stroke-miterlimit='4'"
-				+ " x='" + chartMetrics.get("x") + "' y='" + chartMetrics.get("y") + "' width='" + chartMetrics.get("w")
-				+ "' height='" + chartMetrics.get("h") + "' fill-rule='evenodd'/>\r\n");
+				+ " x='" + chartMetrics.get("x") + "' y='"
+				+ chartMetrics.get("y") + "' width='" + chartMetrics.get("w")
+				+ "' height='" + chartMetrics.get("h")
+				+ "' fill-rule='evenodd'/>\r\n");
 
-		// AXES, IF PRESENT - DO BEFORE ACTUAL SERIES DATA SO DRAWS CORRECTLY + ADJUST
+		// AXES, IF PRESENT - DO BEFORE ACTUAL SERIES DATA SO DRAWS
+		// CORRECTLY + ADJUST
 		// CHART DIMENSIONS
-		svg.append(mychart.getAxes().getSVG(XAXIS, chartMetrics, mychart.getChartSeries().getCategories()));
-		svg.append(mychart.getAxes().getSVG(YAXIS, chartMetrics, mychart.getChartSeries().getCategories()));
+		svg.append(mychart.getAxes().getSVG(XAXIS, chartMetrics, mychart
+				.getChartSeries().getCategories()));
+		svg.append(mychart.getAxes().getSVG(YAXIS, chartMetrics, mychart
+				.getChartSeries().getCategories()));
 		// TODO: Z Axis
 
 		// After Axes and gridlines (if present),
-		// ACTUAL bar/series/area/etc. svg generated from series and scale data
-		svg.append(this.mychart.getChartObject().getSVG(chartMetrics, mychart.getAxes().getMetrics(),
-				mychart.getChartSeries()));
+		// ACTUAL bar/series/area/etc. svg generated from series and
+		// scale data
+		svg.append(this.mychart.getChartObject().getSVG(chartMetrics, mychart
+				.getAxes().getMetrics(), mychart.getChartSeries()));
 
 		svg.append(legendSVG); // append legend SVG obtained above
 
@@ -3560,11 +3853,14 @@ public class ChartHandle implements ChartConstants {
 		svg.append("</svg>");
 		/*
 		 * //KSC: TESTING: REMOVE WHEN DONE if
-		 * (WorkBookFactory.PID==WorkBookFactory.E360) { // save svg for testing
+		 * (WorkBookFactory.PID==WorkBookFactory.E360) { // save svg
+		 * for testing
 		 * purposes try { java.io.File f= new java.io.File(
 		 * "c:/eclipse/workspace/testfiles/io.starter.OpenXLS/output/charts/FromSheetster.svg"
-		 * ); java.io.FileOutputStream fos= new java.io.FileOutputStream(f);
-		 * fos.write(svg.toString().getBytes()); fos.flush(); fos.close(); } catch
+		 * ); java.io.FileOutputStream fos= new
+		 * java.io.FileOutputStream(f);
+		 * fos.write(svg.toString().getBytes()); fos.flush();
+		 * fos.close(); } catch
 		 * (Exception e) {} }
 		 */
 		return svg.toString();
@@ -3572,7 +3868,8 @@ public class ChartHandle implements ChartConstants {
 
 	private String getLegendSVG(HashMap<String, Double> chartMetrics) {
 		try {
-			return mychart.getLegend().getSVG(chartMetrics, mychart.getChartObject(), mychart.getChartSeries());
+			return mychart.getLegend().getSVG(chartMetrics, mychart
+					.getChartObject(), mychart.getChartSeries());
 		} catch (NullPointerException ne) { // no legend??
 			return null;
 		}
@@ -3593,13 +3890,19 @@ public class ChartHandle implements ChartConstants {
 
 		svg.append("function highLight(evt) {");
 		svg.append("this.bgc = evt.target.getAttributeNS(null, 'fill');");
-		svg.append("evt.target.setAttributeNS(null,'fill','gold');"); // rgb('+ red +','+ green+','+blue+')');");
+		svg.append("evt.target.setAttributeNS(null,'fill','gold');"); // rgb('+
+																		// red
+																		// +','+
+																		// green+','+blue+')');");
 		svg.append("evt.target.setAttributeNS(null,'stroke-width','2');");
 		// svg.append("evt.target.setAttributeNS(null,'stroke-color','white');");
 		svg.append("}");
 
 		svg.append("function restore(evt) {");
-		svg.append("evt.target.setAttributeNS(null,'fill',this.bgc);"); // rgb('+ red +','+ green+','+blue+')');");
+		svg.append("evt.target.setAttributeNS(null,'fill',this.bgc);"); // rgb('+
+																		// red
+																		// +','+
+																		// green+','+blue+')');");
 		svg.append("evt.target.setAttributeNS(null,'stroke-width','1');");
 		svg.append("}");
 
@@ -3628,5 +3931,10 @@ public class ChartHandle implements ChartConstants {
 	 */
 	public void WriteMainChartRecs(String fName) {
 		mychart.getChartObject().WriteMainChartRecs(fName);
+	}
+
+	public Axis getAxis(int type) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

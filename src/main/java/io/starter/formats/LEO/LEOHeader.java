@@ -119,7 +119,7 @@ public class LEOHeader implements Serializable{
 	 */
 	private static void displayHeader(ByteBuffer data) {
 		for (int i= 0; i < data.capacity(); i++) {
-			io.starter.OpenXLS.util.Logger.log("[" + i + "] " + data.get(i));
+			io.starter.toolkit.Logger.log("[" + i + "] " + data.get(i));
 		}
 	}
 	

@@ -5,24 +5,30 @@
  * 
  * This file is part of OpenXLS.
  * 
- * OpenXLS is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as
- * published by the Free Software Foundation, either version 3 of
+ * OpenXLS is free software: you can redistribute it and/or
+ * modify
+ * it under the terms of the GNU Lesser General Public
+ * License as
+ * published by the Free Software Foundation, either version
+ * 3 of
  * the License, or (at your option) any later version.
  * 
- * OpenXLS is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * OpenXLS is distributed in the hope that it will be
+ * useful,
+ * but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+ * the
  * GNU Lesser General Public License for more details.
  * 
- * You should have received a copy of the GNU Lesser General Public
- * License along with OpenXLS.  If not, see
+ * You should have received a copy of the GNU Lesser General
+ * Public
+ * License along with OpenXLS. If not, see
  * <http://www.gnu.org/licenses/>.
  * ---------- END COPYRIGHT NOTICE ----------
  */
 package io.starter.toolkit;
 
-import java.awt.font.LineMetrics;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Reader;
@@ -31,15 +37,14 @@ import java.io.StringWriter;
 import java.nio.CharBuffer;
 import java.util.StringTokenizer;
 
-
-
 /**
  * A collection of useful methods for manipulating Strings.
  * 
  */
 public class StringTool implements Serializable {
 
-	// static final long serialVersionUID = -5757918511951798619l;
+	// static final long serialVersionUID =
+	// -5757918511951798619l;
 	static final long serialVersionUID = -2761264230959133529l;
 
 	/**
@@ -54,7 +59,8 @@ public class StringTool implements Serializable {
 	 * @return
 	 */
 	public static String convertXMLChars(String rep) {
-		return io.starter.formats.XLS.OOXMLAdapter.stripNonAscii(rep).toString();	// 20110815 KSC: this method is more complete
+		return io.starter.formats.XLS.OOXMLAdapter.stripNonAscii(rep)
+				.toString(); // 20110815 KSC: this method is more complete
 	}
 
 	// test stuff
@@ -164,10 +170,11 @@ public class StringTool implements Serializable {
 		char[] chars = name.toCharArray();
 		StringBuffer buf = new StringBuffer();
 		for (int i = 0; i < chars.length; i++) {
-			// if there is a single upper-case letter, then it's a case-word
+			// if there is a single upper-case letter, then it's a
+			// case-word
 			if (Character.isUpperCase(chars[i])) {
 				if ((i > 0) && (i + 1 < chars.length)) {
-					if (!Character.isUpperCase(chars[i + 1]))
+					if (!Character.isUpperCase(chars[i]))
 						buf.append("_");
 				}
 				buf.append(chars[i]);
@@ -308,6 +315,14 @@ public class StringTool implements Serializable {
 		return new String(output);
 	}
 
+	public static String getLowerCaseFirstLetter(String thismember) {
+		String upcase = thismember.substring(0, 1);
+		upcase = upcase.toLowerCase();
+		thismember = thismember.substring(1);
+		thismember = upcase + thismember;
+		return thismember;
+	}
+
 	/**
 	 * generate a "setXXXX" string from a field name per Extentech java naming
 	 * conventions.
@@ -315,10 +330,14 @@ public class StringTool implements Serializable {
 	 * ie: Converts "firstName" to "setFirstName"
 	 */
 	public static String getSetMethodNameFromVar(String thismember) {
+		return "set" + getUpperCaseFirstLetter(thismember);
+	}
+
+	public static String getUpperCaseFirstLetter(String thismember) {
 		String upcase = thismember.substring(0, 1);
 		upcase = upcase.toUpperCase();
 		thismember = thismember.substring(1);
-		thismember = "set" + upcase + thismember;
+		thismember = upcase + thismember;
 		return thismember;
 	}
 
@@ -329,11 +348,7 @@ public class StringTool implements Serializable {
 	 * ie: Converts "firstName" to "getFirstName"
 	 */
 	public static String getGetMethodNameFromVar(String thismember) {
-		String upcase = thismember.substring(0, 1);
-		upcase = upcase.toUpperCase();
-		thismember = thismember.substring(1);
-		thismember = "get" + upcase + thismember;
-		return thismember;
+		return "get" + getUpperCaseFirstLetter(thismember);
 	}
 
 	/**
@@ -419,12 +434,12 @@ public class StringTool implements Serializable {
 	}
 
 	// escaped slashes
-	String oneslash = String.valueOf((char) 0x005C);
-	String twoslash = oneslash + oneslash;
+	String	oneslash	= String.valueOf((char) 0x005C);
+	String	twoslash	= oneslash + oneslash;
 
 	/**
-     * 
-     */
+	 * 
+	 */
 	public static String dbencode(String holder) {
 		return replaceText(holder, "'", "''", 0);
 	}
@@ -465,8 +480,8 @@ public class StringTool implements Serializable {
 		StringBuffer stripped = new StringBuffer(tostrip.length());
 		while (tostrip.indexOf(stripstr) > -1) {
 			stripped.append(tostrip.substring(0, tostrip.indexOf(stripstr)));
-			tostrip = tostrip.substring(tostrip.indexOf(stripstr)
-					+ stripstr.length());
+			tostrip = tostrip
+					.substring(tostrip.indexOf(stripstr) + stripstr.length());
 		}
 		stripped.append(tostrip);
 		return (stripped.toString());
@@ -517,11 +532,9 @@ public class StringTool implements Serializable {
 	 *            offset of replacement within original string.
 	 * @return Processed text.
 	 */
-	public static String replaceText(String originalText, String replaceText,
-			String replacementText, int offset, boolean skipmatch) {
+	public static String replaceText(String originalText, String replaceText, String replacementText, int offset, boolean skipmatch) {
 		if (!skipmatch)
-			return replaceText(originalText, replaceText, replacementText,
-					offset);
+			return replaceText(originalText, replaceText, replacementText, offset);
 
 		StringBuffer sb = new StringBuffer();
 		if (originalText.indexOf(replaceText) < 0) {
@@ -570,8 +583,7 @@ public class StringTool implements Serializable {
 	 *            offset of replacement within original string.
 	 * @return Processed text.
 	 */
-	public static String replaceText(String originalText, String replaceText,
-			String replacementText, int offset) {
+	public static String replaceText(String originalText, String replaceText, String replacementText, int offset) {
 
 		int newlen = originalText.length() - replaceText.length()
 				+ replacementText.length();
@@ -638,8 +650,7 @@ public class StringTool implements Serializable {
 	 *            Delimeter for end of retrieved section.
 	 * @return Text between delims or "" if not found.
 	 */
-	public static String getTextBetweenNestedDelims(String originalText,
-			String beginDelim, String endDelim) {
+	public static String getTextBetweenNestedDelims(String originalText, String beginDelim, String endDelim) {
 		StringBuffer sb = new StringBuffer(originalText.length());
 		// Check to see that both delimiters exist in the string
 		if ((originalText.indexOf(beginDelim) < 0)
@@ -681,8 +692,7 @@ public class StringTool implements Serializable {
 	 *            Delimeter for end of retrieved section.
 	 * @return Text between delims or "" if not found.
 	 */
-	public static String getTextBetweenDelims(String originalText,
-			String beginDelim, String endDelim) {
+	public static String getTextBetweenDelims(String originalText, String beginDelim, String endDelim) {
 		StringBuffer sb = new StringBuffer(originalText.length());
 		// Check to see that both delimiters exist in the string
 		if ((originalText.indexOf(beginDelim) < 0)
@@ -728,8 +738,7 @@ public class StringTool implements Serializable {
 	 * @return Processed text.
 	 */
 
-	public static String replaceSection(String originalText,
-			String replaceBegin, String replacementText, String replaceEnd) {
+	public static String replaceSection(String originalText, String replaceBegin, String replacementText, String replaceEnd) {
 		StringBuffer sb = new StringBuffer(originalText.length());
 		if ((originalText.indexOf(replaceBegin) < 0)
 				|| (originalText.indexOf(replaceEnd) < 0)) {
@@ -786,8 +795,7 @@ public class StringTool implements Serializable {
 		return strOut.toString();
 	}
 
-	public static String replaceChars(String theFilter, String theString,
-			String replacement) {
+	public static String replaceChars(String theFilter, String theString, String replacement) {
 		StringBuffer strOut = new StringBuffer(theString.length());
 		char curChar;
 		for (int i = 0; i < theString.length(); i++) {
@@ -805,8 +813,7 @@ public class StringTool implements Serializable {
 	/**
 	 * replace a section of text based on pattern match throughout string.
 	 */
-	public static String replaceText(String theString, String theFilter,
-			String replacement) {
+	public static String replaceText(String theString, String theFilter, String replacement) {
 		return replaceText(theString, theFilter, replacement, 0);
 	}
 
@@ -825,8 +832,7 @@ public class StringTool implements Serializable {
 	 * Replaces a specified token in a string with a value from the passed
 	 * through array this is done in matching order from String to Arrray.
 	 */
-	public static String replaceTokenFromArray(String replace, String token,
-			String[] vals) {
+	public static String replaceTokenFromArray(String replace, String token, String[] vals) {
 		StringBuffer sb = new StringBuffer();
 		StringTokenizer toke = new StringTokenizer(replace, token, false);
 		int i = 0;
@@ -935,9 +941,13 @@ public class StringTool implements Serializable {
 	public static double getApproximateStringWidth(java.awt.Font f, String s) {
 		java.awt.FontMetrics fm = java.awt.Toolkit.getDefaultToolkit()
 				.getFontMetrics(f);
-		/* width/height in pixels = (w/h field) * DPI of the display device / 72 */
-		double conversion = java.awt.Toolkit.getDefaultToolkit().getScreenResolution() / 72.0;
-		return fm.stringWidth(s) * conversion;	// pixels * conversion
+		/*
+		 * width/height in pixels = (w/h field) * DPI of the display
+		 * device / 72
+		 */
+		double conversion = java.awt.Toolkit.getDefaultToolkit()
+				.getScreenResolution() / 72.0;
+		return fm.stringWidth(s) * conversion; // pixels * conversion
 	}
 
 	/**
@@ -950,16 +960,21 @@ public class StringTool implements Serializable {
 	public static double getApproximateStringWidthLB(java.awt.Font f, String s) {
 		java.awt.FontMetrics fm = java.awt.Toolkit.getDefaultToolkit()
 				.getFontMetrics(f);
-		/* width/height in pixels = (w/h field) * DPI of the display device / 72 */
-		double conversion = java.awt.Toolkit.getDefaultToolkit().getScreenResolution() / 72.0;
-		String[] ss= s.split("\n");
-		double len= 0;
+		/*
+		 * width/height in pixels = (w/h field) * DPI of the display
+		 * device / 72
+		 */
+		double conversion = java.awt.Toolkit.getDefaultToolkit()
+				.getScreenResolution() / 72.0;
+		String[] ss = s.split("\n");
+		double len = 0;
 		for (String st : ss) {
-			len= Math.max(len, fm.stringWidth(st) * conversion);
+			len = Math.max(len, fm.stringWidth(st) * conversion);
 		}
-		//		return fm.stringWidth(s) * conversion;
+		// return fm.stringWidth(s) * conversion;
 		return len;
 	}
+
 	/**
 	 * return the approximate witdth in width in pixels of the given character
 	 * 
@@ -970,13 +985,17 @@ public class StringTool implements Serializable {
 	 * @return double approximate width in pixels
 	 */
 	public static double getApproximateCharWidth(java.awt.Font f, Character c) {
-		java.awt.FontMetrics fm = java.awt.Toolkit.getDefaultToolkit().getFontMetrics(f);
-		/* width/height in pixels = (w/h field) * DPI of the display device / 72 */
-		double conversion = java.awt.Toolkit.getDefaultToolkit().getScreenResolution() / 72.0;
+		java.awt.FontMetrics fm = java.awt.Toolkit.getDefaultToolkit()
+				.getFontMetrics(f);
+		/*
+		 * width/height in pixels = (w/h field) * DPI of the display
+		 * device / 72
+		 */
+		double conversion = java.awt.Toolkit.getDefaultToolkit()
+				.getScreenResolution() / 72.0;
 		return fm.charWidth(c) * conversion;
 	}
 
-	
 	/**
 	 * return the approximate height it takes to display the given string in the
 	 * given font in the given width
@@ -1012,17 +1031,25 @@ public class StringTool implements Serializable {
 			s = s.substring(0, lastSpace) + "\n" + s.substring(lastSpace + 1);
 		}
 		int nl = s.split("\n").length;
-		java.awt.FontMetrics fm = java.awt.Toolkit.getDefaultToolkit().getFontMetrics(f);
-		java.awt.font.LineMetrics lm = f.getLineMetrics(s, fm.getFontRenderContext());
+		java.awt.FontMetrics fm = java.awt.Toolkit.getDefaultToolkit()
+				.getFontMetrics(f);
+		java.awt.font.LineMetrics lm = f
+				.getLineMetrics(s, fm.getFontRenderContext());
 		// this calc appears to match Excel's ...
-		float l= lm.getLeading();
-		//float h= lm.getHeight();
-		//io.starter.OpenXLS.util.Logger.log("Font: " + f.toString());		
-		//io.starter.OpenXLS.util.Logger.log("l-i:" + fm.getLeading() + " l:" + l + " h-i:" + fm.getHeight() + " h:" + h + " a-i:" + fm.getAscent() + " a:" + lm.getAscent() + " d-i:" + fm.getDescent() + " d:" + lm.getDescent());
-		float h= fm.getHeight();	// KSC: revert for now ... - l/3;	// i don't know why but this seems to match Excel's the closest
-		return Math.ceil(h * (nl));//+1));	// KSC: added + 1 for testing
+		float l = lm.getLeading();
+		// float h= lm.getHeight();
+		// io.starter.toolkit.Logger.log("Font: " +
+		// f.toString());
+		// io.starter.toolkit.Logger.log("l-i:" +
+		// fm.getLeading() + " l:" + l + " h-i:" + fm.getHeight() +
+		// " h:" + h + " a-i:" + fm.getAscent() + " a:" +
+		// lm.getAscent() + " d-i:" + fm.getDescent() + " d:" +
+		// lm.getDescent());
+		float h = fm.getHeight(); // KSC: revert for now ... - l/3; // i don't
+									// know why but this seems to match Excel's
+									// the closest
+		return Math.ceil(h * (nl));// +1)); // KSC: added + 1 for testing
 	}
-
 
 	/**
 	 * converts an excel-style custom format to String.format custom format i.e. 
@@ -1057,307 +1084,340 @@ public class StringTool implements Serializable {
 	 * @return
 	 */
 	public static String convertPatternFromExcelToStringFormatter(String pattern, boolean isNegative) {
-		String curPattern= pattern;
-		String jpattern= "";		// return pattern
-		int w= 0;
-		int precision= 0;
-		String flags= "";
-		char conversion= 'f';	// default
-		boolean inConversion= false;
-		boolean inPrecision= false; 
-		boolean removeSign= false;	// true if value is negative and pattern calls for parens or color change or ... i.e. don't display the negative sign
-/*			
- * TODO:  \ uXXX is Locale-specific to display? works manually ...
- * TODO;  finish fractional formats:  ?/?
- */
-		for (int i= 0; i < curPattern.length(); i++) {
-			int c= curPattern.charAt(i);
+		String curPattern = pattern;
+		String jpattern = ""; // return pattern
+		int w = 0;
+		int precision = 0;
+		String flags = "";
+		char conversion = 'f'; // default
+		boolean inConversion = false;
+		boolean inPrecision = false;
+		boolean removeSign = false; // true if value is negative and pattern
+									// calls for parens or color change or ...
+									// i.e. don't display the negative sign
+		/*
+		 * TODO: \ uXXX is Locale-specific to display? works
+		 * manually ...
+		 * TODO; finish fractional formats: ?/?
+		 */
+		for (int i = 0; i < curPattern.length(); i++) {
+			int c = curPattern.charAt(i);
 			switch (c) {
 			case '0':
 				w++;
 				if (!inConversion) {
-					jpattern+="%";
-					inConversion= true;
+					jpattern += "%";
+					inConversion = true;
 				}
-				if (inPrecision && conversion!='E') precision++;
+				if (inPrecision && conversion != 'E')
+					precision++;
 				break;
-			case '?':		// don't really know what to do with this one!
-				break;	
+			case '?': // don't really know what to do with this one!
+				break;
 			case '#':
 				if (!inConversion) {
-					jpattern+="%";
-					inConversion= true;
+					jpattern += "%";
+					inConversion = true;
 				}
-				// TODO: handle such as:  ###0.00#########   --- what's the format spec for that?????					
+				// TODO: handle such as: ###0.00######### --- what's the
+				// format spec for that?????
 				// if (inPrecision) precision++;
 				break;
 			case ',':
-				flags+= ",";
+				flags += ",";
 				break;
 			case '.':
-				inPrecision= true;
+				inPrecision = true;
 				break;
 			case 'E':
 			case 'e':
 				if (!inConversion) {
-					jpattern+="%";
-					inConversion= true;
+					jpattern += "%";
+					inConversion = true;
 				}
-				conversion= 'E';
-				i++;   // format is e+, E+, e- or E-
+				conversion = 'E';
+				i++; // format is e+, E+, e- or E-
 				break;
-			case '[':	//	either color code or local-specific formatting
-				int j= ++i;
-				int k= j;
-				for (; i < curPattern.length(); i++) {	// skip colors for now						
-					c= curPattern.charAt(i);
-					if (c=='-')	// got end of an extended char sequence - skip rest (Locale code ...)
-						k= i;
-					if (c==']')
-						break;					
+			case '[': // either color code or local-specific formatting
+				int j = ++i;
+				int k = j;
+				for (; i < curPattern.length(); i++) { // skip colors for now
+					c = curPattern.charAt(i);
+					if (c == '-') // got end of an extended char sequence - skip
+									// rest (Locale code ...)
+						k = i;
+					if (c == ']')
+						break;
 				}
 				if (inConversion) {
-					inConversion= false;
-					inPrecision= false;
-					jpattern+= flags + (w > 0?w:"") + "." + precision + conversion;
+					inConversion = false;
+					inPrecision = false;
+					jpattern += flags + (w > 0 ? w : "") + "." + precision
+							+ conversion;
 				}
-				if (k==j) // then it was a color string
-					removeSign= true;
-				else		// it was a locale-specific string ...
-					jpattern+= curPattern.substring(++j, k);
+				if (k == j) // then it was a color string
+					removeSign = true;
+				else // it was a locale-specific string ...
+					jpattern += curPattern.substring(++j, k);
 				break;
-			case '"':	// start of delimited text
+			case '"': // start of delimited text
 				if (inConversion) {
-					inConversion= false;
-					inPrecision= false;
-					jpattern+= flags + (w > 0?w:"") + "." + precision + conversion;
+					inConversion = false;
+					inPrecision = false;
+					jpattern += flags + (w > 0 ? w : "") + "." + precision
+							+ conversion;
 				}
 				for (i++; i < curPattern.length(); i++) {
-					c= curPattern.charAt(i);
-					if (c=='"')
+					c = curPattern.charAt(i);
+					if (c == '"')
 						break;
-					jpattern+= (char) c;
-					
-				}					
+					jpattern += (char) c;
+
+				}
 				break;
 			// ignore
-			case '@':	// text placeholder
-				jpattern+="%s";
+			case '@': // text placeholder
+				jpattern += "%s";
 				break;
-			case '*':	// repeats the next char to fill -- IGNORE!!!
-				break;	
-			case '(':	// enclose negative #'s in parens					
+			case '*': // repeats the next char to fill -- IGNORE!!!
+				break;
+			case '(': // enclose negative #'s in parens
 			case ')':
-				//flags+="(";
+				// flags+="(";
 				if (isNegative) {
 					if (inConversion) {
-						inConversion= false;
-						inPrecision= false;
-						jpattern+= flags + (w > 0?w:"") + "." + precision + conversion;
+						inConversion = false;
+						inPrecision = false;
+						jpattern += flags + (w > 0 ? w : "") + "." + precision
+								+ conversion;
 					}
-					jpattern+= (char) c;
-					removeSign= true;
+					jpattern += (char) c;
+					removeSign = true;
 				}
 				break;
-			case '_':	// skips the width of the next char - usually _) - to leave space for a closing parenthesis in a positive number format when the negative number format includes parentheses. This allows the values to line up at the decimal point.
+			case '_': // skips the width of the next char - usually _) - to
+						// leave space for a closing parenthesis in a positive
+						// number format when the negative number format
+						// includes parentheses. This allows the values to line
+						// up at the decimal point.
 				if (inConversion) {
-					inConversion= false;
-					inPrecision= false;
-					jpattern+= flags + (w > 0?w:"") + "." + precision + conversion;
+					inConversion = false;
+					inPrecision = false;
+					jpattern += flags + (w > 0 ? w : "") + "." + precision
+							+ conversion;
 				}
-				i++;	// skip next char -- true in all cases???
+				i++; // skip next char -- true in all cases???
 				break;
 			case '%':
 				if (inConversion) {
-					inConversion= false;
-					inPrecision= false;
-					jpattern+= flags + (w > 0?w:"") + "." + precision + conversion;
+					inConversion = false;
+					inPrecision = false;
+					jpattern += flags + (w > 0 ? w : "") + "." + precision
+							+ conversion;
 				}
-				jpattern+="%%";
+				jpattern += "%%";
 				break;
 			case '\\':
 				if (inConversion) {
-					inConversion= false;
-					inPrecision= false;
-					jpattern+= flags + (w > 0?w:"") + "." + precision + conversion;
-				} 
+					inConversion = false;
+					inPrecision = false;
+					jpattern += flags + (w > 0 ? w : "") + "." + precision
+							+ conversion;
+				}
 				int z;
-				if (i+1 < curPattern.length() && curPattern.charAt(i+1)=='u')
-					z= i+6;
+				if (i + 1 < curPattern.length()
+						&& curPattern.charAt(i + 1) == 'u')
+					z = i + 6;
 				else
-					z= i+1;
-				for (; i < z && i < curPattern.length(); i++) 
-					jpattern+= (char) curPattern.charAt(i);
+					z = i + 1;
+				for (; i < z && i < curPattern.length(); i++)
+					jpattern += curPattern.charAt(i);
 				break;
-			default:	// %, $, -  space -- keep
+			default: // %, $, - space -- keep
 				if (inConversion) {
-					inConversion= false;
-					inPrecision= false;
-					jpattern+= flags + (w > 0?w:"") + "." + precision + conversion;
-				} 
-				jpattern+= (char) c;
+					inConversion = false;
+					inPrecision = false;
+					jpattern += flags + (w > 0 ? w : "") + "." + precision
+							+ conversion;
+				}
+				jpattern += (char) c;
 				break;
 			}
 		}
 		if (inConversion) {
-			jpattern+= flags + (w > 0?w:"") + "." + precision + conversion;
+			jpattern += flags + (w > 0 ? w : "") + "." + precision + conversion;
 		}
 		if (isNegative && !removeSign)
-			jpattern= "-" + jpattern;
-//System.out.print("Original Pattern " + pattern + " new " + jpattern);						
-//			patterns[z]= jpattern;
-		pattern= jpattern;
-        return pattern;
+			jpattern = "-" + jpattern;
+		// System.out.print("Original Pattern " + pattern + " new "
+		// + jpattern);
+		// patterns[z]= jpattern;
+		pattern = jpattern;
+		return pattern;
 	}
+
 	public static String convertDatePatternFromExcelToStringFormatter(String pattern) {
-		String jpattern= "";		// return pattern
-		String dString= "";			// d string -- ddd ==> EEE and dddd ==> EEEE
-		String mString= "";			// m string -- either month (M, MM, MMM, MMMM) or minute
-		int prev= 0;
-		for (int i= 0; i < pattern.length(); i++) {
-			int c= pattern.charAt(i);
-			if (c!='d' && !dString.equals("")) {	
-				if (dString.length()<=2)
-					jpattern+= dString;
-				else if (dString.length()==3)
-					jpattern+= "EEE";
-				else if (dString.length()==4)
-					jpattern+= "EEEE";
-				dString= "";
-			} else if(c!='m' && !mString.equals("")) {
-				if (c==':' || prev=='h') {	//it's time
-					jpattern+= mString;
-					prev= c;
+		String jpattern = ""; // return pattern
+		String dString = ""; // d string -- ddd ==> EEE and dddd ==> EEEE
+		String mString = ""; // m string -- either month (M, MM, MMM, MMMM) or
+								// minute
+		int prev = 0;
+		for (int i = 0; i < pattern.length(); i++) {
+			int c = pattern.charAt(i);
+			if (c != 'd' && !dString.equals("")) {
+				if (dString.length() <= 2)
+					jpattern += dString;
+				else if (dString.length() == 3)
+					jpattern += "EEE";
+				else if (dString.length() == 4)
+					jpattern += "EEEE";
+				dString = "";
+			} else if (c != 'm' && !mString.equals("")) {
+				if (c == ':' || prev == 'h') { // it's time
+					jpattern += mString;
+					prev = c;
 				} else
-					jpattern+= mString.toUpperCase();
-				mString= "";
+					jpattern += mString.toUpperCase();
+				mString = "";
 			}
 
 			switch (c) {
 			case 'y':
-				jpattern+=(char) c;
+				jpattern += (char) c;
 				break;
 			case 'h':
-				jpattern+='H';	// h in java is 1-24 excel h= 0-23
-				prev= 'h';
+				jpattern += 'H'; // h in java is 1-24 excel h= 0-23
+				prev = 'h';
 				break;
-			case '\\':	// found case of erroneous use of backslash, as in: mm\-dd\-yy  ignore!
-			case '[':	// no java equivalent of [h] [m] or [ss] == elapsed time
+			case '\\': // found case of erroneous use of backslash, as in:
+						// mm\-dd\-yy ignore!
+			case '[': // no java equivalent of [h] [m] or [ss] == elapsed time
 			case ']':
 				break;
 			case 's':
-				jpattern+=(char) c;
+				jpattern += (char) c;
 				break;
 			case 'A':
-				if (pattern.substring(i, i+5).equals("AM/PM")) {
-					jpattern+= "a";
-					i+=5;
-					for (int z=jpattern.length()-2; z >= 0; z--) {
-						if (jpattern.charAt(z)=='H') {
-							jpattern= jpattern.substring(0, z) + 'h' + jpattern.substring(z+1); 
+				if (pattern.substring(i, i + 5).equals("AM/PM")) {
+					jpattern += "a";
+					i += 5;
+					for (int z = jpattern.length() - 2; z >= 0; z--) {
+						if (jpattern.charAt(z) == 'H') {
+							jpattern = jpattern.substring(0, z) + 'h'
+									+ jpattern.substring(z + 1);
 						}
-					}					
-				}				
+					}
+				}
 				break;
 			case 'd':
-				dString+= (char) c;
+				dString += (char) c;
 				break;
 			case 'm':
-				mString+= (char) c;
+				mString += (char) c;
 				break;
 			default:
-				if (c!=':' && c!='m')
-					prev= c;
-				jpattern+=(char) c;
-			}			
+				if (c != ':' && c != 'm')
+					prev = c;
+				jpattern += (char) c;
+			}
 		}
 		if (!mString.equals("")) {
-			if (prev=='h') 	//it's time
-				jpattern+= mString;
+			if (prev == 'h') // it's time
+				jpattern += mString;
 			else
-				jpattern+=mString.toUpperCase();	// remaining month string
-		} else if (!dString.equals("")) {	
-			if (dString.length()<=2)
-				jpattern+= dString;
-			else if (dString.length()==3)
-				jpattern+= "EEE";
-			else if (dString.length()==4)
-				jpattern+= "EEEE";
-			dString= "";
+				jpattern += mString.toUpperCase(); // remaining month string
+		} else if (!dString.equals("")) {
+			if (dString.length() <= 2)
+				jpattern += dString;
+			else if (dString.length() == 3)
+				jpattern += "EEE";
+			else if (dString.length() == 4)
+				jpattern += "EEEE";
+			dString = "";
 		}
 		return jpattern;
 	}
+
 	/**
 	 * extract info, if any, from bracketed expressions within Excel custom number formats 
 	 * @param pattern String Excel number format
 	 * @return	String returned number format without the bracketed expression
 	 */
 	public static String convertPatternExtractBracketedExpression(String pattern) {
-        String[] s= pattern.split("\\[");
-        if (s.length > 1) {
-        	pattern= "";
-	        for (int i= 0; i < s.length; i++) {
-	        	int zz= s[i].indexOf("]");
-	        	if (zz!=-1) {
-	        		String term= "";
-	        		if (s[i].charAt(0)=='$') 
-	        			term= s[i].substring(1, zz);	// skip first $
-	        		else
-	        			term= s[i].substring(0, zz);
-		        	if (term.indexOf("-")!=-1)  // extract character TODO: locale specifics 
-		        		pattern+= term.substring(0, term.indexOf("-"));
-		        	else
-		        		pattern+= term;
-	        	}
-	        	pattern+= s[i].substring(zz+1);
-	        }
+		String[] s = pattern.split("\\[");
+		if (s.length > 1) {
+			pattern = "";
+			for (int i = 0; i < s.length; i++) {
+				int zz = s[i].indexOf("]");
+				if (zz != -1) {
+					String term = "";
+					if (s[i].charAt(0) == '$')
+						term = s[i].substring(1, zz); // skip first $
+					else
+						term = s[i].substring(0, zz);
+					if (term.indexOf("-") != -1) // extract character TODO:
+													// locale specifics
+						pattern += term.substring(0, term.indexOf("-"));
+					else
+						pattern += term;
+				}
+				pattern += s[i].substring(zz + 1);
+			}
 		}
-        return pattern;
+		return pattern;
 	}
+
 	/**
 	 * qualifies a pattern string to make valid for applying the pattern
 	 * @param pattern
 	 * @return
 	 */
 	public static String qualifyPatternString(String pattern) {
-        pattern = StringTool.strip(pattern, "*");
-        pattern = StringTool.strip(pattern, "_(");	// width placeholder
-        pattern = StringTool.strip(pattern, "_)");	// width placeholder
-        pattern = StringTool.strip(pattern, "_");
-        pattern = pattern.replaceAll("\"", "");
-        pattern = StringTool.strip(pattern, "?");	
-        // there are more bracketed expressions to deal with
-        // see http://office.microsoft.com/en-us/excel-help/creating-international-number-formats-HA001034635.aspx?redir=0
-        //pattern = StringTool.strip(pattern, "[Red]");	// [Black]  [h] [hhh] [=1] [=2]
-        //pattern = StringTool.strip(pattern, "Red]");
-        // TODO: implement locale-specific entries:  [$-409] [$-404] ... ********************
-//        pattern= pattern.replaceAll("\\[.+?\\]", "");
-/*        if (s.length > 1) {
-        	io.starter.OpenXLS.util.Logger.log(s[0]);
-        	java.util.regex.Pattern p = java.util.regex.Pattern.compile("\\[(.*?)\\]");
-        	java.util.regex.Matcher m = p.matcher(pattern);
-
-        	while(m.find()) {
-        	    io.starter.OpenXLS.util.Logger.log(m.group(1));
-        	}        	
-        }*/
-        String[] s= pattern.split("\\[");
-        if (s.length > 1) {
-        	pattern= "";
-	        for (int i= 0; i < s.length; i++) {
-	        	int zz= s[i].indexOf("]");
-	        	if (zz!=-1) {
-		        	String term= s[i].substring(1, zz);	// skip first $
-		        	if (term.indexOf("-")!=-1) { // extract character TODO: locale specifics 
-		        		pattern+= term.substring(0, term.indexOf("-"));
-		        	}	        
-	        	}
-	        	pattern+= s[i].substring(zz+1);
-	        }
+		pattern = StringTool.strip(pattern, "*");
+		pattern = StringTool.strip(pattern, "_("); // width placeholder
+		pattern = StringTool.strip(pattern, "_)"); // width placeholder
+		pattern = StringTool.strip(pattern, "_");
+		pattern = pattern.replaceAll("\"", "");
+		pattern = StringTool.strip(pattern, "?");
+		// there are more bracketed expressions to deal with
+		// see
+		// http://office.microsoft.com/en-us/excel-help/creating-international-number-formats-HA001034635.aspx?redir=0
+		// pattern = StringTool.strip(pattern, "[Red]"); // [Black]
+		// [h] [hhh] [=1] [=2]
+		// pattern = StringTool.strip(pattern, "Red]");
+		// TODO: implement locale-specific entries: [$-409] [$-404]
+		// ... ********************
+		// pattern= pattern.replaceAll("\\[.+?\\]", "");
+		/*
+		 * if (s.length > 1) {
+		 * io.starter.toolkit.Logger.log(s[0]);
+		 * java.util.regex.Pattern p =
+		 * java.util.regex.Pattern.compile("\\[(.*?)\\]");
+		 * java.util.regex.Matcher m = p.matcher(pattern);
+		 * 
+		 * while(m.find()) {
+		 * io.starter.toolkit.Logger.log(m.group(1));
+		 * }
+		 * }
+		 */
+		String[] s = pattern.split("\\[");
+		if (s.length > 1) {
+			pattern = "";
+			for (int i = 0; i < s.length; i++) {
+				int zz = s[i].indexOf("]");
+				if (zz != -1) {
+					String term = s[i].substring(1, zz); // skip first $
+					if (term.indexOf("-") != -1) { // extract character TODO:
+													// locale specifics
+						pattern += term.substring(0, term.indexOf("-"));
+					}
+				}
+				pattern += s[i].substring(zz + 1);
+			}
 		}
-        return pattern;
+		return pattern;
 	}
-	
+
 	/** Reads from a <code>Reader</code> into a <code>String</code>.
 	 * Blocking reads will be issued to the reader and the results will be
 	 * concatenated into a string, which will be returned once the reader
@@ -1365,17 +1425,16 @@ public class StringTool implements Serializable {
 	 * @param reader the <code>Reader</code> from which to read
 	 * @return a string containing all characters read from the input
 	 */
-	public static String readString (Reader reader)
-	throws IOException {
+	public static String readString(Reader reader) throws IOException {
 		StringBuilder builder = new StringBuilder();
-    	CharBuffer buffer = CharBuffer.allocate( 512 );
-    	
-    	while (-1 != reader.read( buffer )) {
-    		buffer.flip();
-    		builder.append( buffer );
-    		buffer.clear();
-    	}
-    	
-    	return builder.toString();
+		CharBuffer buffer = CharBuffer.allocate(512);
+
+		while (-1 != reader.read(buffer)) {
+			buffer.flip();
+			builder.append(buffer);
+			buffer.clear();
+		}
+
+		return builder.toString();
 	}
 }

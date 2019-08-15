@@ -136,7 +136,7 @@ bytes are
         encoding = defaultEnc;
         unread = n;
      }
-     // io.starter.OpenXLS.util.Logger.log("read=" + n + ", unread=" + unread);
+     // io.starter.toolkit.Logger.log("read=" + n + ", unread=" + unread);
 
      if (unread > 0) internalIn.unread(bom, (n - unread), 
 unread);

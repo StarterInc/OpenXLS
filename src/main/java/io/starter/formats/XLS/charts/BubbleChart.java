@@ -139,7 +139,7 @@ public class BubbleChart extends ChartType {
 				double cx= x+xval*xfactor;
 				double cy= (y+h)-(seriesy[j]*yfactor);
 				double r= seriesy[j+nseries]*bfactor;	
-//io.starter.OpenXLS.util.Logger.log("x: " + xval + " val: " + seriesy[j] + " size: " + seriesy[j+nseries]);				
+//io.starter.toolkit.Logger.log("x: " + xval + " val: " + seriesy[j] + " size: " + seriesy[j+nseries]);				
 				if (!threeD)
 					svg.append("<circle "+getScript(curranges[j])+" cx='" + cx + "' cy='" + cy + "' r='" + r + "' "+getStrokeSVG()+" fill='" + seriescolors[i] + "'/>\r\n");
 				else 
@@ -151,7 +151,7 @@ public class BubbleChart extends ChartType {
 			// labels after lines and markers  
 			svg.append(labels);			
 		}
-//io.starter.OpenXLS.util.Logger.log("Bubble svg: " + svg.toString());				
+//io.starter.toolkit.Logger.log("Bubble svg: " + svg.toString());				
 		svg.append("</g>\r\n");
 		return svg.toString();
 	}

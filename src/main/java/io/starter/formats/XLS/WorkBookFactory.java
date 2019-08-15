@@ -691,7 +691,7 @@ public class WorkBookFactory implements io.starter.toolkit.ProgressNotifier, XLS
 	    short op= opcodes[i];
 	    R r = map.get(op);
 	    if (!r.isPresent && r.isRequired) {
-		// io.starter.OpenXLS.util.Logger.log("A required record is not present: " +  op);
+		// io.starter.toolkit.Logger.log("A required record is not present: " +  op);
 		// Create a new Record
 		BiffRec rec= createMissingRequiredRecord(op, book, bs);
 		rec.setDebugLevel(this.DEBUGLEVEL);
@@ -738,9 +738,9 @@ public class WorkBookFactory implements io.starter.toolkit.ProgressNotifier, XLS
      */
     private void validateRecordOrder(LinkedHashMap<Short, R> map, java.util.List list, Short[] opcodes) {
 	/* debugging:
-	io.starter.OpenXLS.util.Logger.log("BeFORE order:");	
+	io.starter.toolkit.Logger.log("BeFORE order:");	
 	for (int zz= 0; zz < list.size(); zz++) {
-		    io.starter.OpenXLS.util.Logger.log(zz + "-" + list.get(zz));
+		    io.starter.toolkit.Logger.log(zz + "-" + list.get(zz));
 	}*/
 	R lastR= map.get(BOF);
 	short lastOp= BOF;
@@ -764,12 +764,12 @@ public class WorkBookFactory implements io.starter.toolkit.ProgressNotifier, XLS
 		    	}
 		    	
 		    	int origRecPos= r.recordPos;
-//io.starter.OpenXLS.util.Logger.log("Record out of order:  r:" + op + "/" + r.recordPos + " lastR:" + lastOp + "/" + lastR.recordPos);
+//io.starter.toolkit.Logger.log("Record out of order:  r:" + op + "/" + r.recordPos + " lastR:" + lastOp + "/" + lastR.recordPos);
 			// find correct insertion point by looking at ordered map 
 			for (int zz= i-1; zz > 0; zz--) {
 			    R prevr = map.get(opcodes[zz]);
 			    if (prevr.isPresent && r.recordPos < prevr.recordPos) {				
-//io.starter.OpenXLS.util.Logger.log("\tInsert at " + prevr.recordPos + " before op= " + opcodes[zz]);
+//io.starter.toolkit.Logger.log("\tInsert at " + prevr.recordPos + " before op= " + opcodes[zz]);
 				int recsMovedCount= 0;
 				BiffRec recToMove= (BiffRec)list.get(origRecPos);
 				do {
@@ -777,7 +777,7 @@ public class WorkBookFactory implements io.starter.toolkit.ProgressNotifier, XLS
 				    list.add(prevr.recordPos /*+ recsMovedCount*/, recToMove);
 				    if (recsMovedCount==0)
 					r.recordPos= recToMove.getRecordIndex();
-//io.starter.OpenXLS.util.Logger.log("\tMoved To " + recToMove.getRecordIndex());				    
+//io.starter.toolkit.Logger.log("\tMoved To " + recToMove.getRecordIndex());				    
 				    recsMovedCount++;
 				    recToMove= (BiffRec)list.get(origRecPos);
 				} while (recToMove.getOpcode()==op); 
@@ -796,9 +796,9 @@ public class WorkBookFactory implements io.starter.toolkit.ProgressNotifier, XLS
 		lastOp= op; 		
 	    }
 	}	
-	/*io.starter.OpenXLS.util.Logger.log("AFTER order:");	
+	/*io.starter.toolkit.Logger.log("AFTER order:");	
 	for (int zz= 0; zz < list.size(); zz++) {
-		    io.starter.OpenXLS.util.Logger.log(zz + "-" + list.get(zz));
+		    io.starter.toolkit.Logger.log(zz + "-" + list.get(zz));
 	}*/
     }
     
@@ -995,7 +995,7 @@ public class WorkBookFactory implements io.starter.toolkit.ProgressNotifier, XLS
 		case EOF:
 		    break;
 default:
-    io.starter.OpenXLS.util.Logger.log("Must create required rec: " + opcode);
+    io.starter.toolkit.Logger.log("Must create required rec: " + opcode);
 		}
 
 		
@@ -1041,7 +1041,7 @@ default:
 /*	    if (opcode != CONTINUE && opcode!=DBCELL 
 		    && opcode < 4000 /* chart records * /
 		    && !rec.isValueForCell()) // ignore CELLTABLE records
-//		io.starter.OpenXLS.util.Logger.log("COULDN'T FIND Opcode: " + opcode);*/
+//		io.starter.toolkit.Logger.log("COULDN'T FIND Opcode: " + opcode);*/
 		
 	}
     }
@@ -1049,12 +1049,12 @@ default:
     /** debug utility */
    private void displayRecsInStream(LinkedHashMap<Short, R> map) {
        Iterator<Short> ii= map.keySet().iterator();
-       io.starter.OpenXLS.util.Logger.log("Present Records");
+       io.starter.toolkit.Logger.log("Present Records");
        while (ii.hasNext())  {
 	   short op= ii.next();
 	   R r= map.get(op);
 	   if (r.isPresent) {
-	       io.starter.OpenXLS.util.Logger.log(op + " at " + r.recordPos);
+	       io.starter.toolkit.Logger.log(op + " at " + r.recordPos);
 	   }
        }
    }

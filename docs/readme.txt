@@ -5,11 +5,8 @@ Thank you for installing OpenXLS Excel-compatible Java Spreadsheet Library.
 This document contains notes regarding this release that may not
 have been available in time to include with the release documentation.
 
-For the most up-to-date information, please visit our resource center:
-http://extentech.com/index.jsp
-
 I - Release Notes
-OpenXLS 11.0 introduces few tangible improvements over prior versions, however it does reflect new stewardship of the project from Starter Inc.
+OpenXLS 11.0 introduces few major tangible improvements over prior versions, however it does reflect new stewardship of the project from Starter Inc.
 
 Please visit our GitHub page for the most recent updates.
 

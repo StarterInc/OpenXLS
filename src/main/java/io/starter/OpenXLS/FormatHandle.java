@@ -1995,7 +1995,7 @@ public class FormatHandle implements Handle, FormatConstants {
         		    newPat+= pats[i];	// leave alone
         	    }		
         	    
-        	    //io.starter.OpenXLS.util.Logger.log("Old Style" + pat + ".  New Style: " + newPat + ". Increase?" +  (increase?"yes":"no"));	// KSC: TESETING: TAKE OUT WHEN DONE                    		
+        	    //io.starter.toolkit.Logger.log("Old Style" + pat + ".  New Style: " + newPat + ". Increase?" +  (increase?"yes":"no"));	// KSC: TESETING: TAKE OUT WHEN DONE                    		
         	    this.setFormatPattern(newPat);
 	    } catch (Exception e) {
 		Logger.logErr("Error setting style");	// KSC: TESETING: TAKE OUT WHEN DONE                    		

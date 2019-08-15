@@ -287,7 +287,7 @@ public final class MSODrawingGroup extends io.starter.formats.XLS.XLSRecord
 			    int fbt = ((0xFF&buf[3])<<8)|(0xFF&buf[2]);
 			    int len = ByteTools.readInt(buf[4], buf[5], buf[6], buf[7]);
 				
-			    //io.starter.OpenXLS.util.Logger.log("fbt:"+Integer.toHexString(fbt)+";len:"+len);
+			    //io.starter.toolkit.Logger.log("fbt:"+Integer.toHexString(fbt)+";len:"+len);
 			    if(fbt <0xF004)
 			    	continue; 	// under 0xF005 are container recs; we just parse the atoms for needed info ...
 

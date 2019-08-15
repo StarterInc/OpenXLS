@@ -171,7 +171,7 @@ public class PtgMemArea extends GenericPtg{
 		}
 /* KSC: TESTING		
 		if (!Arrays.equals(recbytes, postExp))
-			io.starter.OpenXLS.util.Logger.log("ISSUE!!!");*/
+			io.starter.toolkit.Logger.log("ISSUE!!!");*/
 		return recbytes;
 	}
 	
