@@ -2,19 +2,19 @@
  * --------- BEGIN COPYRIGHT NOTICE ---------
  * Copyright 2002-2012 Extentech Inc.
  * Copyright 2013 Infoteria America Corp.
- * 
+ *
  * This file is part of OpenXLS.
- * 
+ *
  * OpenXLS is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
  * published by the Free Software Foundation, either version 3 of
  * the License, or (at your option) any later version.
- * 
+ *
  * OpenXLS is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with OpenXLS.  If not, see
  * <http://www.gnu.org/licenses/>.
@@ -23,41 +23,41 @@
 package io.starter.formats.XLS;
 
 
-/** <b>Pls: Environment-Specific Print Record (4Dh)</b><br>
+/**
+ * <b>Pls: Environment-Specific Print Record (4Dh)</b><br>
+ * <p>
+ * PLS saves printer settings and driver info
+ *
+ * <p><pre>
+ *
+ * offset  name            size    contents
+ * ---
+ * 4       wEnv            2       Operating Environment
+ * 0 = Windows
+ * 1 = Mac
+ * 6       rgb             var     DEVMODE Structure (see MS Win SDK)
+ *
+ * reserved (2 bytes): MUST be zero, and MUST be ignored.
+ * rgb (variable): A DEVMODE structure, as defined in [DEVMODE],
+ * which specifies the printer settings.
+ * The size of this field is equal to the size of the current record
+ * and all of the following Continue records, excluding the record's heading and reserved field.
+ *
+ * </p></pre>
+ **/
+public final class Pls extends io.starter.formats.XLS.XLSRecord {
 
-   PLS saves printer settings and driver info
-   
-   <p><pre>
-    
-    offset  name            size    contents
-    ---
-    4       wEnv            2       Operating Environment
-                                    0 = Windows
-                                    1 = Mac
-    6       rgb             var     DEVMODE Structure (see MS Win SDK)
+    /**
+     * serialVersionUID
+     */
+    private static final long serialVersionUID = -1949819999811121013L;
 
-    reserved (2 bytes): MUST be zero, and MUST be ignored.
-    rgb (variable): A DEVMODE structure, as defined in [DEVMODE], 
-    which specifies the printer settings. 
-    The size of this field is equal to the size of the current record 
-    and all of the following Continue records, excluding the record's heading and reserved field.
-    
-    </p></pre>
-**/
-public final class Pls extends io.starter.formats.XLS.XLSRecord 
-{
-    
-    /** 
-	* serialVersionUID
-	*/
-	private static final long serialVersionUID = -1949819999811121013L;
-
-	// TODO: implement this class
-    public void init(){
-        super.init();        
+    // TODO: implement this class
+    public void init() {
+        super.init();
         getData();
     }
-    
+
 }
 
 /* more documenation:

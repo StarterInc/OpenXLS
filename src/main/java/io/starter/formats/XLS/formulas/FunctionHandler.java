@@ -2,19 +2,19 @@
  * --------- BEGIN COPYRIGHT NOTICE ---------
  * Copyright 2002-2012 Extentech Inc.
  * Copyright 2013 Infoteria America Corp.
- * 
+ *
  * This file is part of OpenXLS.
- * 
+ *
  * OpenXLS is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
  * published by the Free Software Foundation, either version 3 of
  * the License, or (at your option) any later version.
- * 
+ *
  * OpenXLS is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with OpenXLS.  If not, see
  * <http://www.gnu.org/licenses/>.
@@ -22,1183 +22,1182 @@
  */
 package io.starter.formats.XLS.formulas;
 
-import java.util.Locale;
-
 import io.starter.formats.XLS.FunctionNotSupportedException;
 import io.starter.formats.XLS.XLSRecord;
 
-/**
- *  Function Handler takes an array of PTG's with a header PtgFunc or PtgFuncVar, calcuates
- *  those ptgs in the determined way, then return a relevant PtgValue
- *
- *  Descriptions of these functions are available on the msdn site, 
- *  http://msdn.microsoft.com/library/default.asp?url=/library/en-us/office97/html/S88F9.asp
- *
-*/
-
-
-public class FunctionHandler
-{
-    
-
-/*
-	Calculates the function and returns a relevant Ptg as a value
-	This is the main entry method.
-
-*/
-public static final Ptg calculateFunction(Ptg[] ptgs) throws FunctionNotSupportedException, CalculationException{
-   Ptg funk; // the function identifier
-   Ptg[] operands; // the ptgs acted upon by the function
-   int funkId = 0;   //what function are we calling?
-
-   funk = ptgs[0];
-   // if ptgs are missing parent_recs, populate from funk
-   XLSRecord bpar = funk.getParentRec();
-   if(bpar!=null){
-	   for(int t=0;t<ptgs.length;t++){
-		   if(ptgs[t].getParentRec()==null)
-			   ptgs[t].setParentRec(bpar);
-		}
-	}
-	
-	int oplen = ptgs.length - 1;
-	operands = new Ptg[oplen];
-	System.arraycopy(ptgs, 1, operands, 0, oplen);    
-	if (funk.getOpcode() == 0x21 || funk.getOpcode() == 0x41 || funk.getOpcode() == 0x61){  // ptgfunc        
-		return calculatePtgFunc(funk, funkId, operands);
-	}else if (funk.getOpcode() == 0x22 || funk.getOpcode() == 0x42 || funk.getOpcode() == 0x62){ // ptgfuncvar
-		return calculatePtgFuncVar(funk, funkId, operands);		
-	}
-	return null;
-}
-
-/*
-	Keep the calculation of ptgfunc & ptgfuncvar seperate in case any differences show up
-*/
-public static final Ptg calculatePtgFunc(Ptg funk, int funkId,  Ptg[] operands)
-throws FunctionNotSupportedException, CalculationException{
-	PtgFunc pf = (PtgFunc) funk;
-	funkId = pf.getVal();
-	return parse_n_calc(funk, funkId, operands);    
-}
-
+import java.util.Locale;
 
 /**
-	Keep the calculation of ptgfunc & ptgfuncvar seperate in case any differences show up
- * @throws CalculationException 
-*/
-public static final Ptg calculatePtgFuncVar(Ptg funk, int funkId,  Ptg[] operands) throws FunctionNotSupportedException, CalculationException{
-	PtgFuncVar pf = (PtgFuncVar) funk;
-	funkId = pf.getVal();
-	// Handle Add-in Formulas - which have a name operand 1st 
-	if (funkId==FunctionConstants.xlfADDIN)	{  // XL flag that formula is an add-in	
-		//	must pop the PtgNameX record to get the correct function id
-		String s= "";
-		boolean foundit = false;
-		if (operands[0] instanceof PtgNameX) {
-			int index= ((PtgNameX) operands[0]).getVal();
-			s= pf.getParentRec().getSheet().getWorkBook().getExternalName(index);
-		} else if (operands[0] instanceof PtgName) {
-			s= ((PtgName) operands[0]).getStoredName();
-		}
-		if (s.startsWith("_xlfn.")) {	// Excel "new" functions
-			s= s.substring(6);
-		}
-        if (Locale.JAPAN.equals(Locale.getDefault())) {
-            for (int y=0;y<FunctionConstants.jRecArr.length;y++){    
-               if (s.equalsIgnoreCase(FunctionConstants.jRecArr[y][0])){
-                   funkId= Integer.valueOf(FunctionConstants.jRecArr[y][1]).intValue();
-                   y= FunctionConstants.jRecArr.length;  // exit loop
-                   foundit = true;
-               }
+ * Function Handler takes an array of PTG's with a header PtgFunc or PtgFuncVar, calcuates
+ * those ptgs in the determined way, then return a relevant PtgValue
+ * <p>
+ * Descriptions of these functions are available on the msdn site,
+ * http://msdn.microsoft.com/library/default.asp?url=/library/en-us/office97/html/S88F9.asp
+ */
+
+
+public class FunctionHandler {
+
+
+    /*
+        Calculates the function and returns a relevant Ptg as a value
+        This is the main entry method.
+
+    */
+    public static final Ptg calculateFunction(Ptg[] ptgs) throws FunctionNotSupportedException, CalculationException {
+        Ptg funk; // the function identifier
+        Ptg[] operands; // the ptgs acted upon by the function
+        int funkId = 0;   //what function are we calling?
+
+        funk = ptgs[0];
+        // if ptgs are missing parent_recs, populate from funk
+        XLSRecord bpar = funk.getParentRec();
+        if (bpar != null) {
+            for (int t = 0; t < ptgs.length; t++) {
+                if (ptgs[t].getParentRec() == null)
+                    ptgs[t].setParentRec(bpar);
             }
         }
-        if (!foundit) {
-			for (int y=0;y<FunctionConstants.recArr.length;y++){	// Use FunctionConstants instead of PtFuncVar
-			   if (s.equalsIgnoreCase(FunctionConstants.recArr[y][0])){
-				   funkId= Integer.valueOf(FunctionConstants.recArr[y][1]).intValue();
-				   y= FunctionConstants.recArr.length;	// exit loop
-			   }
-			}
+
+        int oplen = ptgs.length - 1;
+        operands = new Ptg[oplen];
+        System.arraycopy(ptgs, 1, operands, 0, oplen);
+        if (funk.getOpcode() == 0x21 || funk.getOpcode() == 0x41 || funk.getOpcode() == 0x61) {  // ptgfunc
+            return calculatePtgFunc(funk, funkId, operands);
+        } else if (funk.getOpcode() == 0x22 || funk.getOpcode() == 0x42 || funk.getOpcode() == 0x62) { // ptgfuncvar
+            return calculatePtgFuncVar(funk, funkId, operands);
         }
-        if (funkId==255)// it's not found
-        	throw new FunctionNotSupportedException(s);
-            
+        return null;
+    }
+
+    /*
+        Keep the calculation of ptgfunc & ptgfuncvar seperate in case any differences show up
+    */
+    public static final Ptg calculatePtgFunc(Ptg funk, int funkId, Ptg[] operands)
+            throws FunctionNotSupportedException, CalculationException {
+        PtgFunc pf = (PtgFunc) funk;
+        funkId = pf.getVal();
+        return parse_n_calc(funk, funkId, operands);
+    }
+
+
+    /**
+     * Keep the calculation of ptgfunc & ptgfuncvar seperate in case any differences show up
+     *
+     * @throws CalculationException
+     */
+    public static final Ptg calculatePtgFuncVar(Ptg funk, int funkId, Ptg[] operands) throws FunctionNotSupportedException, CalculationException {
+        PtgFuncVar pf = (PtgFuncVar) funk;
+        funkId = pf.getVal();
+        // Handle Add-in Formulas - which have a name operand 1st
+        if (funkId == FunctionConstants.xlfADDIN) {  // XL flag that formula is an add-in
+            //	must pop the PtgNameX record to get the correct function id
+            String s = "";
+            boolean foundit = false;
+            if (operands[0] instanceof PtgNameX) {
+                int index = ((PtgNameX) operands[0]).getVal();
+                s = pf.getParentRec().getSheet().getWorkBook().getExternalName(index);
+            } else if (operands[0] instanceof PtgName) {
+                s = ((PtgName) operands[0]).getStoredName();
+            }
+            if (s.startsWith("_xlfn.")) {    // Excel "new" functions
+                s = s.substring(6);
+            }
+            if (Locale.JAPAN.equals(Locale.getDefault())) {
+                for (int y = 0; y < FunctionConstants.jRecArr.length; y++) {
+                    if (s.equalsIgnoreCase(FunctionConstants.jRecArr[y][0])) {
+                        funkId = Integer.valueOf(FunctionConstants.jRecArr[y][1]).intValue();
+                        y = FunctionConstants.jRecArr.length;  // exit loop
+                        foundit = true;
+                    }
+                }
+            }
+            if (!foundit) {
+                for (int y = 0; y < FunctionConstants.recArr.length; y++) {    // Use FunctionConstants instead of PtFuncVar
+                    if (s.equalsIgnoreCase(FunctionConstants.recArr[y][0])) {
+                        funkId = Integer.valueOf(FunctionConstants.recArr[y][1]).intValue();
+                        y = FunctionConstants.recArr.length;    // exit loop
+                    }
+                }
+            }
+            if (funkId == 255)// it's not found
+                throw new FunctionNotSupportedException(s);
+
 //			now get rid of PtgNameX operand before calling function
-		Ptg[] ops = new Ptg[operands.length-1];
-		System.arraycopy(operands, 1, ops, 0, operands.length-1);	
-		operands = new Ptg[ops.length];
-		System.arraycopy(ops, 0, operands, 0, ops.length);	
-	}	// end KSC added
-	return parse_n_calc(funk, funkId, operands);  
-}
-    
-    
-/************************************************************************************
-*                                                                                   *
-*    Your standard big case statement, calling methods based on what the funkid is. *
-*    You will notice that these are seperated out into packages based on the MS     *
-*    documentation (Link above).  Each package calls a different class full of      *
-*    static method calls.   There are a lot of these :-)                            *
-*                                                                                   *
-*       PLEASE:  Remove function from comment list when you enable it!!!!           *
-*                                                                                   *
- * @throws CalculationException 
-*************************************************************************************/
-public static final Ptg parse_n_calc(Ptg function, int functionId,  Ptg[] operands) throws FunctionNotSupportedException, CalculationException{
-	Ptg resultPtg = null;
-	Ptg[] resultArrPtg = null;
+            Ptg[] ops = new Ptg[operands.length - 1];
+            System.arraycopy(operands, 1, ops, 0, operands.length - 1);
+            operands = new Ptg[ops.length];
+            System.arraycopy(ops, 0, operands, 0, ops.length);
+        }    // end KSC added
+        return parse_n_calc(funk, funkId, operands);
+    }
 
-	switch(functionId){
-		/********************************************
-		*   Database and List package functions    **
-		********************************************/
-		case FunctionConstants.xlfDaverage:
-			resultPtg= DatabaseCalculator.calcDAverage(operands);
-			break;
-			
-		case FunctionConstants.xlfDcount:
-			resultPtg= DatabaseCalculator.calcDCount(operands);
-			break;
-			
-		case FunctionConstants.xlfDcounta:
-			resultPtg= DatabaseCalculator.calcDCountA(operands);
-			break;
-			
-		case FunctionConstants.xlfDget:
-			resultPtg= DatabaseCalculator.calcDGet(operands);
-			break;
-		
-		case FunctionConstants.xlfDmax:
-			resultPtg= DatabaseCalculator.calcDMax(operands);
-			break;
-			
-		case FunctionConstants.xlfDmin:
-			resultPtg= DatabaseCalculator.calcDMin(operands);
-			break;
 
-		case FunctionConstants.xlfDproduct:
-			resultPtg= DatabaseCalculator.calcDProduct(operands);
-			break;
-			
-		case FunctionConstants.xlfDstdev:
-			resultPtg= DatabaseCalculator.calcDStdDev(operands);
-			break;
-		
-		case FunctionConstants.xlfDstdevp:
-			resultPtg= DatabaseCalculator.calcDStdDevP(operands);
-			break;
-		
-		case FunctionConstants.xlfDsum:
-			resultPtg = DatabaseCalculator.calcDSum(operands);
-			break;
-			
-		case FunctionConstants.xlfDvar:
-			resultPtg= DatabaseCalculator.calcDVar(operands);
-			break;
-        
-		case FunctionConstants.xlfDvarp:
-			resultPtg= DatabaseCalculator.calcDVarP(operands);
-			break;
-        
-		/********************************************
-		*   Date and time functions         *********
-		********************************************/
-		case FunctionConstants.xlfDate:
-			resultPtg = DateTimeCalculator.calcDate(operands);
-			break;
-			
-		case FunctionConstants.xlfDay:
-			resultPtg = DateTimeCalculator.calcDay(operands);
-			break;
-			
-		case FunctionConstants.xlfDays360:
-			resultPtg = DateTimeCalculator.calcDays360(operands);
-			break;
-			
-		case FunctionConstants.xlfHour:
-			resultPtg = DateTimeCalculator.calcHour(operands);
-			break;
-			
-		case FunctionConstants.xlfMinute:
-			resultPtg = DateTimeCalculator.calcMinute(operands);
-			break;
-			
-		case FunctionConstants.xlfMonth:
-			resultPtg = DateTimeCalculator.calcMonth(operands);
-			break;
-			
-		case FunctionConstants.xlfYear:
-			resultPtg = DateTimeCalculator.calcYear(operands);
-			break;
-			
-		case FunctionConstants.xlfSecond:
-			resultPtg = DateTimeCalculator.calcSecond(operands);
-			break;
-			
-		case FunctionConstants.xlfTimevalue:
-			resultPtg = DateTimeCalculator.calcTimevalue(operands);
-			break;
-			
-		case FunctionConstants.xlfWeekday:
-			resultPtg = DateTimeCalculator.calcWeekday(operands);
-			break;
-			
-		case FunctionConstants.xlfWEEKNUM:
-			resultPtg = DateTimeCalculator.calcWeeknum(operands);
-			break;
-			
-		case FunctionConstants.xlfWORKDAY:
-			resultPtg = DateTimeCalculator.calcWorkday(operands);
-			break;
-			
-		case FunctionConstants.xlfYEARFRAC:
-			resultPtg = DateTimeCalculator.calcYearFrac(operands);
-			break;
-			
-		case FunctionConstants.xlfNow:
-			resultPtg = DateTimeCalculator.calcNow(operands);
-			break;
-			
-		case FunctionConstants.xlfTime:
-			resultPtg = DateTimeCalculator.calcTime(operands);
-			break;
-			
-		case FunctionConstants.xlfToday:
-			resultPtg = DateTimeCalculator.calcToday(operands);
-			break;
-			
-		case FunctionConstants.xlfDatevalue:
-			resultPtg = DateTimeCalculator.calcDateValue(operands);
-			break;
-			
-		case FunctionConstants.xlfEDATE:
-			resultPtg = DateTimeCalculator.calcEdate(operands);
-			break;
-			
-		case FunctionConstants.xlfEOMONTH:			
-			resultPtg = DateTimeCalculator.calcEOMonth(operands);
-			break;
-			
-		case FunctionConstants.xlfNETWORKDAYS:
-			resultPtg = DateTimeCalculator.calcNetWorkdays(operands);
-			break;
-			
-		/********************************************
-		*   DDE and External functions           ****
-		********************************************/
-        
-        
-		/********************************************
-		*   Engineering functions           *********
-		********************************************/
-        case FunctionConstants.xlfBIN2DEC:
-        	resultPtg= EngineeringCalculator.calcBin2Dec(operands);
-        	break;
-        
-        case FunctionConstants.xlfBIN2HEX:
-        	resultPtg= EngineeringCalculator.calcBin2Hex(operands);
-        	break;
-        
-        case FunctionConstants.xlfBIN2OCT:
-        	resultPtg= EngineeringCalculator.calcBin2Oct(operands);
-        	break;
-        
-        case FunctionConstants.xlfDEC2BIN:
-        	resultPtg= EngineeringCalculator.calcDec2Bin(operands);
-        	break;
-        
-        case FunctionConstants.xlfDEC2HEX:
-        	resultPtg= EngineeringCalculator.calcDec2Hex(operands);
-        	break;
-        
-        case FunctionConstants.xlfDEC2OCT:
-        	resultPtg= EngineeringCalculator.calcDec2Oct(operands);
-        	break;
-        
-        case FunctionConstants.xlfHEX2BIN:
-        	resultPtg= EngineeringCalculator.calcHex2Bin(operands);
-        	break;
-        
-        case FunctionConstants.xlfHEX2DEC:
-        	resultPtg= EngineeringCalculator.calcHex2Dec(operands);
-        	break;
-        
-        case FunctionConstants.xlfHEX2OCT:
-        	resultPtg= EngineeringCalculator.calcHex2Oct(operands);
-        	break;
-        
-        case FunctionConstants.xlfOCT2BIN:
-        	resultPtg= EngineeringCalculator.calcOct2Bin(operands);
-        	break;
-        
-        case FunctionConstants.xlfOCT2DEC:
-        	resultPtg= EngineeringCalculator.calcOct2Dec(operands);
-        	break;
-        
-        case FunctionConstants.xlfOCT2HEX:
-        	resultPtg= EngineeringCalculator.calcOct2Hex(operands);
-        	break;
-        	
-        case FunctionConstants.xlfCOMPLEX:
-        	resultPtg= EngineeringCalculator.calcComplex(operands);
-        	break;
-        	
-        case FunctionConstants.xlfGESTEP:
-        	resultPtg= EngineeringCalculator.calcGEStep(operands);
-        	break;
-        	
-        case FunctionConstants.xlfDELTA:
-        	resultPtg= EngineeringCalculator.calcDelta(operands);
-        	break;
-        
-        case FunctionConstants.xlfIMAGINARY:
-        	resultPtg= EngineeringCalculator.calcImaginary(operands);
-        	break;
-        	
-        case FunctionConstants.xlfIMREAL:
-        	resultPtg= EngineeringCalculator.calcImReal(operands);
-        	break;
-        	
-        case FunctionConstants.xlfIMARGUMENT:
-        	resultPtg= EngineeringCalculator.calcImArgument(operands);
-        	break;
-        	
-        case FunctionConstants.xlfIMABS:
-        	resultPtg= EngineeringCalculator.calcImAbs(operands);
-        	break;
-        	
-        case FunctionConstants.xlfIMDIV:
-        	resultPtg= EngineeringCalculator.calcImDiv(operands);
-        	break;
-        		
-        case FunctionConstants.xlfIMCONJUGATE:
-        	resultPtg= EngineeringCalculator.calcImConjugate(operands);
-        	break;
-        	
-        case FunctionConstants.xlfIMCOS:
-        	resultPtg= EngineeringCalculator.calcImCos(operands);
-        	break;
-        
-        case FunctionConstants.xlfIMSIN:
-        	resultPtg= EngineeringCalculator.calcImSin(operands);
-        	break;
-        	
-        case FunctionConstants.xlfIMEXP:
-        	resultPtg= EngineeringCalculator.calcImExp(operands);
-        	break;
-        
-        case FunctionConstants.xlfIMSUB:
-        	resultPtg= EngineeringCalculator.calcImSub(operands);
-        	break;
-        	
-        case FunctionConstants.xlfIMSUM:
-        	resultPtg= EngineeringCalculator.calcImSum(operands);
-        	break;
-        	
-        case FunctionConstants.xlfIMPRODUCT:
-        	resultPtg= EngineeringCalculator.calcImProduct(operands);
-        	break;
-        	
-        case FunctionConstants.xlfIMLN:
-        	resultPtg= EngineeringCalculator.calcImLn(operands);
-        	break;
-        	
-        case FunctionConstants.xlfIMLOG10:
-        	resultPtg= EngineeringCalculator.calcImLog10(operands);
-        	break;
-        	
-        case FunctionConstants.xlfIMLOG2:
-        	resultPtg= EngineeringCalculator.calcImLog2(operands);
-        	break;
-        	
-        case FunctionConstants.xlfIMPOWER:
-        	resultPtg= EngineeringCalculator.calcImPower(operands);
-        	break;
-        	
-        case FunctionConstants.xlfIMSQRT:
-        	resultPtg= EngineeringCalculator.calcImSqrt(operands);
-        	break;
-        	
-        case FunctionConstants.xlfCONVERT:
-        	resultPtg= EngineeringCalculator.calcConvert(operands);
-        	break;
-        	
-		case FunctionConstants.xlfERF:
-			resultPtg= EngineeringCalculator.calcErf(operands);
-			break;			
-        	
-        	
-		/********************************************
-		*   Financial functions             *********
-		********************************************/
-		
-		case FunctionConstants.xlfDb:
-			resultPtg = FinancialCalculator.calcDB(operands);
-			break;
-			
-		case FunctionConstants.xlfDdb:
-			resultPtg = FinancialCalculator.calcDDB(operands);
-			break;
-			
-		case FunctionConstants.xlfPmt:
-			resultPtg = FinancialCalculator.calcPmt(operands);
-			break;
-        
-		// KSC: Added
-		case FunctionConstants.xlfAccrintm:
-			resultPtg= FinancialCalculator.calcAccrintm(operands); 
-			break;
+    /************************************************************************************
+     *                                                                                   *
+     *    Your standard big case statement, calling methods based on what the funkid is. *
+     *    You will notice that these are seperated out into packages based on the MS     *
+     *    documentation (Link above).  Each package calls a different class full of      *
+     *    static method calls.   There are a lot of these :-)                            *
+     *                                                                                   *
+     *       PLEASE:  Remove function from comment list when you enable it!!!!           *
+     *                                                                                   *
+     * @throws CalculationException
+     *************************************************************************************/
+    public static final Ptg parse_n_calc(Ptg function, int functionId, Ptg[] operands) throws FunctionNotSupportedException, CalculationException {
+        Ptg resultPtg = null;
+        Ptg[] resultArrPtg = null;
 
-		case FunctionConstants.xlfAccrint:
-			resultPtg= FinancialCalculator.calcAccrint(operands); 
-			break;
+        switch (functionId) {
+            /********************************************
+             *   Database and List package functions    **
+             ********************************************/
+            case FunctionConstants.xlfDaverage:
+                resultPtg = DatabaseCalculator.calcDAverage(operands);
+                break;
 
-		case FunctionConstants.xlfCoupDayBS:
-			resultPtg= FinancialCalculator.calcCoupDayBS(operands);
-			break;
-			
-		case FunctionConstants.xlfCoupDays:
-			resultPtg= FinancialCalculator.calcCoupDays(operands);
-			break;
-			
-        case FunctionConstants.xlfNpv:
-        	resultPtg= FinancialCalculator.calcNPV(operands);
-        	break;
-        
-        case FunctionConstants.xlfPv:
-        	resultPtg= FinancialCalculator.calcPV(operands);
-        	break;
-        	
-        case FunctionConstants.xlfFv:
-        	resultPtg= FinancialCalculator.calcFV(operands);
-        	break;
-        	
-        case FunctionConstants.xlfIpmt:
-        	resultPtg= FinancialCalculator.calcIPMT(operands);
-        	break;
-        	
-        case FunctionConstants.xlfCumIPmt:
-        	resultPtg= FinancialCalculator.calcCumIPmt(operands);
-        	break;
-        	
-        case FunctionConstants.xlfCumPrinc:
-        	resultPtg= FinancialCalculator.calcCumPrinc(operands);
-        	break;
-        	
-        case FunctionConstants.xlfCoupNCD:
-        	resultPtg= FinancialCalculator.calcCoupNCD(operands);
-        	break;
-        	
-        case FunctionConstants.xlfCoupDaysNC:
-        	resultPtg= FinancialCalculator.calcCoupDaysNC(operands);
-        	break;
-        	
-        case FunctionConstants.xlfCoupPCD:
-        	resultPtg= FinancialCalculator.calcCoupPCD(operands);
-        	break;
-        	
-        case FunctionConstants.xlfCoupNUM:
-        	resultPtg= FinancialCalculator.calcCoupNum(operands);
-        	break;
-        	
-        case FunctionConstants.xlfDollarDE:
-        	resultPtg= FinancialCalculator.calcDollarDE(operands);
-        	break;
-        	
-        case FunctionConstants.xlfDollarFR:
-        	resultPtg= FinancialCalculator.calcDollarFR(operands);
-        	break;
-        
-        case FunctionConstants.xlfEffect:
-        	resultPtg= FinancialCalculator.calcEffect(operands);
-        	break;
-        	
-        case FunctionConstants.xlfRECEIVED:
-        	resultPtg= FinancialCalculator.calcReceived(operands);
-        	break;
-        
-        case FunctionConstants.xlfINTRATE:
-        	resultPtg= FinancialCalculator.calcINTRATE(operands);
-        	break;
-        
-        case FunctionConstants.xlfIrr:
-        	resultPtg= FinancialCalculator.calcIRR(operands);
-        	break;
-        	
-        case FunctionConstants.xlfMirr:
-        	resultPtg= FinancialCalculator.calcMIRR(operands);
-        	break;
-        
-        case FunctionConstants.xlfXIRR:
-        	resultPtg= FinancialCalculator.calcXIRR(operands);
-        	break;
+            case FunctionConstants.xlfDcount:
+                resultPtg = DatabaseCalculator.calcDCount(operands);
+                break;
 
-        case FunctionConstants.xlfXNPV:
-        	resultPtg= FinancialCalculator.calcXNPV(operands);
-        	break;        
-        
-        case FunctionConstants.xlfRate:
-        	resultPtg= FinancialCalculator.calcRate(operands);
-        	break;
-        	
-        case FunctionConstants.xlfYIELD:
-        	resultPtg= FinancialCalculator.calcYIELD(operands);
-        	break;
-        
-        case FunctionConstants.xlfPRICE:
-        	resultPtg= FinancialCalculator.calcPRICE(operands);
-        	break;
-        	
-        case FunctionConstants.xlfPRICEDISC:
-        	resultPtg= FinancialCalculator.calcPRICEDISC(operands);
-        	break;
-        
-        case FunctionConstants.xlfPRICEMAT:
-        	resultPtg= FinancialCalculator.calcPRICEMAT(operands);
-        	break;
-        	
-        case FunctionConstants.xlfDISC:
-        	resultPtg= FinancialCalculator.calcDISC(operands);
-        	break;
-        	
-        case FunctionConstants.xlfNper:
-        	resultPtg= FinancialCalculator.calcNPER(operands);
-        	break;
-        
-        case FunctionConstants.xlfSln:
-        	resultPtg= FinancialCalculator.calcSLN(operands);
-        	break;
-        
-        case FunctionConstants.xlfSyd:
-        	resultPtg= FinancialCalculator.calcSYD(operands);
-        	break;
-        
-        case FunctionConstants.xlfDURATION:
-        	resultPtg= FinancialCalculator.calcDURATION(operands);
-        	break;
-        
-        case FunctionConstants.xlfMDURATION:
-        	resultPtg= FinancialCalculator.calcMDURATION(operands);
-        	break;
-        	
-        case FunctionConstants.xlfTBillEq:
-        	resultPtg= FinancialCalculator.calcTBillEq(operands);
-        	break;
-        	
-        case FunctionConstants.xlfTBillPrice:
-        	resultPtg= FinancialCalculator.calcTBillPrice(operands);
-        	break;
-        
-        case FunctionConstants.xlfTBillYield:
-        	resultPtg= FinancialCalculator.calcTBillYield(operands);
-        	break;
-        	
-        case FunctionConstants.xlfYieldDisc:
-        	resultPtg= FinancialCalculator.calcYieldDisc(operands);
-        	break;
-        
-        case FunctionConstants.xlfYieldMat:
-        	resultPtg= FinancialCalculator.calcYieldMat(operands);
-        	break;
-        
-        case FunctionConstants.xlfPpmt:
-        	resultPtg= FinancialCalculator.calcPPMT(operands);
-        	break;
-        
-        case FunctionConstants.xlfFVSchedule:
-        	resultPtg= FinancialCalculator.calcFVSCHEDULE(operands);
-        	break;
-        	
-        case FunctionConstants.xlfIspmt:
-        	resultPtg= FinancialCalculator.calcISPMT(operands);
-        	break;
-        	
-        case FunctionConstants.xlfAmorlinc:
-        	resultPtg= FinancialCalculator.calcAmorlinc(operands);
-        	break;
-        
-        case FunctionConstants.xlfAmordegrc:
-        	resultPtg= FinancialCalculator.calcAmordegrc(operands);
-        	break;
-        	
-        case FunctionConstants.xlfOddFPrice:
-        	resultPtg= FinancialCalculator.calcODDFPRICE(operands);
-        	break;
-        	
-        case FunctionConstants.xlfOddFYield:
-        	resultPtg= FinancialCalculator.calcODDFYIELD(operands);
-        	break;
-        
-        case FunctionConstants.xlfOddLPrice:
-        	resultPtg= FinancialCalculator.calcODDLPRICE(operands);
-        	break;
-        	
-        case FunctionConstants.xlfOddLYield:
-        	resultPtg= FinancialCalculator.calcODDLYIELD(operands);
-        	break;
-        	
-        case FunctionConstants.xlfNOMINAL:
-        	resultPtg= FinancialCalculator.calcNominal(operands);
-        	break;
-        	
-		case FunctionConstants.xlfVdb:
-			resultPtg = FinancialCalculator.calcVDB(operands);
-			break;
-		/********************************************
-		*   Information functions           *********
-		********************************************/
-        
-		case FunctionConstants.xlfCell:
-			resultPtg = InformationCalculator.calcCell(operands);
-			break;
-			
-		case FunctionConstants.xlfInfo:
-			resultPtg = InformationCalculator.calcInfo(operands);
-			break;
-			
-		case FunctionConstants.XLF_IS_NA:
-			resultPtg = InformationCalculator.calcIsna(operands);
-			break;
-            
-		case FunctionConstants.XLF_IS_ERROR:
-			resultPtg = InformationCalculator.calcIserror(operands);
-			break;
-            
-		case FunctionConstants.xlfIserr:
-			resultPtg = InformationCalculator.calcIserr(operands);
-			break;
-			
-		case FunctionConstants.xlfErrorType:
-			resultPtg = InformationCalculator.calcErrorType(operands);
-			break;
-			
-		case FunctionConstants.xlfNa:
-			resultPtg = InformationCalculator.calcNa(operands);
-			break;
-			
-		case FunctionConstants.xlfIsblank:
-			resultPtg = InformationCalculator.calcIsBlank(operands);
-			break;
-			
-		case FunctionConstants.xlfIslogical:
-			resultPtg = InformationCalculator.calcIsLogical(operands);
-			break;
-			
-		case FunctionConstants.xlfIsnontext:
-			resultPtg = InformationCalculator.calcIsNonText(operands);
-			break;
-			
-		case FunctionConstants.xlfIstext:
-			resultPtg = InformationCalculator.calcIsText(operands);
-			break;
-                     
-		case FunctionConstants.xlfIsref:
-			resultPtg = InformationCalculator.calcIsRef(operands);
-			break;           
-			
-		case FunctionConstants.xlfN:
-			resultPtg = InformationCalculator.calcN(operands);
-			break;   
-			
-		case FunctionConstants.xlfIsnumber:
-			resultPtg = InformationCalculator.calcIsNumber(operands);
-			break;
-			
-		case FunctionConstants.xlfISEVEN:
-			resultPtg = InformationCalculator.calcIsEven(operands);
-			break;
+            case FunctionConstants.xlfDcounta:
+                resultPtg = DatabaseCalculator.calcDCountA(operands);
+                break;
 
-		case FunctionConstants.xlfISODD:
-			resultPtg = InformationCalculator.calcIsOdd(operands);
-			break;
-			
-		case FunctionConstants.xlfType:
-			resultPtg= InformationCalculator.calcType(operands);
-			break;
-                
-		/********************************************
-		*   Logical functions       *****
-		********************************************/
-		case FunctionConstants.xlfAnd:
-			resultPtg = LogicalCalculator.calcAnd(operands);
-			break;    
-			
-		case FunctionConstants.xlfFalse:
-			resultPtg = LogicalCalculator.calcFalse(operands);
-			break; 
-			
-		case FunctionConstants.xlfTrue:
-			resultPtg = LogicalCalculator.calcTrue(operands);
-			break; 
-			
-		case FunctionConstants.XLF_IS:
-			resultPtg = LogicalCalculator.calcIf(operands);
-			break; 
-			
-		case FunctionConstants.xlfNot:
-			resultPtg = LogicalCalculator.calcNot(operands);
-			break; 
-	            
-		case FunctionConstants.xlfOr:
-			resultPtg = LogicalCalculator.calcOr(operands);
-			break; 
-			
-		case FunctionConstants.xlfIFERROR:
-			resultPtg= LogicalCalculator.calcIferror(operands);
-			break;
-			
-		/********************************************
-		*   Lookup and reference functions       *****
-		********************************************/
-		case FunctionConstants.xlfAddress:
-			resultPtg = LookupReferenceCalculator.calcAddress(operands);
-			break;
-			
-		case FunctionConstants.xlfAreas:
-			resultPtg = LookupReferenceCalculator.calcAreas(operands);
-			break;
-			
-		case FunctionConstants.xlfChoose:
-			resultPtg = LookupReferenceCalculator.calcChoose(operands);
-			break;
-			
-		case FunctionConstants.xlfColumn:
-			if (operands.length == 0){
-				operands = new Ptg[1];
-				operands[0] = function;
-			}
-			resultPtg = LookupReferenceCalculator.calcColumn(operands);
-			break;
-		
-		case FunctionConstants.xlfColumns:
-			resultPtg = LookupReferenceCalculator.calcColumns(operands);
-			break;
-		
-		case FunctionConstants.xlfHyperlink:
-			resultPtg = LookupReferenceCalculator.calcHyperlink(operands);
-			break;
-			
-			
-		case FunctionConstants.xlfIndex:
-			resultPtg = LookupReferenceCalculator.calcIndex(operands);
-			break;
+            case FunctionConstants.xlfDget:
+                resultPtg = DatabaseCalculator.calcDGet(operands);
+                break;
 
-		case FunctionConstants.XLF_INDIRECT:
-			resultPtg = LookupReferenceCalculator.calcIndirect(operands);
-			break;
-			
-		case FunctionConstants.XLF_ROW:
-		    if (operands.length == 0){
-                operands = new Ptg[1];
-                operands[0] = function;
-            }
-			resultPtg = LookupReferenceCalculator.calcRow(operands);
-			break;	
-			
-		case FunctionConstants.xlfRows:
-			resultPtg = LookupReferenceCalculator.calcRows(operands);
-			break;			
+            case FunctionConstants.xlfDmax:
+                resultPtg = DatabaseCalculator.calcDMax(operands);
+                break;
 
-		case FunctionConstants.xlfTranspose:
-			resultPtg= LookupReferenceCalculator.calcTranspose(operands);
-			break;
-			
-		case FunctionConstants.xlfLookup: 
-			resultPtg = LookupReferenceCalculator.calcLookup(operands);
-			// KSC: Clear out lookup caches!
+            case FunctionConstants.xlfDmin:
+                resultPtg = DatabaseCalculator.calcDMin(operands);
+                break;
+
+            case FunctionConstants.xlfDproduct:
+                resultPtg = DatabaseCalculator.calcDProduct(operands);
+                break;
+
+            case FunctionConstants.xlfDstdev:
+                resultPtg = DatabaseCalculator.calcDStdDev(operands);
+                break;
+
+            case FunctionConstants.xlfDstdevp:
+                resultPtg = DatabaseCalculator.calcDStdDevP(operands);
+                break;
+
+            case FunctionConstants.xlfDsum:
+                resultPtg = DatabaseCalculator.calcDSum(operands);
+                break;
+
+            case FunctionConstants.xlfDvar:
+                resultPtg = DatabaseCalculator.calcDVar(operands);
+                break;
+
+            case FunctionConstants.xlfDvarp:
+                resultPtg = DatabaseCalculator.calcDVarP(operands);
+                break;
+
+            /********************************************
+             *   Date and time functions         *********
+             ********************************************/
+            case FunctionConstants.xlfDate:
+                resultPtg = DateTimeCalculator.calcDate(operands);
+                break;
+
+            case FunctionConstants.xlfDay:
+                resultPtg = DateTimeCalculator.calcDay(operands);
+                break;
+
+            case FunctionConstants.xlfDays360:
+                resultPtg = DateTimeCalculator.calcDays360(operands);
+                break;
+
+            case FunctionConstants.xlfHour:
+                resultPtg = DateTimeCalculator.calcHour(operands);
+                break;
+
+            case FunctionConstants.xlfMinute:
+                resultPtg = DateTimeCalculator.calcMinute(operands);
+                break;
+
+            case FunctionConstants.xlfMonth:
+                resultPtg = DateTimeCalculator.calcMonth(operands);
+                break;
+
+            case FunctionConstants.xlfYear:
+                resultPtg = DateTimeCalculator.calcYear(operands);
+                break;
+
+            case FunctionConstants.xlfSecond:
+                resultPtg = DateTimeCalculator.calcSecond(operands);
+                break;
+
+            case FunctionConstants.xlfTimevalue:
+                resultPtg = DateTimeCalculator.calcTimevalue(operands);
+                break;
+
+            case FunctionConstants.xlfWeekday:
+                resultPtg = DateTimeCalculator.calcWeekday(operands);
+                break;
+
+            case FunctionConstants.xlfWEEKNUM:
+                resultPtg = DateTimeCalculator.calcWeeknum(operands);
+                break;
+
+            case FunctionConstants.xlfWORKDAY:
+                resultPtg = DateTimeCalculator.calcWorkday(operands);
+                break;
+
+            case FunctionConstants.xlfYEARFRAC:
+                resultPtg = DateTimeCalculator.calcYearFrac(operands);
+                break;
+
+            case FunctionConstants.xlfNow:
+                resultPtg = DateTimeCalculator.calcNow(operands);
+                break;
+
+            case FunctionConstants.xlfTime:
+                resultPtg = DateTimeCalculator.calcTime(operands);
+                break;
+
+            case FunctionConstants.xlfToday:
+                resultPtg = DateTimeCalculator.calcToday(operands);
+                break;
+
+            case FunctionConstants.xlfDatevalue:
+                resultPtg = DateTimeCalculator.calcDateValue(operands);
+                break;
+
+            case FunctionConstants.xlfEDATE:
+                resultPtg = DateTimeCalculator.calcEdate(operands);
+                break;
+
+            case FunctionConstants.xlfEOMONTH:
+                resultPtg = DateTimeCalculator.calcEOMonth(operands);
+                break;
+
+            case FunctionConstants.xlfNETWORKDAYS:
+                resultPtg = DateTimeCalculator.calcNetWorkdays(operands);
+                break;
+
+            /********************************************
+             *   DDE and External functions           ****
+             ********************************************/
+
+
+            /********************************************
+             *   Engineering functions           *********
+             ********************************************/
+            case FunctionConstants.xlfBIN2DEC:
+                resultPtg = EngineeringCalculator.calcBin2Dec(operands);
+                break;
+
+            case FunctionConstants.xlfBIN2HEX:
+                resultPtg = EngineeringCalculator.calcBin2Hex(operands);
+                break;
+
+            case FunctionConstants.xlfBIN2OCT:
+                resultPtg = EngineeringCalculator.calcBin2Oct(operands);
+                break;
+
+            case FunctionConstants.xlfDEC2BIN:
+                resultPtg = EngineeringCalculator.calcDec2Bin(operands);
+                break;
+
+            case FunctionConstants.xlfDEC2HEX:
+                resultPtg = EngineeringCalculator.calcDec2Hex(operands);
+                break;
+
+            case FunctionConstants.xlfDEC2OCT:
+                resultPtg = EngineeringCalculator.calcDec2Oct(operands);
+                break;
+
+            case FunctionConstants.xlfHEX2BIN:
+                resultPtg = EngineeringCalculator.calcHex2Bin(operands);
+                break;
+
+            case FunctionConstants.xlfHEX2DEC:
+                resultPtg = EngineeringCalculator.calcHex2Dec(operands);
+                break;
+
+            case FunctionConstants.xlfHEX2OCT:
+                resultPtg = EngineeringCalculator.calcHex2Oct(operands);
+                break;
+
+            case FunctionConstants.xlfOCT2BIN:
+                resultPtg = EngineeringCalculator.calcOct2Bin(operands);
+                break;
+
+            case FunctionConstants.xlfOCT2DEC:
+                resultPtg = EngineeringCalculator.calcOct2Dec(operands);
+                break;
+
+            case FunctionConstants.xlfOCT2HEX:
+                resultPtg = EngineeringCalculator.calcOct2Hex(operands);
+                break;
+
+            case FunctionConstants.xlfCOMPLEX:
+                resultPtg = EngineeringCalculator.calcComplex(operands);
+                break;
+
+            case FunctionConstants.xlfGESTEP:
+                resultPtg = EngineeringCalculator.calcGEStep(operands);
+                break;
+
+            case FunctionConstants.xlfDELTA:
+                resultPtg = EngineeringCalculator.calcDelta(operands);
+                break;
+
+            case FunctionConstants.xlfIMAGINARY:
+                resultPtg = EngineeringCalculator.calcImaginary(operands);
+                break;
+
+            case FunctionConstants.xlfIMREAL:
+                resultPtg = EngineeringCalculator.calcImReal(operands);
+                break;
+
+            case FunctionConstants.xlfIMARGUMENT:
+                resultPtg = EngineeringCalculator.calcImArgument(operands);
+                break;
+
+            case FunctionConstants.xlfIMABS:
+                resultPtg = EngineeringCalculator.calcImAbs(operands);
+                break;
+
+            case FunctionConstants.xlfIMDIV:
+                resultPtg = EngineeringCalculator.calcImDiv(operands);
+                break;
+
+            case FunctionConstants.xlfIMCONJUGATE:
+                resultPtg = EngineeringCalculator.calcImConjugate(operands);
+                break;
+
+            case FunctionConstants.xlfIMCOS:
+                resultPtg = EngineeringCalculator.calcImCos(operands);
+                break;
+
+            case FunctionConstants.xlfIMSIN:
+                resultPtg = EngineeringCalculator.calcImSin(operands);
+                break;
+
+            case FunctionConstants.xlfIMEXP:
+                resultPtg = EngineeringCalculator.calcImExp(operands);
+                break;
+
+            case FunctionConstants.xlfIMSUB:
+                resultPtg = EngineeringCalculator.calcImSub(operands);
+                break;
+
+            case FunctionConstants.xlfIMSUM:
+                resultPtg = EngineeringCalculator.calcImSum(operands);
+                break;
+
+            case FunctionConstants.xlfIMPRODUCT:
+                resultPtg = EngineeringCalculator.calcImProduct(operands);
+                break;
+
+            case FunctionConstants.xlfIMLN:
+                resultPtg = EngineeringCalculator.calcImLn(operands);
+                break;
+
+            case FunctionConstants.xlfIMLOG10:
+                resultPtg = EngineeringCalculator.calcImLog10(operands);
+                break;
+
+            case FunctionConstants.xlfIMLOG2:
+                resultPtg = EngineeringCalculator.calcImLog2(operands);
+                break;
+
+            case FunctionConstants.xlfIMPOWER:
+                resultPtg = EngineeringCalculator.calcImPower(operands);
+                break;
+
+            case FunctionConstants.xlfIMSQRT:
+                resultPtg = EngineeringCalculator.calcImSqrt(operands);
+                break;
+
+            case FunctionConstants.xlfCONVERT:
+                resultPtg = EngineeringCalculator.calcConvert(operands);
+                break;
+
+            case FunctionConstants.xlfERF:
+                resultPtg = EngineeringCalculator.calcErf(operands);
+                break;
+
+
+            /********************************************
+             *   Financial functions             *********
+             ********************************************/
+
+            case FunctionConstants.xlfDb:
+                resultPtg = FinancialCalculator.calcDB(operands);
+                break;
+
+            case FunctionConstants.xlfDdb:
+                resultPtg = FinancialCalculator.calcDDB(operands);
+                break;
+
+            case FunctionConstants.xlfPmt:
+                resultPtg = FinancialCalculator.calcPmt(operands);
+                break;
+
+            // KSC: Added
+            case FunctionConstants.xlfAccrintm:
+                resultPtg = FinancialCalculator.calcAccrintm(operands);
+                break;
+
+            case FunctionConstants.xlfAccrint:
+                resultPtg = FinancialCalculator.calcAccrint(operands);
+                break;
+
+            case FunctionConstants.xlfCoupDayBS:
+                resultPtg = FinancialCalculator.calcCoupDayBS(operands);
+                break;
+
+            case FunctionConstants.xlfCoupDays:
+                resultPtg = FinancialCalculator.calcCoupDays(operands);
+                break;
+
+            case FunctionConstants.xlfNpv:
+                resultPtg = FinancialCalculator.calcNPV(operands);
+                break;
+
+            case FunctionConstants.xlfPv:
+                resultPtg = FinancialCalculator.calcPV(operands);
+                break;
+
+            case FunctionConstants.xlfFv:
+                resultPtg = FinancialCalculator.calcFV(operands);
+                break;
+
+            case FunctionConstants.xlfIpmt:
+                resultPtg = FinancialCalculator.calcIPMT(operands);
+                break;
+
+            case FunctionConstants.xlfCumIPmt:
+                resultPtg = FinancialCalculator.calcCumIPmt(operands);
+                break;
+
+            case FunctionConstants.xlfCumPrinc:
+                resultPtg = FinancialCalculator.calcCumPrinc(operands);
+                break;
+
+            case FunctionConstants.xlfCoupNCD:
+                resultPtg = FinancialCalculator.calcCoupNCD(operands);
+                break;
+
+            case FunctionConstants.xlfCoupDaysNC:
+                resultPtg = FinancialCalculator.calcCoupDaysNC(operands);
+                break;
+
+            case FunctionConstants.xlfCoupPCD:
+                resultPtg = FinancialCalculator.calcCoupPCD(operands);
+                break;
+
+            case FunctionConstants.xlfCoupNUM:
+                resultPtg = FinancialCalculator.calcCoupNum(operands);
+                break;
+
+            case FunctionConstants.xlfDollarDE:
+                resultPtg = FinancialCalculator.calcDollarDE(operands);
+                break;
+
+            case FunctionConstants.xlfDollarFR:
+                resultPtg = FinancialCalculator.calcDollarFR(operands);
+                break;
+
+            case FunctionConstants.xlfEffect:
+                resultPtg = FinancialCalculator.calcEffect(operands);
+                break;
+
+            case FunctionConstants.xlfRECEIVED:
+                resultPtg = FinancialCalculator.calcReceived(operands);
+                break;
+
+            case FunctionConstants.xlfINTRATE:
+                resultPtg = FinancialCalculator.calcINTRATE(operands);
+                break;
+
+            case FunctionConstants.xlfIrr:
+                resultPtg = FinancialCalculator.calcIRR(operands);
+                break;
+
+            case FunctionConstants.xlfMirr:
+                resultPtg = FinancialCalculator.calcMIRR(operands);
+                break;
+
+            case FunctionConstants.xlfXIRR:
+                resultPtg = FinancialCalculator.calcXIRR(operands);
+                break;
+
+            case FunctionConstants.xlfXNPV:
+                resultPtg = FinancialCalculator.calcXNPV(operands);
+                break;
+
+            case FunctionConstants.xlfRate:
+                resultPtg = FinancialCalculator.calcRate(operands);
+                break;
+
+            case FunctionConstants.xlfYIELD:
+                resultPtg = FinancialCalculator.calcYIELD(operands);
+                break;
+
+            case FunctionConstants.xlfPRICE:
+                resultPtg = FinancialCalculator.calcPRICE(operands);
+                break;
+
+            case FunctionConstants.xlfPRICEDISC:
+                resultPtg = FinancialCalculator.calcPRICEDISC(operands);
+                break;
+
+            case FunctionConstants.xlfPRICEMAT:
+                resultPtg = FinancialCalculator.calcPRICEMAT(operands);
+                break;
+
+            case FunctionConstants.xlfDISC:
+                resultPtg = FinancialCalculator.calcDISC(operands);
+                break;
+
+            case FunctionConstants.xlfNper:
+                resultPtg = FinancialCalculator.calcNPER(operands);
+                break;
+
+            case FunctionConstants.xlfSln:
+                resultPtg = FinancialCalculator.calcSLN(operands);
+                break;
+
+            case FunctionConstants.xlfSyd:
+                resultPtg = FinancialCalculator.calcSYD(operands);
+                break;
+
+            case FunctionConstants.xlfDURATION:
+                resultPtg = FinancialCalculator.calcDURATION(operands);
+                break;
+
+            case FunctionConstants.xlfMDURATION:
+                resultPtg = FinancialCalculator.calcMDURATION(operands);
+                break;
+
+            case FunctionConstants.xlfTBillEq:
+                resultPtg = FinancialCalculator.calcTBillEq(operands);
+                break;
+
+            case FunctionConstants.xlfTBillPrice:
+                resultPtg = FinancialCalculator.calcTBillPrice(operands);
+                break;
+
+            case FunctionConstants.xlfTBillYield:
+                resultPtg = FinancialCalculator.calcTBillYield(operands);
+                break;
+
+            case FunctionConstants.xlfYieldDisc:
+                resultPtg = FinancialCalculator.calcYieldDisc(operands);
+                break;
+
+            case FunctionConstants.xlfYieldMat:
+                resultPtg = FinancialCalculator.calcYieldMat(operands);
+                break;
+
+            case FunctionConstants.xlfPpmt:
+                resultPtg = FinancialCalculator.calcPPMT(operands);
+                break;
+
+            case FunctionConstants.xlfFVSchedule:
+                resultPtg = FinancialCalculator.calcFVSCHEDULE(operands);
+                break;
+
+            case FunctionConstants.xlfIspmt:
+                resultPtg = FinancialCalculator.calcISPMT(operands);
+                break;
+
+            case FunctionConstants.xlfAmorlinc:
+                resultPtg = FinancialCalculator.calcAmorlinc(operands);
+                break;
+
+            case FunctionConstants.xlfAmordegrc:
+                resultPtg = FinancialCalculator.calcAmordegrc(operands);
+                break;
+
+            case FunctionConstants.xlfOddFPrice:
+                resultPtg = FinancialCalculator.calcODDFPRICE(operands);
+                break;
+
+            case FunctionConstants.xlfOddFYield:
+                resultPtg = FinancialCalculator.calcODDFYIELD(operands);
+                break;
+
+            case FunctionConstants.xlfOddLPrice:
+                resultPtg = FinancialCalculator.calcODDLPRICE(operands);
+                break;
+
+            case FunctionConstants.xlfOddLYield:
+                resultPtg = FinancialCalculator.calcODDLYIELD(operands);
+                break;
+
+            case FunctionConstants.xlfNOMINAL:
+                resultPtg = FinancialCalculator.calcNominal(operands);
+                break;
+
+            case FunctionConstants.xlfVdb:
+                resultPtg = FinancialCalculator.calcVDB(operands);
+                break;
+            /********************************************
+             *   Information functions           *********
+             ********************************************/
+
+            case FunctionConstants.xlfCell:
+                resultPtg = InformationCalculator.calcCell(operands);
+                break;
+
+            case FunctionConstants.xlfInfo:
+                resultPtg = InformationCalculator.calcInfo(operands);
+                break;
+
+            case FunctionConstants.XLF_IS_NA:
+                resultPtg = InformationCalculator.calcIsna(operands);
+                break;
+
+            case FunctionConstants.XLF_IS_ERROR:
+                resultPtg = InformationCalculator.calcIserror(operands);
+                break;
+
+            case FunctionConstants.xlfIserr:
+                resultPtg = InformationCalculator.calcIserr(operands);
+                break;
+
+            case FunctionConstants.xlfErrorType:
+                resultPtg = InformationCalculator.calcErrorType(operands);
+                break;
+
+            case FunctionConstants.xlfNa:
+                resultPtg = InformationCalculator.calcNa(operands);
+                break;
+
+            case FunctionConstants.xlfIsblank:
+                resultPtg = InformationCalculator.calcIsBlank(operands);
+                break;
+
+            case FunctionConstants.xlfIslogical:
+                resultPtg = InformationCalculator.calcIsLogical(operands);
+                break;
+
+            case FunctionConstants.xlfIsnontext:
+                resultPtg = InformationCalculator.calcIsNonText(operands);
+                break;
+
+            case FunctionConstants.xlfIstext:
+                resultPtg = InformationCalculator.calcIsText(operands);
+                break;
+
+            case FunctionConstants.xlfIsref:
+                resultPtg = InformationCalculator.calcIsRef(operands);
+                break;
+
+            case FunctionConstants.xlfN:
+                resultPtg = InformationCalculator.calcN(operands);
+                break;
+
+            case FunctionConstants.xlfIsnumber:
+                resultPtg = InformationCalculator.calcIsNumber(operands);
+                break;
+
+            case FunctionConstants.xlfISEVEN:
+                resultPtg = InformationCalculator.calcIsEven(operands);
+                break;
+
+            case FunctionConstants.xlfISODD:
+                resultPtg = InformationCalculator.calcIsOdd(operands);
+                break;
+
+            case FunctionConstants.xlfType:
+                resultPtg = InformationCalculator.calcType(operands);
+                break;
+
+            /********************************************
+             *   Logical functions       *****
+             ********************************************/
+            case FunctionConstants.xlfAnd:
+                resultPtg = LogicalCalculator.calcAnd(operands);
+                break;
+
+            case FunctionConstants.xlfFalse:
+                resultPtg = LogicalCalculator.calcFalse(operands);
+                break;
+
+            case FunctionConstants.xlfTrue:
+                resultPtg = LogicalCalculator.calcTrue(operands);
+                break;
+
+            case FunctionConstants.XLF_IS:
+                resultPtg = LogicalCalculator.calcIf(operands);
+                break;
+
+            case FunctionConstants.xlfNot:
+                resultPtg = LogicalCalculator.calcNot(operands);
+                break;
+
+            case FunctionConstants.xlfOr:
+                resultPtg = LogicalCalculator.calcOr(operands);
+                break;
+
+            case FunctionConstants.xlfIFERROR:
+                resultPtg = LogicalCalculator.calcIferror(operands);
+                break;
+
+            /********************************************
+             *   Lookup and reference functions       *****
+             ********************************************/
+            case FunctionConstants.xlfAddress:
+                resultPtg = LookupReferenceCalculator.calcAddress(operands);
+                break;
+
+            case FunctionConstants.xlfAreas:
+                resultPtg = LookupReferenceCalculator.calcAreas(operands);
+                break;
+
+            case FunctionConstants.xlfChoose:
+                resultPtg = LookupReferenceCalculator.calcChoose(operands);
+                break;
+
+            case FunctionConstants.xlfColumn:
+                if (operands.length == 0) {
+                    operands = new Ptg[1];
+                    operands[0] = function;
+                }
+                resultPtg = LookupReferenceCalculator.calcColumn(operands);
+                break;
+
+            case FunctionConstants.xlfColumns:
+                resultPtg = LookupReferenceCalculator.calcColumns(operands);
+                break;
+
+            case FunctionConstants.xlfHyperlink:
+                resultPtg = LookupReferenceCalculator.calcHyperlink(operands);
+                break;
+
+
+            case FunctionConstants.xlfIndex:
+                resultPtg = LookupReferenceCalculator.calcIndex(operands);
+                break;
+
+            case FunctionConstants.XLF_INDIRECT:
+                resultPtg = LookupReferenceCalculator.calcIndirect(operands);
+                break;
+
+            case FunctionConstants.XLF_ROW:
+                if (operands.length == 0) {
+                    operands = new Ptg[1];
+                    operands[0] = function;
+                }
+                resultPtg = LookupReferenceCalculator.calcRow(operands);
+                break;
+
+            case FunctionConstants.xlfRows:
+                resultPtg = LookupReferenceCalculator.calcRows(operands);
+                break;
+
+            case FunctionConstants.xlfTranspose:
+                resultPtg = LookupReferenceCalculator.calcTranspose(operands);
+                break;
+
+            case FunctionConstants.xlfLookup:
+                resultPtg = LookupReferenceCalculator.calcLookup(operands);
+                // KSC: Clear out lookup caches!
 //			function.getParentRec().getWorkBook().getRefTracker().clearLookupCaches();
-			break;
-		
-		case FunctionConstants.xlfHlookup: 
-			resultPtg = LookupReferenceCalculator.calcHlookup(operands);
-			// KSC: Clear out lookup caches!
+                break;
+
+            case FunctionConstants.xlfHlookup:
+                resultPtg = LookupReferenceCalculator.calcHlookup(operands);
+                // KSC: Clear out lookup caches!
 //			function.getParentRec().getWorkBook().getRefTracker().clearLookupCaches();
-			break;
-			
-		case FunctionConstants.xlfVlookup: 
-			resultPtg = LookupReferenceCalculator.calcVlookup(operands);
-			break;
-		
-		case FunctionConstants.xlfMatch:
-			resultPtg = LookupReferenceCalculator.calcMatch(operands);
-			break;
-			
-		case FunctionConstants.xlfOffset:
-			resultPtg= LookupReferenceCalculator.calcOffset(operands);
-			break;
-			
-		/********************************************
-		*   Math & Trigonometry functions       *****
-		********************************************/
-                
-		case FunctionConstants.XLF_SUM:
-			resultPtg = MathFunctionCalculator.calcSum(operands);
-			break;
-			
-		case FunctionConstants.XLF_SUM_IF:
-			resultPtg= MathFunctionCalculator.calcSumif(operands);
-			break;
-        
-		case FunctionConstants.xlfSUMIFS:
-			resultPtg= MathFunctionCalculator.calcSumIfS(operands);
-			break;			
-			
-		case FunctionConstants.xlfSumproduct:
-			resultPtg = MathFunctionCalculator.calcSumproduct(operands);
-			break;
-        
-		case FunctionConstants.xlfExp:
-			resultPtg = MathFunctionCalculator.calcExp(operands);
-			break;
-                
-		case FunctionConstants.xlfAbs:
-			resultPtg = MathFunctionCalculator.calcAbs(operands);
-			break;
-            
-		case FunctionConstants.xlfAcos:
-			resultPtg = MathFunctionCalculator.calcAcos(operands);
-			break;
-            
-		case FunctionConstants.xlfAcosh: 
-			resultPtg = MathFunctionCalculator.calcAcosh(operands);
-			break;
-        	
-		case FunctionConstants.xlfAsin:
-			resultPtg = MathFunctionCalculator.calcAsin(operands);
-			break;
-        	
-		case FunctionConstants.xlfAsinh:
-			resultPtg = MathFunctionCalculator.calcAsinh(operands);
-			break;
-			
-		case FunctionConstants.xlfAtan:
-			resultPtg = MathFunctionCalculator.calcAtan(operands);
-			break;
-			
-		case FunctionConstants.xlfAtan2:
-			resultPtg = MathFunctionCalculator.calcAtan2(operands);
-			break;
-			
-		case FunctionConstants.xlfAtanh:
-			resultPtg = MathFunctionCalculator.calcAtanh(operands);
-			break;
-			
-		case FunctionConstants.xlfCeiling:
-			resultPtg = MathFunctionCalculator.calcCeiling(operands);
-			break;
-			
-		case FunctionConstants.xlfCombin:
-			resultPtg = MathFunctionCalculator.calcCombin(operands);
-			break;
-			
-		case FunctionConstants.xlfCos:
-			resultPtg = MathFunctionCalculator.calcCos(operands);
-			break;
-			
-		case FunctionConstants.xlfCosh:
-			resultPtg = MathFunctionCalculator.calcCosh(operands);
-			break;
-						
-		case FunctionConstants.xlfDegrees:
-			resultPtg = MathFunctionCalculator.calcDegrees(operands);
-			break;
-			
-		case FunctionConstants.xlfEven:
-			resultPtg = MathFunctionCalculator.calcEven(operands);
-			break;
-			
-		case FunctionConstants.xlfFact:
-			resultPtg = MathFunctionCalculator.calcFact(operands);
-			break;
+                break;
 
-		case FunctionConstants.xlfDOUBLEFACT:
-			resultPtg = MathFunctionCalculator.calcFactDouble(operands);
-			break;	
+            case FunctionConstants.xlfVlookup:
+                resultPtg = LookupReferenceCalculator.calcVlookup(operands);
+                break;
 
-		case FunctionConstants.xlfFloor:
-			resultPtg = MathFunctionCalculator.calcFloor(operands);
-			break;
+            case FunctionConstants.xlfMatch:
+                resultPtg = LookupReferenceCalculator.calcMatch(operands);
+                break;
 
-		case FunctionConstants.xlfGCD:
-			resultPtg = MathFunctionCalculator.calcGCD(operands);
-			break;	
+            case FunctionConstants.xlfOffset:
+                resultPtg = LookupReferenceCalculator.calcOffset(operands);
+                break;
 
-		case FunctionConstants.xlfInt:
-			resultPtg = MathFunctionCalculator.calcInt(operands);
-			break;
+            /********************************************
+             *   Math & Trigonometry functions       *****
+             ********************************************/
 
-		case FunctionConstants.xlfLCM:
-			resultPtg = MathFunctionCalculator.calcLCM(operands);
-			break;	
-			
-		case FunctionConstants.xlfMROUND:
-			resultPtg= MathFunctionCalculator.calcMRound(operands);
-			break;
-			
-		case FunctionConstants.xlfMmult:
-			resultPtg= MathFunctionCalculator.calcMMult(operands);
-			break;
-			
-		case FunctionConstants.xlfMULTINOMIAL:
-			resultPtg= MathFunctionCalculator.calcMultinomial(operands);
-			break;
+            case FunctionConstants.XLF_SUM:
+                resultPtg = MathFunctionCalculator.calcSum(operands);
+                break;
 
-		case FunctionConstants.xlfLn:
-			resultPtg = MathFunctionCalculator.calcLn(operands);
-			break;
-			
-		case FunctionConstants.xlfLog:
-			resultPtg = MathFunctionCalculator.calcLog(operands);
-			break;
-				
-		case FunctionConstants.xlfLog10:
-			resultPtg = MathFunctionCalculator.calcLog10(operands);
-			break;
-							
-		case FunctionConstants.xlfMod:
-			resultPtg = MathFunctionCalculator.calcMod(operands);
-			break;	
-					
-		case FunctionConstants.xlfOdd:
-			resultPtg = MathFunctionCalculator.calcOdd(operands);
-			break;	
-			
-		case FunctionConstants.xlfPi:
-			resultPtg = MathFunctionCalculator.calcPi(operands);
-			break;	
-			
-		case FunctionConstants.xlfPower:
-			resultPtg = MathFunctionCalculator.calcPower(operands);
-			break;	
-			
-		case FunctionConstants.xlfProduct:
-			resultPtg = MathFunctionCalculator.calcProduct(operands);
-			break;
-			
-		case FunctionConstants.xlfQUOTIENT:
-			resultPtg= MathFunctionCalculator.calcQuotient(operands);
-			break;
-			
-		case FunctionConstants.xlfRadians:
-			resultPtg = MathFunctionCalculator.calcRadians(operands);
-			break;	
-			
-		case FunctionConstants.xlfRand:
-			resultPtg = MathFunctionCalculator.calcRand(operands);
-			break;
-			
-		case FunctionConstants.xlfRANDBETWEEN:
-			resultPtg= MathFunctionCalculator.calcRandBetween(operands);
-			break;
-			      
-		case FunctionConstants.xlfRoman:
-			resultPtg = MathFunctionCalculator.calcRoman(operands);
-			break;	
-			  	
-		case FunctionConstants.xlfRound:
-			resultPtg = MathFunctionCalculator.calcRound(operands);
-			break;	 
-					
-		case FunctionConstants.xlfRounddown:
-			resultPtg = MathFunctionCalculator.calcRoundDown(operands);
-			break;	
-			
-		case FunctionConstants.xlfRoundup:
-			resultPtg = MathFunctionCalculator.calcRoundUp(operands);
-			break;	
-			
-		case FunctionConstants.xlfSign:
-			resultPtg = MathFunctionCalculator.calcSign(operands);
-			break;	
-			
-		case FunctionConstants.xlfSin:
-			resultPtg = MathFunctionCalculator.calcSin(operands);
-			break;	
-			
-		case FunctionConstants.xlfSinh:
-			resultPtg = MathFunctionCalculator.calcSinh(operands);
-			break;	
-			
-		case FunctionConstants.xlfSqrt:
-			resultPtg = MathFunctionCalculator.calcSqrt(operands);
-			break;	
+            case FunctionConstants.XLF_SUM_IF:
+                resultPtg = MathFunctionCalculator.calcSumif(operands);
+                break;
 
-		case FunctionConstants.xlfSQRTPI:
-			resultPtg = MathFunctionCalculator.calcSqrtPi(operands);
-			break;				
+            case FunctionConstants.xlfSUMIFS:
+                resultPtg = MathFunctionCalculator.calcSumIfS(operands);
+                break;
 
-		case FunctionConstants.xlfTan:
-			resultPtg = MathFunctionCalculator.calcTan(operands);
-			break;	
-		
-		case FunctionConstants.xlfTanh:
-			resultPtg= MathFunctionCalculator.calcTanh(operands);
-			break;
-			
-		case FunctionConstants.xlfTrunc:
-			resultPtg = MathFunctionCalculator.calcTrunc(operands);
-			break;
-			
-		/********************************************
-		*   Statistical functions       *****
-		********************************************/
-                
-		case FunctionConstants.XLF_COUNT:
-			resultPtg = StatisticalCalculator.calcCount(operands);
-			break;
-			
-		case FunctionConstants.xlfCounta:
-			resultPtg = StatisticalCalculator.calcCountA(operands);
-			break;			
-			
-		case FunctionConstants.xlfCountblank:
-			resultPtg = StatisticalCalculator.calcCountBlank(operands);
-			break;
-			
-		case FunctionConstants.xlfCountif:
-			resultPtg = StatisticalCalculator.calcCountif(operands);
-			break;
+            case FunctionConstants.xlfSumproduct:
+                resultPtg = MathFunctionCalculator.calcSumproduct(operands);
+                break;
 
-		case FunctionConstants.xlfCOUNTIFS:
-			resultPtg = StatisticalCalculator.calcCountIfS(operands);
-			break;
-			                            
-		case FunctionConstants.XLF_MIN:
-			resultPtg = StatisticalCalculator.calcMin(operands);
-			break;
-        
-		case FunctionConstants.xlfMinA:
-			resultPtg = StatisticalCalculator.calcMinA(operands);
-			break;
-        
-		case FunctionConstants.XLF_MAX:
-			resultPtg = StatisticalCalculator.calcMax(operands);
-			break;
-        
-		case FunctionConstants.xlfMaxA:
-			resultPtg = StatisticalCalculator.calcMaxA(operands);
-			break;
-			
-		case FunctionConstants.xlfNormdist:
-			resultPtg = StatisticalCalculator.calcNormdist(operands);
-			break;
-        
-		case FunctionConstants.xlfNormsdist:
-			resultPtg = StatisticalCalculator.calcNormsdist(operands);
-			break;
-			
-		case FunctionConstants.xlfNormsinv:
-			resultPtg = StatisticalCalculator.calcNormsInv(operands);
-			break;
-	
-		case FunctionConstants.xlfNorminv:
-			resultPtg = StatisticalCalculator.calcNormInv(operands);
-			break;
-			
-		case FunctionConstants.XLF_AVERAGE:
-			resultPtg = StatisticalCalculator.calcAverage(operands);
-			break;
-            
-		case FunctionConstants.xlfAVERAGEIF:
-			resultPtg = StatisticalCalculator.calcAverageIf(operands);
-			break;
-			
-		case FunctionConstants.xlfAVERAGEIFS:
-			resultPtg = StatisticalCalculator.calcAverageIfS(operands);
-			break;
-			
-		case FunctionConstants.xlfAvedev:
-			resultPtg = StatisticalCalculator.calcAveDev(operands);
-			break;
-			
-		case FunctionConstants.xlfAverageA:
-			resultPtg = StatisticalCalculator.calcAverageA(operands);
-			break;
-			
-		case FunctionConstants.xlfMedian:
-			resultPtg = StatisticalCalculator.calcMedian(operands);
-			break;
-			
-		case FunctionConstants.xlfMode:
-			resultPtg = StatisticalCalculator.calcMode(operands);
-			break;
-			
-		case FunctionConstants.xlfQuartile:
-			resultPtg = StatisticalCalculator.calcQuartile(operands);
-			break;
-			
-		case FunctionConstants.xlfRank:
-			resultPtg = StatisticalCalculator.calcRank(operands);
-			break;
-			
-		case FunctionConstants.xlfStdev:
-			resultPtg = StatisticalCalculator.calcStdev(operands);
-			break;
-			
-		case FunctionConstants.xlfVar:
-			resultPtg = StatisticalCalculator.calcVar(operands);
-			break;
-			
-		case FunctionConstants.xlfVarp:
-			resultPtg = StatisticalCalculator.calcVarp(operands);
-			break;
-			
-		case FunctionConstants.xlfCovar:
-			resultPtg = StatisticalCalculator.calcCovar(operands);
-			break;
-			
-		case FunctionConstants.xlfCorrel:
-			resultPtg = StatisticalCalculator.calcCorrel(operands);
-			break;
-			
-		case FunctionConstants.xlfFrequency:
-			resultPtg = StatisticalCalculator.calcFrequency(operands);
-			break;
-			
-		case FunctionConstants.xlfLinest:
-			resultPtg = StatisticalCalculator.calcLineSt(operands);
-			break;
-			
-		case FunctionConstants.xlfSlope:
-			resultPtg = StatisticalCalculator.calcSlope(operands);
-			break;
-			
-		case FunctionConstants.xlfIntercept:
-			resultPtg = StatisticalCalculator.calcIntercept(operands);
-			break;
-			
-		case FunctionConstants.xlfPearson:
-			resultPtg = StatisticalCalculator.calcPearson(operands);
-			break;
-			
-		case FunctionConstants.xlfRsq:
-			resultPtg = StatisticalCalculator.calcRsq(operands);
-			break;
-			
-		case FunctionConstants.xlfSteyx:
-			resultPtg = StatisticalCalculator.calcSteyx(operands);
-			break;
-			
-		case FunctionConstants.xlfForecast:
-			resultPtg = StatisticalCalculator.calcForecast(operands);
-			break;
-			
-		case FunctionConstants.xlfTrend:
-			resultPtg = StatisticalCalculator.calcTrend(operands);
-			break;
-			
-		case FunctionConstants.xlfLarge:
-			resultPtg = StatisticalCalculator.calcLarge(operands);
-			break;
-			
-		case FunctionConstants.xlfSmall:
-			resultPtg = StatisticalCalculator.calcSmall(operands);
-			break;
-			
-		/********************************************
-		*   Text functions                                *****
-		********************************************/
+            case FunctionConstants.xlfExp:
+                resultPtg = MathFunctionCalculator.calcExp(operands);
+                break;
+
+            case FunctionConstants.xlfAbs:
+                resultPtg = MathFunctionCalculator.calcAbs(operands);
+                break;
+
+            case FunctionConstants.xlfAcos:
+                resultPtg = MathFunctionCalculator.calcAcos(operands);
+                break;
+
+            case FunctionConstants.xlfAcosh:
+                resultPtg = MathFunctionCalculator.calcAcosh(operands);
+                break;
+
+            case FunctionConstants.xlfAsin:
+                resultPtg = MathFunctionCalculator.calcAsin(operands);
+                break;
+
+            case FunctionConstants.xlfAsinh:
+                resultPtg = MathFunctionCalculator.calcAsinh(operands);
+                break;
+
+            case FunctionConstants.xlfAtan:
+                resultPtg = MathFunctionCalculator.calcAtan(operands);
+                break;
+
+            case FunctionConstants.xlfAtan2:
+                resultPtg = MathFunctionCalculator.calcAtan2(operands);
+                break;
+
+            case FunctionConstants.xlfAtanh:
+                resultPtg = MathFunctionCalculator.calcAtanh(operands);
+                break;
+
+            case FunctionConstants.xlfCeiling:
+                resultPtg = MathFunctionCalculator.calcCeiling(operands);
+                break;
+
+            case FunctionConstants.xlfCombin:
+                resultPtg = MathFunctionCalculator.calcCombin(operands);
+                break;
+
+            case FunctionConstants.xlfCos:
+                resultPtg = MathFunctionCalculator.calcCos(operands);
+                break;
+
+            case FunctionConstants.xlfCosh:
+                resultPtg = MathFunctionCalculator.calcCosh(operands);
+                break;
+
+            case FunctionConstants.xlfDegrees:
+                resultPtg = MathFunctionCalculator.calcDegrees(operands);
+                break;
+
+            case FunctionConstants.xlfEven:
+                resultPtg = MathFunctionCalculator.calcEven(operands);
+                break;
+
+            case FunctionConstants.xlfFact:
+                resultPtg = MathFunctionCalculator.calcFact(operands);
+                break;
+
+            case FunctionConstants.xlfDOUBLEFACT:
+                resultPtg = MathFunctionCalculator.calcFactDouble(operands);
+                break;
+
+            case FunctionConstants.xlfFloor:
+                resultPtg = MathFunctionCalculator.calcFloor(operands);
+                break;
+
+            case FunctionConstants.xlfGCD:
+                resultPtg = MathFunctionCalculator.calcGCD(operands);
+                break;
+
+            case FunctionConstants.xlfInt:
+                resultPtg = MathFunctionCalculator.calcInt(operands);
+                break;
+
+            case FunctionConstants.xlfLCM:
+                resultPtg = MathFunctionCalculator.calcLCM(operands);
+                break;
+
+            case FunctionConstants.xlfMROUND:
+                resultPtg = MathFunctionCalculator.calcMRound(operands);
+                break;
+
+            case FunctionConstants.xlfMmult:
+                resultPtg = MathFunctionCalculator.calcMMult(operands);
+                break;
+
+            case FunctionConstants.xlfMULTINOMIAL:
+                resultPtg = MathFunctionCalculator.calcMultinomial(operands);
+                break;
+
+            case FunctionConstants.xlfLn:
+                resultPtg = MathFunctionCalculator.calcLn(operands);
+                break;
+
+            case FunctionConstants.xlfLog:
+                resultPtg = MathFunctionCalculator.calcLog(operands);
+                break;
+
+            case FunctionConstants.xlfLog10:
+                resultPtg = MathFunctionCalculator.calcLog10(operands);
+                break;
+
+            case FunctionConstants.xlfMod:
+                resultPtg = MathFunctionCalculator.calcMod(operands);
+                break;
+
+            case FunctionConstants.xlfOdd:
+                resultPtg = MathFunctionCalculator.calcOdd(operands);
+                break;
+
+            case FunctionConstants.xlfPi:
+                resultPtg = MathFunctionCalculator.calcPi(operands);
+                break;
+
+            case FunctionConstants.xlfPower:
+                resultPtg = MathFunctionCalculator.calcPower(operands);
+                break;
+
+            case FunctionConstants.xlfProduct:
+                resultPtg = MathFunctionCalculator.calcProduct(operands);
+                break;
+
+            case FunctionConstants.xlfQUOTIENT:
+                resultPtg = MathFunctionCalculator.calcQuotient(operands);
+                break;
+
+            case FunctionConstants.xlfRadians:
+                resultPtg = MathFunctionCalculator.calcRadians(operands);
+                break;
+
+            case FunctionConstants.xlfRand:
+                resultPtg = MathFunctionCalculator.calcRand(operands);
+                break;
+
+            case FunctionConstants.xlfRANDBETWEEN:
+                resultPtg = MathFunctionCalculator.calcRandBetween(operands);
+                break;
+
+            case FunctionConstants.xlfRoman:
+                resultPtg = MathFunctionCalculator.calcRoman(operands);
+                break;
+
+            case FunctionConstants.xlfRound:
+                resultPtg = MathFunctionCalculator.calcRound(operands);
+                break;
+
+            case FunctionConstants.xlfRounddown:
+                resultPtg = MathFunctionCalculator.calcRoundDown(operands);
+                break;
+
+            case FunctionConstants.xlfRoundup:
+                resultPtg = MathFunctionCalculator.calcRoundUp(operands);
+                break;
+
+            case FunctionConstants.xlfSign:
+                resultPtg = MathFunctionCalculator.calcSign(operands);
+                break;
+
+            case FunctionConstants.xlfSin:
+                resultPtg = MathFunctionCalculator.calcSin(operands);
+                break;
+
+            case FunctionConstants.xlfSinh:
+                resultPtg = MathFunctionCalculator.calcSinh(operands);
+                break;
+
+            case FunctionConstants.xlfSqrt:
+                resultPtg = MathFunctionCalculator.calcSqrt(operands);
+                break;
+
+            case FunctionConstants.xlfSQRTPI:
+                resultPtg = MathFunctionCalculator.calcSqrtPi(operands);
+                break;
+
+            case FunctionConstants.xlfTan:
+                resultPtg = MathFunctionCalculator.calcTan(operands);
+                break;
+
+            case FunctionConstants.xlfTanh:
+                resultPtg = MathFunctionCalculator.calcTanh(operands);
+                break;
+
+            case FunctionConstants.xlfTrunc:
+                resultPtg = MathFunctionCalculator.calcTrunc(operands);
+                break;
+
+            /********************************************
+             *   Statistical functions       *****
+             ********************************************/
+
+            case FunctionConstants.XLF_COUNT:
+                resultPtg = StatisticalCalculator.calcCount(operands);
+                break;
+
+            case FunctionConstants.xlfCounta:
+                resultPtg = StatisticalCalculator.calcCountA(operands);
+                break;
+
+            case FunctionConstants.xlfCountblank:
+                resultPtg = StatisticalCalculator.calcCountBlank(operands);
+                break;
+
+            case FunctionConstants.xlfCountif:
+                resultPtg = StatisticalCalculator.calcCountif(operands);
+                break;
+
+            case FunctionConstants.xlfCOUNTIFS:
+                resultPtg = StatisticalCalculator.calcCountIfS(operands);
+                break;
+
+            case FunctionConstants.XLF_MIN:
+                resultPtg = StatisticalCalculator.calcMin(operands);
+                break;
+
+            case FunctionConstants.xlfMinA:
+                resultPtg = StatisticalCalculator.calcMinA(operands);
+                break;
+
+            case FunctionConstants.XLF_MAX:
+                resultPtg = StatisticalCalculator.calcMax(operands);
+                break;
+
+            case FunctionConstants.xlfMaxA:
+                resultPtg = StatisticalCalculator.calcMaxA(operands);
+                break;
+
+            case FunctionConstants.xlfNormdist:
+                resultPtg = StatisticalCalculator.calcNormdist(operands);
+                break;
+
+            case FunctionConstants.xlfNormsdist:
+                resultPtg = StatisticalCalculator.calcNormsdist(operands);
+                break;
+
+            case FunctionConstants.xlfNormsinv:
+                resultPtg = StatisticalCalculator.calcNormsInv(operands);
+                break;
+
+            case FunctionConstants.xlfNorminv:
+                resultPtg = StatisticalCalculator.calcNormInv(operands);
+                break;
+
+            case FunctionConstants.XLF_AVERAGE:
+                resultPtg = StatisticalCalculator.calcAverage(operands);
+                break;
+
+            case FunctionConstants.xlfAVERAGEIF:
+                resultPtg = StatisticalCalculator.calcAverageIf(operands);
+                break;
+
+            case FunctionConstants.xlfAVERAGEIFS:
+                resultPtg = StatisticalCalculator.calcAverageIfS(operands);
+                break;
+
+            case FunctionConstants.xlfAvedev:
+                resultPtg = StatisticalCalculator.calcAveDev(operands);
+                break;
+
+            case FunctionConstants.xlfAverageA:
+                resultPtg = StatisticalCalculator.calcAverageA(operands);
+                break;
+
+            case FunctionConstants.xlfMedian:
+                resultPtg = StatisticalCalculator.calcMedian(operands);
+                break;
+
+            case FunctionConstants.xlfMode:
+                resultPtg = StatisticalCalculator.calcMode(operands);
+                break;
+
+            case FunctionConstants.xlfQuartile:
+                resultPtg = StatisticalCalculator.calcQuartile(operands);
+                break;
+
+            case FunctionConstants.xlfRank:
+                resultPtg = StatisticalCalculator.calcRank(operands);
+                break;
+
+            case FunctionConstants.xlfStdev:
+                resultPtg = StatisticalCalculator.calcStdev(operands);
+                break;
+
+            case FunctionConstants.xlfVar:
+                resultPtg = StatisticalCalculator.calcVar(operands);
+                break;
+
+            case FunctionConstants.xlfVarp:
+                resultPtg = StatisticalCalculator.calcVarp(operands);
+                break;
+
+            case FunctionConstants.xlfCovar:
+                resultPtg = StatisticalCalculator.calcCovar(operands);
+                break;
+
+            case FunctionConstants.xlfCorrel:
+                resultPtg = StatisticalCalculator.calcCorrel(operands);
+                break;
+
+            case FunctionConstants.xlfFrequency:
+                resultPtg = StatisticalCalculator.calcFrequency(operands);
+                break;
+
+            case FunctionConstants.xlfLinest:
+                resultPtg = StatisticalCalculator.calcLineSt(operands);
+                break;
+
+            case FunctionConstants.xlfSlope:
+                resultPtg = StatisticalCalculator.calcSlope(operands);
+                break;
+
+            case FunctionConstants.xlfIntercept:
+                resultPtg = StatisticalCalculator.calcIntercept(operands);
+                break;
+
+            case FunctionConstants.xlfPearson:
+                resultPtg = StatisticalCalculator.calcPearson(operands);
+                break;
+
+            case FunctionConstants.xlfRsq:
+                resultPtg = StatisticalCalculator.calcRsq(operands);
+                break;
+
+            case FunctionConstants.xlfSteyx:
+                resultPtg = StatisticalCalculator.calcSteyx(operands);
+                break;
+
+            case FunctionConstants.xlfForecast:
+                resultPtg = StatisticalCalculator.calcForecast(operands);
+                break;
+
+            case FunctionConstants.xlfTrend:
+                resultPtg = StatisticalCalculator.calcTrend(operands);
+                break;
+
+            case FunctionConstants.xlfLarge:
+                resultPtg = StatisticalCalculator.calcLarge(operands);
+                break;
+
+            case FunctionConstants.xlfSmall:
+                resultPtg = StatisticalCalculator.calcSmall(operands);
+                break;
+
+            /********************************************
+             *   Text functions                                *****
+             ********************************************/
 			/*
 			 * these DBCS functions are not working yet
 		case FunctionConstants.xlfAsc:
@@ -1209,151 +1208,147 @@ public static final Ptg parse_n_calc(Ptg function, int functionId,  Ptg[] operan
 			resultPtg= TextCalculator.calcJIS(operands);
 			break;
 			*/
-		case FunctionConstants.xlfChar:
-			resultPtg = TextCalculator.calcChar(operands);
-			break;
-			
-		case FunctionConstants.xlfClean:
-			resultPtg= TextCalculator.calcClean(operands);
-			break;
-			
-		case FunctionConstants.xlfCode:
-			resultPtg = TextCalculator.calcCode(operands);
-			break;
-			
-		case FunctionConstants.xlfConcatenate:
-			resultPtg = TextCalculator.calcConcatenate(operands);
-			break;
-			
-		case FunctionConstants.xlfDollar:
-			resultPtg = TextCalculator.calcDollar(operands);
-			break;
-			
-		case FunctionConstants.xlfExact:
-			resultPtg = TextCalculator.calcExact(operands);
-			break;
-			
-		case FunctionConstants.xlfFind:
-			resultPtg = TextCalculator.calcFind(operands);
-			break;
-			
-        // DBCS functions are not working 100% yet
-		case FunctionConstants.xlfFindb:
-			resultPtg = TextCalculator.calcFindB(operands);
-			break;
-			
-		case FunctionConstants.xlfFixed:
-			resultPtg = TextCalculator.calcFixed(operands);
-			break;
-			
-		case FunctionConstants.xlfLeft:
-			resultPtg = TextCalculator.calcLeft(operands);
-			break;
-			
-		case FunctionConstants.xlfLeftb:
-			resultPtg = TextCalculator.calcLeftB(operands);
-			break;
-			
-		case FunctionConstants.xlfLen:
-			resultPtg = TextCalculator.calcLen(operands);
-			break;
-			
-		case FunctionConstants.xlfLenb:
-			resultPtg = TextCalculator.calcLenB(operands);
-			break; 
-		
-		case FunctionConstants.xlfLower:
-			resultPtg = TextCalculator.calcLower(operands);
-			break;
-			
-		case FunctionConstants.xlfUpper:
-			resultPtg = TextCalculator.calcUpper(operands);
-			break;
-			
-		case FunctionConstants.xlfMid:
-			resultPtg = TextCalculator.calcMid(operands);
-			break;
+            case FunctionConstants.xlfChar:
+                resultPtg = TextCalculator.calcChar(operands);
+                break;
 
-		case FunctionConstants.xlfProper:
-			resultPtg = TextCalculator.calcProper(operands);
-			break;
-			
-		case FunctionConstants.xlfReplace:
-			resultPtg = TextCalculator.calcReplace(operands);
-			break;
-			
-		case FunctionConstants.xlfRept:
-			resultPtg = TextCalculator.calcRept(operands);
-			break;
-			
-		case FunctionConstants.xlfRight:
-			resultPtg = TextCalculator.calcRight(operands);
-			break;
-			
-		case FunctionConstants.xlfSearch:
-			resultPtg = TextCalculator.calcSearch(operands);
-			break;
-		
-		case FunctionConstants.xlfSearchb:
-			resultPtg = TextCalculator.calcSearchB(operands);
-			break;
-		
-		case FunctionConstants.xlfSubstitute:	
-			resultPtg = TextCalculator.calcSubstitute(operands);
-			break;
-		
-		case FunctionConstants.xlfT:
-			resultPtg = TextCalculator.calcT(operands);
-			break;
-			
-		case FunctionConstants.xlfTrim:
-			resultPtg = TextCalculator.calcTrim(operands);
-			break;
-			
-		case FunctionConstants.xlfText:
-			resultPtg = TextCalculator.calcText(operands);
-			break;
-			
-		
-		case FunctionConstants.xlfValue:
-			resultPtg = TextCalculator.calcValue(operands);
-			break;	
+            case FunctionConstants.xlfClean:
+                resultPtg = TextCalculator.calcClean(operands);
+                break;
 
-        
-        
+            case FunctionConstants.xlfCode:
+                resultPtg = TextCalculator.calcCode(operands);
+                break;
 
-		default:
-			String s= FunctionConstants.getFunctionString((short)functionId);
-			if (s!=null && !s.equals( ""))
-				s= s.substring(0, s.length()-1);
-			else 
-				s= new String(Integer.toHexString((int)functionId));
-		//throw new FunctionNotSupportedException( (!.equals(""))?FunctionConstants.getFunctionString((short)funkId).substring(0, ):Integer.toHexString((int)funkId));
-			throw new FunctionNotSupportedException(s);	// 20081118 KSC: add a little more info ...
-		
-	}
+            case FunctionConstants.xlfConcatenate:
+                resultPtg = TextCalculator.calcConcatenate(operands);
+                break;
 
-    
-	return resultPtg;
-}
-	
-	/****************************************************************************
-	*                                                                           *
-	*   The following section is made up of the calcuations for each of the     *
-	*   function types.  These map directly to the name of the function         *
-	*   declared in the header and is called from the coresponding switch       *
-	*   statement above.  ENJOY!                                                *
-	*                                                                           *
-	*****************************************************************************/
-	
-	
-	  
-	    
-	/****************************************
-	*                                       *
-	*   Excel function numbers              *
-	*                                       *
-	****************************************/
+            case FunctionConstants.xlfDollar:
+                resultPtg = TextCalculator.calcDollar(operands);
+                break;
+
+            case FunctionConstants.xlfExact:
+                resultPtg = TextCalculator.calcExact(operands);
+                break;
+
+            case FunctionConstants.xlfFind:
+                resultPtg = TextCalculator.calcFind(operands);
+                break;
+
+            // DBCS functions are not working 100% yet
+            case FunctionConstants.xlfFindb:
+                resultPtg = TextCalculator.calcFindB(operands);
+                break;
+
+            case FunctionConstants.xlfFixed:
+                resultPtg = TextCalculator.calcFixed(operands);
+                break;
+
+            case FunctionConstants.xlfLeft:
+                resultPtg = TextCalculator.calcLeft(operands);
+                break;
+
+            case FunctionConstants.xlfLeftb:
+                resultPtg = TextCalculator.calcLeftB(operands);
+                break;
+
+            case FunctionConstants.xlfLen:
+                resultPtg = TextCalculator.calcLen(operands);
+                break;
+
+            case FunctionConstants.xlfLenb:
+                resultPtg = TextCalculator.calcLenB(operands);
+                break;
+
+            case FunctionConstants.xlfLower:
+                resultPtg = TextCalculator.calcLower(operands);
+                break;
+
+            case FunctionConstants.xlfUpper:
+                resultPtg = TextCalculator.calcUpper(operands);
+                break;
+
+            case FunctionConstants.xlfMid:
+                resultPtg = TextCalculator.calcMid(operands);
+                break;
+
+            case FunctionConstants.xlfProper:
+                resultPtg = TextCalculator.calcProper(operands);
+                break;
+
+            case FunctionConstants.xlfReplace:
+                resultPtg = TextCalculator.calcReplace(operands);
+                break;
+
+            case FunctionConstants.xlfRept:
+                resultPtg = TextCalculator.calcRept(operands);
+                break;
+
+            case FunctionConstants.xlfRight:
+                resultPtg = TextCalculator.calcRight(operands);
+                break;
+
+            case FunctionConstants.xlfSearch:
+                resultPtg = TextCalculator.calcSearch(operands);
+                break;
+
+            case FunctionConstants.xlfSearchb:
+                resultPtg = TextCalculator.calcSearchB(operands);
+                break;
+
+            case FunctionConstants.xlfSubstitute:
+                resultPtg = TextCalculator.calcSubstitute(operands);
+                break;
+
+            case FunctionConstants.xlfT:
+                resultPtg = TextCalculator.calcT(operands);
+                break;
+
+            case FunctionConstants.xlfTrim:
+                resultPtg = TextCalculator.calcTrim(operands);
+                break;
+
+            case FunctionConstants.xlfText:
+                resultPtg = TextCalculator.calcText(operands);
+                break;
+
+
+            case FunctionConstants.xlfValue:
+                resultPtg = TextCalculator.calcValue(operands);
+                break;
+
+
+            default:
+                String s = FunctionConstants.getFunctionString((short) functionId);
+                if (s != null && !s.equals(""))
+                    s = s.substring(0, s.length() - 1);
+                else
+                    s = Integer.toHexString(functionId);
+                //throw new FunctionNotSupportedException( (!.equals(""))?FunctionConstants.getFunctionString((short)funkId).substring(0, ):Integer.toHexString((int)funkId));
+                throw new FunctionNotSupportedException(s);    // 20081118 KSC: add a little more info ...
+
+        }
+
+
+        return resultPtg;
+    }
+
+    /****************************************************************************
+     *                                                                           *
+     *   The following section is made up of the calcuations for each of the     *
+     *   function types.  These map directly to the name of the function         *
+     *   declared in the header and is called from the coresponding switch       *
+     *   statement above.  ENJOY!                                                *
+     *                                                                           *
+     *****************************************************************************/
+
+
+    /****************************************
+     *                                       *
+     *   Excel function numbers              *
+     *                                       *
+     ****************************************/
 /*	
 	public static final int xlfCount    = 0;
 	public static final int xlfIf	    = 1;
@@ -1790,4 +1785,5 @@ public static final Ptg parse_n_calc(Ptg function, int functionId,  Ptg[] operan
 	public static final int xlfRANDBETWEEN= 444;
 	public static final int xlfSERIESSUM=	445;
 	public static final int xlfSQRTPI=		446;
-*/}
+*/
+}

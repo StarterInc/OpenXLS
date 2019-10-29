@@ -2,25 +2,26 @@
  * --------- BEGIN COPYRIGHT NOTICE ---------
  * Copyright 2002-2012 Extentech Inc.
  * Copyright 2013 Infoteria America Corp.
- * 
+ *
  * This file is part of OpenXLS.
- * 
+ *
  * OpenXLS is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
  * published by the Free Software Foundation, either version 3 of
  * the License, or (at your option) any later version.
- * 
+ *
  * OpenXLS is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with OpenXLS.  If not, see
  * <http://www.gnu.org/licenses/>.
  * ---------- END COPYRIGHT NOTICE ----------
  */
 package io.starter.toolkit;
+
 /**
  * implementation of MD4 as RFC 1320 by R. Rivest, MIT Laboratory for
  * Computer Science and RSA Data Security, Inc.
@@ -30,76 +31,69 @@ package io.starter.toolkit;
  */
 
 public class MD4Digest {
-	
-    private int     H1, H2, H3, H4;         // IV's
-    private int[]   X = new int[16];
-    private int     xOff;
+
+    private int H1, H2, H3, H4;         // IV's
+    private int[] X = new int[16];
+    private int xOff;
     private static final int BYTE_LENGTH = 64;
-    private byte[]  xBuf;
-    private int     xBufOff;
-    private long    byteCount;
+    private byte[] xBuf;
+    private int xBufOff;
+    private long byteCount;
 
     /**
      * Standard constructor
      */
-    public MD4Digest()
-    {
-    	 xBuf = new byte[4];
-         xBufOff = 0;
+    public MD4Digest() {
+        xBuf = new byte[4];
+        xBufOff = 0;
         reset();
     }
 
-    public byte[] getDigest(byte[] data){
-    	
-    	this.update(data,0,data.length);
-    	byte[] digest = new byte[16];
-    	this.doFinal(digest,0);
-    	
-    	return digest;
-    	
+    public byte[] getDigest(byte[] data) {
+
+        this.update(data, 0, data.length);
+        byte[] digest = new byte[16];
+        this.doFinal(digest, 0);
+
+        return digest;
+
     }
 
-   
-    protected void processWord(
-        byte[]  in,
-        int     inOff)
-    {
-        X[xOff++] = (in[inOff] & 0xff) | ((in[inOff + 1] & 0xff) << 8)
-            | ((in[inOff + 2] & 0xff) << 16) | ((in[inOff + 3] & 0xff) << 24); 
 
-        if (xOff == 16)
-        {
+    protected void processWord(
+            byte[] in,
+            int inOff) {
+        X[xOff++] = (in[inOff] & 0xff) | ((in[inOff + 1] & 0xff) << 8)
+                | ((in[inOff + 2] & 0xff) << 16) | ((in[inOff + 3] & 0xff) << 24);
+
+        if (xOff == 16) {
             processBlock();
         }
     }
 
     protected void processLength(
-        long    bitLength)
-    {
-        if (xOff > 14)
-        {
+            long bitLength) {
+        if (xOff > 14) {
             processBlock();
         }
 
-        X[14] = (int)(bitLength & 0xffffffff);
-        X[15] = (int)(bitLength >>> 32);
+        X[14] = (int) (bitLength & 0xffffffff);
+        X[15] = (int) (bitLength >>> 32);
     }
 
     private void unpackWord(
-        int     word,
-        byte[]  out,
-        int     outOff)
-    {
-        out[outOff]     = (byte)word;
-        out[outOff + 1] = (byte)(word >>> 8);
-        out[outOff + 2] = (byte)(word >>> 16);
-        out[outOff + 3] = (byte)(word >>> 24);
+            int word,
+            byte[] out,
+            int outOff) {
+        out[outOff] = (byte) word;
+        out[outOff + 1] = (byte) (word >>> 8);
+        out[outOff + 2] = (byte) (word >>> 16);
+        out[outOff + 3] = (byte) (word >>> 24);
     }
 
     public int doFinal(
-        byte[]  out,
-        int     outOff)
-    {
+            byte[] out,
+            int outOff) {
         finish();
 
         unpackWord(H1, out, outOff);
@@ -115,13 +109,11 @@ public class MD4Digest {
     /**
      * reset the chaining variables to the IV values.
      */
-    public void reset()
-    {
-    	byteCount = 0;
+    public void reset() {
+        byteCount = 0;
 
         xBufOff = 0;
-        for (int i = 0; i < xBuf.length; i++)
-        {
+        for (int i = 0; i < xBuf.length; i++) {
             xBuf[i] = 0;
         }
 
@@ -132,8 +124,7 @@ public class MD4Digest {
 
         xOff = 0;
 
-        for (int i = 0; i != X.length; i++)
-        {
+        for (int i = 0; i != X.length; i++) {
             X[i] = 0;
         }
     }
@@ -166,9 +157,8 @@ public class MD4Digest {
      * rotate int x left n bits.
      */
     private int rotateLeft(
-        int x,
-        int n)
-    {
+            int x,
+            int n) {
         return (x << n) | (x >>> (32 - n));
     }
 
@@ -176,31 +166,27 @@ public class MD4Digest {
      * F, G, H and I are the basic MD4 functions.
      */
     private int F(
-        int u,
-        int v,
-        int w)
-    {
+            int u,
+            int v,
+            int w) {
         return (u & v) | (~u & w);
     }
 
     private int G(
-        int u,
-        int v,
-        int w)
-    {
+            int u,
+            int v,
+            int w) {
         return (u & v) | (u & w) | (v & w);
     }
 
     private int H(
-        int u,
-        int v,
-        int w)
-    {
+            int u,
+            int v,
+            int w) {
         return u ^ v ^ w;
     }
 
-    protected void processBlock()
-    {
+    protected void processBlock() {
         int a = H1;
         int b = H2;
         int c = H3;
@@ -209,16 +195,16 @@ public class MD4Digest {
         //
         // Round 1 - F cycle, 16 times.
         //
-        a = rotateLeft(a + F(b, c, d) + X[ 0], S11);
-        d = rotateLeft(d + F(a, b, c) + X[ 1], S12);
-        c = rotateLeft(c + F(d, a, b) + X[ 2], S13);
-        b = rotateLeft(b + F(c, d, a) + X[ 3], S14);
-        a = rotateLeft(a + F(b, c, d) + X[ 4], S11);
-        d = rotateLeft(d + F(a, b, c) + X[ 5], S12);
-        c = rotateLeft(c + F(d, a, b) + X[ 6], S13);
-        b = rotateLeft(b + F(c, d, a) + X[ 7], S14);
-        a = rotateLeft(a + F(b, c, d) + X[ 8], S11);
-        d = rotateLeft(d + F(a, b, c) + X[ 9], S12);
+        a = rotateLeft(a + F(b, c, d) + X[0], S11);
+        d = rotateLeft(d + F(a, b, c) + X[1], S12);
+        c = rotateLeft(c + F(d, a, b) + X[2], S13);
+        b = rotateLeft(b + F(c, d, a) + X[3], S14);
+        a = rotateLeft(a + F(b, c, d) + X[4], S11);
+        d = rotateLeft(d + F(a, b, c) + X[5], S12);
+        c = rotateLeft(c + F(d, a, b) + X[6], S13);
+        b = rotateLeft(b + F(c, d, a) + X[7], S14);
+        a = rotateLeft(a + F(b, c, d) + X[8], S11);
+        d = rotateLeft(d + F(a, b, c) + X[9], S12);
         c = rotateLeft(c + F(d, a, b) + X[10], S13);
         b = rotateLeft(b + F(c, d, a) + X[11], S14);
         a = rotateLeft(a + F(b, c, d) + X[12], S11);
@@ -229,41 +215,41 @@ public class MD4Digest {
         //
         // Round 2 - G cycle, 16 times.
         //
-        a = rotateLeft(a + G(b, c, d) + X[ 0] + 0x5a827999, S21);
-        d = rotateLeft(d + G(a, b, c) + X[ 4] + 0x5a827999, S22);
-        c = rotateLeft(c + G(d, a, b) + X[ 8] + 0x5a827999, S23);
+        a = rotateLeft(a + G(b, c, d) + X[0] + 0x5a827999, S21);
+        d = rotateLeft(d + G(a, b, c) + X[4] + 0x5a827999, S22);
+        c = rotateLeft(c + G(d, a, b) + X[8] + 0x5a827999, S23);
         b = rotateLeft(b + G(c, d, a) + X[12] + 0x5a827999, S24);
-        a = rotateLeft(a + G(b, c, d) + X[ 1] + 0x5a827999, S21);
-        d = rotateLeft(d + G(a, b, c) + X[ 5] + 0x5a827999, S22);
-        c = rotateLeft(c + G(d, a, b) + X[ 9] + 0x5a827999, S23);
+        a = rotateLeft(a + G(b, c, d) + X[1] + 0x5a827999, S21);
+        d = rotateLeft(d + G(a, b, c) + X[5] + 0x5a827999, S22);
+        c = rotateLeft(c + G(d, a, b) + X[9] + 0x5a827999, S23);
         b = rotateLeft(b + G(c, d, a) + X[13] + 0x5a827999, S24);
-        a = rotateLeft(a + G(b, c, d) + X[ 2] + 0x5a827999, S21);
-        d = rotateLeft(d + G(a, b, c) + X[ 6] + 0x5a827999, S22);
+        a = rotateLeft(a + G(b, c, d) + X[2] + 0x5a827999, S21);
+        d = rotateLeft(d + G(a, b, c) + X[6] + 0x5a827999, S22);
         c = rotateLeft(c + G(d, a, b) + X[10] + 0x5a827999, S23);
         b = rotateLeft(b + G(c, d, a) + X[14] + 0x5a827999, S24);
-        a = rotateLeft(a + G(b, c, d) + X[ 3] + 0x5a827999, S21);
-        d = rotateLeft(d + G(a, b, c) + X[ 7] + 0x5a827999, S22);
+        a = rotateLeft(a + G(b, c, d) + X[3] + 0x5a827999, S21);
+        d = rotateLeft(d + G(a, b, c) + X[7] + 0x5a827999, S22);
         c = rotateLeft(c + G(d, a, b) + X[11] + 0x5a827999, S23);
         b = rotateLeft(b + G(c, d, a) + X[15] + 0x5a827999, S24);
 
         //
         // Round 3 - H cycle, 16 times.
         //
-        a = rotateLeft(a + H(b, c, d) + X[ 0] + 0x6ed9eba1, S31);
-        d = rotateLeft(d + H(a, b, c) + X[ 8] + 0x6ed9eba1, S32);
-        c = rotateLeft(c + H(d, a, b) + X[ 4] + 0x6ed9eba1, S33);
+        a = rotateLeft(a + H(b, c, d) + X[0] + 0x6ed9eba1, S31);
+        d = rotateLeft(d + H(a, b, c) + X[8] + 0x6ed9eba1, S32);
+        c = rotateLeft(c + H(d, a, b) + X[4] + 0x6ed9eba1, S33);
         b = rotateLeft(b + H(c, d, a) + X[12] + 0x6ed9eba1, S34);
-        a = rotateLeft(a + H(b, c, d) + X[ 2] + 0x6ed9eba1, S31);
+        a = rotateLeft(a + H(b, c, d) + X[2] + 0x6ed9eba1, S31);
         d = rotateLeft(d + H(a, b, c) + X[10] + 0x6ed9eba1, S32);
-        c = rotateLeft(c + H(d, a, b) + X[ 6] + 0x6ed9eba1, S33);
+        c = rotateLeft(c + H(d, a, b) + X[6] + 0x6ed9eba1, S33);
         b = rotateLeft(b + H(c, d, a) + X[14] + 0x6ed9eba1, S34);
-        a = rotateLeft(a + H(b, c, d) + X[ 1] + 0x6ed9eba1, S31);
-        d = rotateLeft(d + H(a, b, c) + X[ 9] + 0x6ed9eba1, S32);
-        c = rotateLeft(c + H(d, a, b) + X[ 5] + 0x6ed9eba1, S33);
+        a = rotateLeft(a + H(b, c, d) + X[1] + 0x6ed9eba1, S31);
+        d = rotateLeft(d + H(a, b, c) + X[9] + 0x6ed9eba1, S32);
+        c = rotateLeft(c + H(d, a, b) + X[5] + 0x6ed9eba1, S33);
         b = rotateLeft(b + H(c, d, a) + X[13] + 0x6ed9eba1, S34);
-        a = rotateLeft(a + H(b, c, d) + X[ 3] + 0x6ed9eba1, S31);
+        a = rotateLeft(a + H(b, c, d) + X[3] + 0x6ed9eba1, S31);
         d = rotateLeft(d + H(a, b, c) + X[11] + 0x6ed9eba1, S32);
-        c = rotateLeft(c + H(d, a, b) + X[ 7] + 0x6ed9eba1, S33);
+        c = rotateLeft(c + H(d, a, b) + X[7] + 0x6ed9eba1, S33);
         b = rotateLeft(b + H(c, d, a) + X[15] + 0x6ed9eba1, S34);
 
         H1 += a;
@@ -275,22 +261,17 @@ public class MD4Digest {
         // reset the offset and clean out the word buffer.
         //
         xOff = 0;
-        for (int i = 0; i != X.length; i++)
-        {
+        for (int i = 0; i != X.length; i++) {
             X[i] = 0;
         }
     }
-    
-   
-   
-   
+
+
     public void update(
-        byte in)
-    {
+            byte in) {
         xBuf[xBufOff++] = in;
 
-        if (xBufOff == xBuf.length)
-        {
+        if (xBufOff == xBuf.length) {
             processWord(xBuf, 0);
             xBufOff = 0;
         }
@@ -299,15 +280,13 @@ public class MD4Digest {
     }
 
     public void update(
-        byte[]  in,
-        int     inOff,
-        int     len)
-    {
+            byte[] in,
+            int inOff,
+            int len) {
         //
         // fill the current word
         //
-        while ((xBufOff != 0) && (len > 0))
-        {
+        while ((xBufOff != 0) && (len > 0)) {
             update(in[inOff]);
 
             inOff++;
@@ -317,8 +296,7 @@ public class MD4Digest {
         //
         // process whole words.
         //
-        while (len > xBuf.length)
-        {
+        while (len > xBuf.length) {
             processWord(in, inOff);
 
             inOff += xBuf.length;
@@ -329,8 +307,7 @@ public class MD4Digest {
         //
         // load in the remainder.
         //
-        while (len > 0)
-        {
+        while (len > 0) {
             update(in[inOff]);
 
             inOff++;
@@ -338,18 +315,16 @@ public class MD4Digest {
         }
     }
 
-    public void finish()
-    {
-        long    bitLength = (byteCount << 3);
+    public void finish() {
+        long bitLength = (byteCount << 3);
 
         //
         // add the pad bytes.
         //
-        update((byte)128);
+        update((byte) 128);
 
-        while (xBufOff != 0)
-        {
-            update((byte)0);
+        while (xBufOff != 0) {
+            update((byte) 0);
         }
 
         processLength(bitLength);
@@ -357,14 +332,11 @@ public class MD4Digest {
         processBlock();
     }
 
-    
 
-    public int getByteLength()
-    {
+    public int getByteLength() {
         return BYTE_LENGTH;
     }
-    
-    
+
 
 }
 
