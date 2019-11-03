@@ -3,13 +3,13 @@
 
 	<groupId>io.starter</groupId>
 	<artifactId>OpenXLS</artifactId>
-	<version>11.0.3</version>
+	<version>11.0.4-SNAPSHOT</version>
 	<packaging>jar</packaging>
 	<scm>
 		<connection>scm:git:https://github.com/StarterInc/OpenXLS.git</connection>
 		<developerConnection>scm:git:ssh://git@github.com/StarterInc/OpenXLS.git</developerConnection>
 		<url>https://github.com/StarterInc/OpenXLS</url>
-		<tag>OpenXLS-11.0.3</tag>
+		<tag>OpenXLS-11.0.2</tag>
 	</scm>
 	<organization>
 		<name>Starter Inc.</name>
