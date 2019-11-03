@@ -5,17 +5,28 @@
 	<artifactId>OpenXLS</artifactId>
 	<version>11.0.4-SNAPSHOT</version>
 	<packaging>jar</packaging>
+	
 	<scm>
 		<connection>scm:git:https://github.com/StarterInc/OpenXLS.git</connection>
 		<developerConnection>scm:git:ssh://git@github.com/StarterInc/OpenXLS.git</developerConnection>
 		<url>https://github.com/StarterInc/OpenXLS</url>
 		<tag>OpenXLS-11.0.2</tag>
 	</scm>
+	
 	<organization>
 		<name>Starter Inc.</name>
 		<url>http://starter.io</url>
 	</organization>
-
+	
+    <developers>
+        <developer>
+            <name>John McMahon</name>
+            <email>john@starter.io</email>
+            <organization>Starter Inc.</organization>
+            <organizationUrl>https://starter.io</organizationUrl>
+        </developer>
+    </developers>
+    
 	<name>OpenXLS Java Spreadsheet SDK</name>
 	<description>
         Provides Excel-compatible spreadsheet file reading and writing
@@ -42,7 +53,6 @@
 			<distribution>repo</distribution>
 		</license>
 	</licenses>
-
 
 	<dependencies>
 		<dependency>
@@ -83,8 +93,6 @@
 	</dependencies>
 
 	<build>
-
-
 		<plugins>
 			<plugin>
 				<groupId>se.jiderhamn</groupId>
