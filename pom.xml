@@ -170,6 +170,7 @@
 			<id>release</id>
 			<build>
 				<plugins>
+				<!-- 
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-javadoc-plugin</artifactId>
@@ -189,8 +190,8 @@
 									</subpackages>
 
 									<additionalparam>
-										<!-- individual classes for inclusion - these have to be given 
-											as source files because - there's no way to include only part of a package -->
+										individual classes for inclusion - these have to be given 
+											as source files because - there's no way to include only part of a package
 										${project.build.sourceDirectory}/io/starter/formats/XLS/CellNotFoundException.java
 										${project.build.sourceDirectory}/io/starter/formats/XLS/FormulaNotFoundException.java
 										${project.build.sourceDirectory}/io/starter/formats/XLS/FunctionNotSupportedException.java
@@ -207,7 +208,7 @@
 							</execution>
 						</executions>
 					</plugin>
-
+ -->
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-source-plugin</artifactId>
