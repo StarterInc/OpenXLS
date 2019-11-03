@@ -1,4 +1,6 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>io.starter</groupId>
@@ -83,17 +85,177 @@
 	</dependencies>
 
 	<build>
-		<extensions>
-			<extension>
-				<groupId>org.kuali.maven.wagons</groupId>
-				<artifactId>maven-s3-wagon</artifactId>
-				<version>1.2.1</version>
-			</extension>
-		</extensions>
 
 
 		<plugins>
+			<plugin>
+				<groupId>se.jiderhamn</groupId>
+				<artifactId>promote-maven-plugin</artifactId>
+				<version>2.0.1</version>
+				<!-- Automatically execute promote:make-promotable after each snapshot 
+					build -->
+				<executions>
+					<execution>
+						<goals>
+							<goal>make-promotable</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.sonatype.plugins</groupId>
+				<artifactId>nexus-staging-maven-plugin</artifactId>
+				<version>1.6.7</version>
+				<extensions>true</extensions>
+				<configuration>
+					<serverId>ossrh</serverId>
+					<nexusUrl>https://oss.sonatype.org/</nexusUrl>
+					<autoReleaseAfterClose>true</autoReleaseAfterClose>
+				</configuration>
+			</plugin>
+			<plugin>
+				<artifactId>maven-deploy-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>default-deploy</id>
+						<phase>deploy</phase>
+						<goals>
+							<goal>deploy</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-release-plugin</artifactId>
+				<configuration>
+					<localCheckout>true</localCheckout>
+					<pushChanges>false</pushChanges>
+					<mavenExecutorId>forked-path</mavenExecutorId>
+					<arguments>-Dgpg.passphrase=${gpg.passphrase}</arguments>
+				</configuration>
+				<dependencies>
+					<dependency>
+						<groupId>org.apache.maven.scm</groupId>
+						<artifactId>maven-scm-provider-gitexe</artifactId>
+						<version>1.9.5</version>
+					</dependency>
+				</dependencies>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>2.6</version>
+				<configuration>
+					<resources>
+						<resource>
+							<directory>src/main/resources</directory>
+						</resource>
+					</resources>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>jar</goal>
+							<goal>test-jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.8.0</version>
+				<configuration>
+					<source>1.8</source>
+					<target>1.8</target>
+					<exclusions>
+						<exclude>
+							/gen
+						</exclude>
+					</exclusions>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>build-helper-maven-plugin</artifactId>
+				<version>1.10</version>
+				<executions>
+					<execution>
+						<id>add_sources</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>add-source</goal>
+						</goals>
+						<configuration>
+							<sources>
+								<source>
+									src/main/java</source>
+							</sources>
+						</configuration>
+					</execution>
+					<execution>
+						<id>add_test_sources</id>
+						<phase>generate-test-sources</phase>
+						<goals>
+							<goal>add-test-source</goal>
+						</goals>
+						<configuration>
+							<sources>
+								<source>
+									src/test/java</source>
+							</sources>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>2.10.4</version>
+				<configuration>
+					<failOnError>false</failOnError>
+				</configuration>
+				<executions>
+					<execution>
+						<id>attach-javadocs</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<version>2.2.1</version>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<goals>
+							<goal>jar-no-fork</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 			<plugin>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
@@ -170,45 +332,6 @@
 			<id>release</id>
 			<build>
 				<plugins>
-				<!-- 
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-javadoc-plugin</artifactId>
-						<version>2.9</version>
-						<executions>
-							<execution>
-								<id>default-javadoc</id>
-								<goals>
-									<goal>jar</goal>
-								</goals>
-								<phase>package</phase>
-								<configuration>
-									<encoding>ISO-8859-1</encoding>
-
-									<subpackages>
-										io.starter.OpenXLS
-									</subpackages>
-
-									<additionalparam>
-										individual classes for inclusion - these have to be given 
-											as source files because - there's no way to include only part of a package
-										${project.build.sourceDirectory}/io/starter/formats/XLS/CellNotFoundException.java
-										${project.build.sourceDirectory}/io/starter/formats/XLS/FormulaNotFoundException.java
-										${project.build.sourceDirectory}/io/starter/formats/XLS/FunctionNotSupportedException.java
-										${project.build.sourceDirectory}/io/starter/formats/XLS/RowNotFoundException.java
-										${project.build.sourceDirectory}/io/starter/formats/XLS/ColumnNotFoundException.java
-										${project.build.sourceDirectory}/io/starter/formats/XLS/FormulaNotFoundException.java
-										${project.build.sourceDirectory}/io/starter/formats/XLS/WorkSheetNotFoundException.java
-										${project.build.sourceDirectory}/io/starter/formats/XLS/CellTypeMismatchException.java
-										${project.build.sourceDirectory}/io/starter/formats/XLS/CellPositionConflictException.java
-										${project.build.sourceDirectory}/io/starter/toolkit/ByteTools.java
-										${project.build.sourceDirectory}/io/starter/toolkit/StringTool.java
-									</additionalparam>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>
- -->
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-source-plugin</artifactId>
@@ -226,7 +349,54 @@
 				</plugins>
 			</build>
 		</profile>
+
+		<!-- GPG Signature on release -->
+		<profile>
+			<id>release-sign-artifacts</id>
+			<activation>
+				<property>
+					<name>performRelease</name>
+					<value>true</value>
+				</property>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-gpg-plugin</artifactId>
+						<version>1.6</version>
+						<executions>
+							<execution>
+								<id>sign-artifacts</id>
+								<phase>verify</phase>
+								<goals>
+									<goal>sign</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
 	</profiles>
+
+
+	<distributionManagement>
+		<snapshotRepository>
+			<id>ossrh</id>
+			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
+		</snapshotRepository>
+		<repository>
+			<id>ossrh</id>
+			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/
+			</url>
+		</repository>
+		<!-- S3 Private Maven Rep <snapshotRepository> <id>snapshot.repo.starter.io</id> 
+			<url>s3://repo.starter.io/snapshot</url> </snapshotRepository> <repository> 
+			<id>release.repo.starter.io</id> <url>s3://repo.starter.io/release</url> 
+			</repository> -->
+	</distributionManagement>
+
 
 
 	<!-- S3 Private Maven Rep <distributionManagement> <snapshotRepository> 
