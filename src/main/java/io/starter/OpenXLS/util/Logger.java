@@ -3,7 +3,8 @@
  */
 package io.starter.OpenXLS.util;
 
-import org.apache.log4j.PropertyConfigurator;
+import org.slf4j.LoggerFactory;
+
 
 /**
  * the usual logging stuff
@@ -11,17 +12,11 @@ import org.apache.log4j.PropertyConfigurator;
  * @author John McMahon Copyright 2013 Starter Inc., all rights reserved.
  * 
  */
-public class Logger implements SystemConstants {
+public class Logger {
 
-	static org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(Logger.class);
-
-	// PropertiesConfigurator is used to configure logger from properties file
-	static {
-		// URL lc =
-		// Logger.class.getClassLoader().getResource("resources/log4j.properties");
-		String lc = ROOT_FOLDER + "/src/resources/log4j.properties";
-		PropertyConfigurator.configure(lc);
-	}
+	public static final org.slf4j.Logger  LOG = LoggerFactory
+			.getLogger(Logger.class);
+	
 
 	/**
 	 * start with the basics
@@ -29,19 +24,19 @@ public class Logger implements SystemConstants {
 	 * @param message
 	 */
 	public static void log(String message) {
-		logger.info(message);
+		LOG.info(message);
 	}
 
 	public static void debug(String string) {
-		logger.debug(string);
+		LOG.debug(string);
 	}
 
 	public static void error(String string) {
-		logger.error(string);
+		LOG.error(string);
 	}
 
 	public static void warn(String string) {
-		logger.warn(string);
+		LOG.warn(string);
 
 	}
 

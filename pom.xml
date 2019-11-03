@@ -5,22 +5,26 @@
 
 	<groupId>io.starter</groupId>
 	<artifactId>OpenXLS</artifactId>
-	<version>11.0.0-SNAPSHOT</version>
+	<version>11.0.2-SNAPSHOT</version>
 	<packaging>jar</packaging>
 	<scm>
 		<connection>scm:git:https://github.com/StarterInc/OpenXLS.git</connection>
 		<developerConnection>scm:git:ssh://git@github.com/StarterInc/OpenXLS.git</developerConnection>
 		<url>https://github.com/StarterInc/OpenXLS</url>
-		<tag>OpenXLS-11.0.0</tag>
+		<tag>OpenXLS-11.0.2</tag>
 	</scm>
+	<organization>
+		<name>Starter Inc.</name>
+		<url>http://starter.io</url>
+	</organization>
 
 	<name>OpenXLS Java Spreadsheet SDK</name>
 	<description>
-        Handles AspectJ usage within Maven.
-        Functionality provided is: weaving of aspects (or existing aspects from libraries) with the
-        test and/or main classes, weaving of pre-existing jars and ajdoc reporting.
-  </description>
-	<url>https://sourceforge.net/projects/openxls/</url>
+        Provides Excel-compatible spreadsheet file reading and writing
+        as well as in-memory Spreadsheet functions
+    </description>
+
+	<url>https://github.com/StarterInc/OpenXLS</url>
 	<inceptionYear>2002</inceptionYear>
 
 	<properties>
@@ -41,24 +45,25 @@
 		</license>
 	</licenses>
 
-	<organization>
-		<name>Starter Inc.</name>
-		<url>http://starter.io</url>
-	</organization>
-
-	<scm>
-		<url>https://bitbucket.org/openxls/openxls</url>
-		<connection>scm:git:ssh://git@bitbucket.org/openxls/openxls.git</connection>
-		<tag>master</tag>
-	</scm>
 
 	<dependencies>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>1.7.28</version>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>jcl-over-slf4j</artifactId>
+			<version>1.7.28</version>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-log4j12</artifactId>
+			<version>1.7.28</version>
+			<scope>test</scope>
+		</dependency>
 
-		<!-- Logging <dependency> <groupId>org.slf4j</groupId> <artifactId>slf4j-api</artifactId> 
-			<version>1.7.25</version> </dependency> <dependency> <groupId>org.slf4j</groupId> 
-			<artifactId>jcl-over-slf4j</artifactId> <version>1.7.25</version> </dependency> 
-			<dependency> <groupId>org.slf4j</groupId> <artifactId>slf4j-log4j12</artifactId> 
-			<version>1.7.25</version> </dependency> -->
 		<dependency>
 			<groupId>org.json</groupId>
 			<artifactId>json</artifactId>
@@ -90,32 +95,7 @@
 
 
 		<plugins>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>buildnumber-maven-plugin</artifactId>
-				<version>1.2</version>
-				<executions>
-					<execution>
-						<id>build-number</id>
-						<goals>
-							<goal>create</goal>
-						</goals>
-						<phase>initialize</phase>
-						<configuration>
-							<!-- put the git commit hash in ${scmVersion} -->
-							<revisionOnScmFailure>UNKNOWN</revisionOnScmFailure>
-							<buildNumberPropertyName>scmVersion</buildNumberPropertyName>
-							<format>{0}</format>
-							<items>
-								<item>scmVersion</item>
-							</items>
 
-							<!-- put the time stamp in deploy format in ${timestamp} -->
-							<timestampFormat>{0,date,yyyyMMdd.HHmmss}</timestampFormat>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
 			<plugin>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
@@ -250,28 +230,11 @@
 	</profiles>
 
 
-	<!-- S3 Private Maven Rep
-	<distributionManagement>
-		<snapshotRepository>
-			<id>snapshot.repo.starter.io</id>
-			<url>s3://repo.starter.io/snapshot</url>
-		</snapshotRepository>
-		<repository>
-			<id>release.repo.starter.io</id>
-			<url>s3://repo.starter.io/release</url>
-		</repository>
-	</distributionManagement>
-
-	<repositories>
-		<repository>
-			<id>snapshot.repo.starter.io</id>
-			<url>s3://repo.starter.io/snapshot</url>
-		</repository>
-		<repository>
-			<id>release.repo.starter.io</id>
-			<url>s3://repo.starter.io/release</url>
-		</repository>
-	</repositories>
- -->
+	<!-- S3 Private Maven Rep <distributionManagement> <snapshotRepository> 
+		<id>snapshot.repo.starter.io</id> <url>s3://repo.starter.io/snapshot</url> 
+		</snapshotRepository> <repository> <id>release.repo.starter.io</id> <url>s3://repo.starter.io/release</url> 
+		</repository> </distributionManagement> <repositories> <repository> <id>snapshot.repo.starter.io</id> 
+		<url>s3://repo.starter.io/snapshot</url> </repository> <repository> <id>release.repo.starter.io</id> 
+		<url>s3://repo.starter.io/release</url> </repository> </repositories> -->
 
 </project>
