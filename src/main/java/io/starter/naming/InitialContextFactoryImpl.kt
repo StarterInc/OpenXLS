@@ -20,23 +20,21 @@
  * <http://www.gnu.org/licenses/>.
  * ---------- END COPYRIGHT NOTICE ----------
  */
-package io.starter.naming;
+package io.starter.naming
 
-import java.util.*;
-import javax.naming.*;
-import javax.naming.spi.InitialContextFactory;
+import java.util.*
+import javax.naming.Context
+import javax.naming.NamingException
+import javax.naming.spi.InitialContextFactory
+
 /**
- *  Read the details at: http://java.sun.com/j2se/1.3/docs/guide/jndi/spec/spi/jndispiTOC.fm.html
+ * Read the details at: http://java.sun.com/j2se/1.3/docs/guide/jndi/spec/spi/jndispiTOC.fm.html
  *
- * 
+ *
  */
-public class InitialContextFactoryImpl implements InitialContextFactory {
-	
-	
-	public Context getInitialContext(Hashtable<?, ?> env)         
-		throws NamingException{
-			InitialContextImpl contimple = new InitialContextImpl();
-			
-			return contimple;
-		}
+class InitialContextFactoryImpl : InitialContextFactory {
+    @Throws(NamingException::class)
+    override fun getInitialContext(env: Hashtable<*, *>?): Context {
+        return InitialContextImpl()
+    }
 }

@@ -20,24 +20,26 @@
  * <http://www.gnu.org/licenses/>.
  * ---------- END COPYRIGHT NOTICE ----------
  */
-package io.starter.naming;
-import javax.naming.*;
+package io.starter.naming
 
-/* 
+import javax.naming.Name
+import javax.naming.NameParser
+import javax.naming.NamingException
+
+/*
   This class is used for parsing names from a hierarchical
-  namespace. The NameParser contains knowledge of the syntactic 
-  information (like left-to-right orientation, name separator, etc.) 
-  needed to parse names. 
-  
-  The equals() method, when used to compare two NameParsers, returns 
-  true if and only if they serve the same namespace. 
+  namespace. The NameParser contains knowledge of the syntactic
+  information (like left-to-right orientation, name separator, etc.)
+  needed to parse names.
 
-	
+  The equals() method, when used to compare two NameParsers, returns
+  true if and only if they serve the same namespace.
+
+
 	@see:CompoundName, Name
 */
-class NameParserImpl implements NameParser{
-
-	/* Parses a name into its components.
+internal class NameParserImpl : NameParser {
+    /* Parses a name into its components.
 		Parameters:
 		name - The non-null string name to parse.
 		Returns:
@@ -47,12 +49,10 @@ class NameParserImpl implements NameParser{
 		NamingException - If a naming exception was encountered.
 	 * @see javax.naming.NameParser#parse(java.lang.String)
 	 */
-	public Name parse(String arg0) throws NamingException {
-		Name nm = new NameImpl();
-		
-		nm.add(arg0); // just plop it in for now...
-		
-		return nm;
-	}
-	
+    @Throws(NamingException::class)
+    override fun parse(arg0: String): Name {
+        val nm: Name = NameImpl()
+        nm.add(arg0) // just plop it in for now...
+        return nm
+    }
 }

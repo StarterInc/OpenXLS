@@ -20,53 +20,53 @@
  * <http://www.gnu.org/licenses/>.
  * ---------- END COPYRIGHT NOTICE ----------
  */
-package io.starter.naming;
+package io.starter.naming
 
+import java.util.*
+import javax.naming.NamingEnumeration
+import javax.naming.NamingException
 
-import javax.naming.*;
-import java.util.*;
+class NamingEnumerationImpl : NamingEnumeration<Any> {
+    private var e: Enumeration<*>? = null
+    fun setEnumeration(ex: Enumeration<*>?) {
+        e = ex
+    }
 
-public class NamingEnumerationImpl implements NamingEnumeration<Object>{
-
-	private Enumeration<?> e = null;
-	
-	void setEnumeration(Enumeration<?> ex){
-		e = ex;
-	}
-
-	/* (non-Javadoc)
+    /* (non-Javadoc)
 	 * @see javax.naming.NamingEnumeration#close()
 	 */
-	public void close() throws NamingException {
-		e = null;
-	}
+    @Throws(NamingException::class)
+    override fun close() {
+        e = null
+    }
 
-	/* (non-Javadoc)
+    /* (non-Javadoc)
 	 * @see javax.naming.NamingEnumeration#hasMore()
 	 */
-	public boolean hasMore() throws NamingException {
-		return e.hasMoreElements();
-	}
+    @Throws(NamingException::class)
+    override fun hasMore(): Boolean {
+        return e!!.hasMoreElements()
+    }
 
-	/* (non-Javadoc)
+    /* (non-Javadoc)
 	 * @see javax.naming.NamingEnumeration#next()
 	 */
-	public Object next() throws NamingException {
-		return e.nextElement();
-	}
+    @Throws(NamingException::class)
+    override fun next(): Any {
+        return e!!.nextElement()
+    }
 
-	/* (non-Javadoc)
+    /* (non-Javadoc)
 	 * @see java.util.Enumeration#hasMoreElements()
 	 */
-	public boolean hasMoreElements() {
-		return e.hasMoreElements();
-	}
+    override fun hasMoreElements(): Boolean {
+        return e!!.hasMoreElements()
+    }
 
-	/* (non-Javadoc)
+    /* (non-Javadoc)
 	 * @see java.util.Enumeration#nextElement()
 	 */
-	public Object nextElement() {
-		return e.nextElement();
-	}
-	
+    override fun nextElement(): Any {
+        return e!!.nextElement()
+    }
 }
