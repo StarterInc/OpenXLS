@@ -20,11 +20,11 @@
  * <http://www.gnu.org/licenses/>.
  * ---------- END COPYRIGHT NOTICE ----------
  */
-package io.starter.formats.cellformat;
+package io.starter.formats.cellformat
 
-import io.starter.OpenXLS.Cell;
+import io.starter.OpenXLS.Cell
 
-public interface CellFormat {
-	public String format (Object input);
-	public String format (Cell cell);
+interface CellFormat {
+    fun format(input: Any?): String?
+    fun format(cell: Cell?): String?
 }
