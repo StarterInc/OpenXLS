@@ -54,7 +54,44 @@ import io.starter.formats.LEO.*;
 
 public class XLSRecord implements BiffRec, BlockByteConsumer, Serializable, XLSConstants  {
 
-	private static final long serialVersionUID = -106915096753184441L;
+		private static final long serialVersionUID = -106915096753184441L;
+		short rwFirst;
+		short rwLast;
+		short colFirst;
+		short colLast;
+		short cce;
+		short grbit;
+		byte[] rgce;
+		Formula parentRec= null;
+
+		public int getFirstRow(){
+			return (int)rwFirst;
+		}
+		public int getLastRow(){
+			return (int)rwLast;
+		}
+		public int getFirstCol(){
+			return (int)colFirst;
+		}
+		public int getLastCol(){
+			return (int)colLast;
+		}
+
+		public int getCol(){
+			return getFirstCol();
+		}
+		public void setFirstRow(int i){
+			rwFirst = (short) i;
+		}
+		public void setLastRow(int i){
+			rwLast = (short) i;
+		}
+		public void setFirstCol(int i){
+			colFirst = (byte) i;
+		}
+		public void setLastCol(int i){
+			colLast = (byte) i;
+		}
 
 		private short opcode;
 		int reclen;
